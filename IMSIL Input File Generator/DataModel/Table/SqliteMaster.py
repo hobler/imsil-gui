@@ -11,11 +11,10 @@ DATABASE_SQL_COL = 4
 
 class SqliteMaster:
     """
-        SqliteMaster is used to get all table names from an sqlite database
-        file.
+    Hold the master table of an sqlite database.
 
-        With get_table_names all table names can be taken from the database
-        file.
+    Methods:
+    :get_table_names: retrieve all table names of the database.
     """
     def __init__(self, db_file):
         self.table = load_database_table(db_file,
@@ -27,6 +26,6 @@ class SqliteMaster:
 
     def get_table_names(self):
         table_names = list()
-        for table_row in self.get_table():
+        for table_row in self.table:
             table_names.append(table_row[DATABASE_TBL_NAME_COL])
         return table_names

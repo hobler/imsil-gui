@@ -28,8 +28,8 @@ CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES = 61
 
 def bind_mouse_event(parent, mode):
     """
-        bind_mouse_event has to be called on each new created element in the
-        frame to be able to scroll in the frame.
+    bind_mouse_event has to be called on each new created element in the
+    frame to be able to scroll in the frame.
 
     :param parent:
     :param mode:
@@ -52,9 +52,9 @@ def show_long_desc(par_name, long_desc):
 
 class ImsilScrollFrame(BlancFrame):
     """
-        ImsilScrollFrame contains a scrollable area where is frame for basic
-        (common) parameters called self.content_frame_basic and a frame for
-        all other parameters called self.content_frame_adv.
+    ImsilScrollFrame contains a scrollable area where is frame for basic
+    (common) parameters called self.content_frame_basic and a frame for
+    all other parameters called self.content_frame_adv.
     """
 
     def __init__(self, parent, index_var_list=None, *args, **kwargs):
@@ -116,10 +116,10 @@ class ImsilScrollFrame(BlancFrame):
                                index_var_list, default_value, short_desc,
                                long_desc, is_bool):
         """
-            update_buttons_command go through each widget in the parameter
-            frame and update the parameter values of the button commands.
-            This is necessary to make sure that the right row of the
-            specified parameter will be added or removed.
+        Go through each widget in the parameter
+        frame and update the parameter values of the button commands.
+        This is necessary to make sure that the right row of the
+        specified parameter will be added or removed.
         """
         par_frame = self.par_frame_list[par_frame_index]
         for child in par_frame.winfo_children():
@@ -154,16 +154,16 @@ class ImsilScrollFrame(BlancFrame):
                                  index_var_list, default_value, short_desc,
                                  long_desc, is_bool, row_index):
         """
-            add_content_in_par_frame add a row in the given parameter frame
-            (defined by the parameter frame index par_frame_index).
-            The parameter name will be taken from the parameter par_name.
-            index_var_list defines a list of index variables that are used by
-            this parameter.
-            Depending on is_bool the parameter will be placed in the basic
-            or not basic frame of the scrollframe.
-            row_index defines the row in which the parameter should be placed.
-            row_index start from "1" and is handled automatically by the
-            function update_buttons_command.
+        Add a row in the given parameter frame
+        (defined by the parameter frame index par_frame_index).
+        The parameter name will be taken from the parameter par_name.
+        index_var_list defines a list of index variables that are used by
+        this parameter.
+        Depending on is_bool the parameter will be placed in the basic
+        or not basic frame of the scrollframe.
+        row_index defines the row in which the parameter should be placed.
+        row_index start from "1" and is handled automatically by the
+        function update_buttons_command.
         """
         par_frame = self.par_frame_list[par_frame_index]
         row_number = int(row_index)

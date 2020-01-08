@@ -3,7 +3,7 @@ import tkinter as tk
 
 class BlancFrame(tk.Frame):
     """
-    class for the blanc frame
+    Class for the blanc frame
     """
 
     def __init__(self, parent, rows=1, columns=1, set_grid_propagate=True,

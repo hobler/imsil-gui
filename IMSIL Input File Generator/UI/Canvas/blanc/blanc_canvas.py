@@ -3,7 +3,7 @@ import tkinter as tk
 
 class BlancCanvas(tk.Canvas):
     """
-    class for the blanc frame
+    Class for the blanc frame
     """
 
     def __init__(self, parent, rows=1, columns=1,

@@ -1,16 +1,17 @@
 class DataList:
-    """ DataList contains one list with tuples where a tuple has the
-        following format:
+    """
+    DataList contains one list with tuples where a tuple has the
+    following format:
 
-        (PARAMETER_NAME, TKINTER_WIDGET [Entry/Checkbutton], WIDGET_VARIABLE)
+    (PARAMETER_NAME, TKINTER_WIDGET [Entry/Checkbutton], WIDGET_VARIABLE)
 
-        ARAMETER_NAME:      name of parameter from database
-                            type:   str
-        TKINTER_WIDGET:     Checkbutton for logical parameters, Entry else
-        WIDGET_VARIABLE:    contains the current value of the parameter
-                            type:   StringVar
-        DEFAULT_VALUE:      text from database column 'default value'
-                            type:   str
+    PARAMETER_NAME:      name of parameter from database
+                         type:   str
+    TKINTER_WIDGET:     Checkbutton for logical parameters, Entry else
+    WIDGET_VARIABLE:    contains the current value of the parameter
+                        type:   StringVar
+    DEFAULT_VALUE:      text from database column 'default value'
+                        type:   str
     """
 
     def __init__(self):

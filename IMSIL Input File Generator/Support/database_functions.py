@@ -3,9 +3,9 @@ import sqlite3
 
 def run_query(database, query, parameters=()) -> list:
     """
-        This function opens a connection to the SQLite database file *database*
-        and run the *query* that is given as a string. Optionaly parameters can
-        be given as a tuple.
+    This function opens a connection to the SQLite database file *database*
+    and run the *query* that is given as a string. Optionally parameters can
+    be given as a tuple.
 
     :param database:
     :param query:
@@ -29,9 +29,9 @@ def run_query(database, query, parameters=()) -> list:
 
 def load_database_table(database, table, list_where=None) -> list:
     """
-        This function load the content of the SQLite database file *database*
-        for a specific *table*. list_where is a list of strings which will be
-        placed to the WHERE clause.
+    This function loads the content of the SQLite database file *database*
+    for a specific *table*. list_where is a list of strings which will be
+    placed to the WHERE clause.
 
     :param database:
     :param table:

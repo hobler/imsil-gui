@@ -1,7 +1,6 @@
 import tkinter as tk
 import platform
 
-from DataModel.DataList import DataList
 from DataModel.Table.DatabaseTable import *
 from UI.Frames.scroll.imsil_scroll_frame import ImsilScrollFrame
 from UI.Frames.blanc.blanc_frame import BlancFrame
@@ -11,9 +10,9 @@ OS = platform.system()
 
 def create_info_button_text(table_row):
     """
-        create_info_button_text create a string which contains all
-        information that should be shown to the user by pressing the info
-        button
+    Create a string which contains all
+    information that should be shown to the user by pressing the info
+    button
 
     :param table_row:
     :return:
@@ -26,8 +25,8 @@ def create_info_button_text(table_row):
 
 class DbFrame(BlancFrame):
     """
-        DbFrame is a Frame which contains a ImsilScrollFrame.
-        With ImsilScrollFrame you can add parameters
+    DbFrame is a Frame which contains an ImsilScrollFrame.
+    With ImsilScrollFrame you can add parameters
     """
 
     def __init__(self, parent, db_file, table_name, type_of_simulation,
