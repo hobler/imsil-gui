@@ -3,10 +3,11 @@ class DataList:
     DataList contains one list with tuples where a tuple has the
     following format:
 
-    (PARAMETER_NAME, TKINTER_WIDGET [Entry/Checkbutton], WIDGET_VARIABLE)
+    (PARAMETER_NAME, TKINTER_WIDGET [Entry/Checkbutton], WIDGET_VARIABLE,
+    DEFAULT_VALUE)
 
-    PARAMETER_NAME:      name of parameter from database
-                         type:   str
+    PARAMETER_NAME:     name of parameter from database
+                        type:   str
     TKINTER_WIDGET:     Checkbutton for logical parameters, Entry else
     WIDGET_VARIABLE:    contains the current value of the parameter
                         type:   StringVar
@@ -25,9 +26,6 @@ class DataList:
         for data in self.data_list:
             print(data[0], "[", data[1], "]", ":", data[2].get(),
                   "default:", data[3])
-
-    def length(self):
-        return len(self.data_list)
 
     def get_widgets(self, name):
         widgets = list()

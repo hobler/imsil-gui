@@ -1,8 +1,24 @@
+"""
+This module defines a tk.Frame and create for each table row a row with
+following elements: a tk.Label with the parameter name, an info Button
+which pop up a window with a long description about the parameter,
+a tk.Entry that contains the parameter value (or if the parameter is of type
+boolean, then there is a tk.Checkbutton), for each index variable of the
+current database table there is a tk.Label and tk.Entry with the index
+varibale name and value. At least there are two tk.Buttons (+) and (-) to
+add and delete new paramters.
+
+Furthermore the main tk.Frame contains a scrollable area where is a frame for
+basic (common) parameters called self.content_frame_basic and a frame for
+all other parameters called self.content_frame_adv.
+With the show/hide Button the visibility of the frame with advanced parameters
+can be turned on/off.
+"""
+
 import platform
+import Pmw
 import tkinter as tk
 from tkinter import ttk, messagebox
-
-import Pmw
 
 from DataModel.DataList import DataList
 from UI.Canvas.blanc.blanc_canvas import BlancCanvas
@@ -10,12 +26,12 @@ from UI.Widgets.ShowAdvParButton import ShowAdvParButton, ButtonState
 from UI.Frames.blanc.blanc_frame import BlancFrame
 
 OS = platform.system()
-BTN_TEXT_SHOW_ADV = \
-    "----------------------------------------- Show advanced " \
-    "parameters ----------------------------------------- "
-BTN_TEXT_HIDE_ADV = \
-    "-----------------------------------------  Hide advanced parameters " \
-    "-----------------------------------------"
+
+MINUS = "-----------------------------------------"
+BTN_TEXT_SHOW_ADV = MINUS + " Show advanced parameters " + MINUS
+BTN_TEXT_HIDE_ADV = MINUS + " Hide advanced parameters " + MINUS
+
+# configure elements width
 PARAMETER_NAME_LABEL_WIDTH = 15
 PARAMETER_NAME_LABEL_WIDTH_WITHOUT_INDEX_VARIABLES = 5
 PARAMETER_NAME_ENTRY_WIDTH = 35
@@ -26,35 +42,10 @@ CHECKBUTTON_WIDTH = 36
 CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES = 61
 
 
-def bind_mouse_event(parent, mode):
-    """
-    bind_mouse_event has to be called on each new created element in the
-    frame to be able to scroll in the frame.
-
-    :param parent:
-    :param mode:
-    :return:
-    """
-    if parent is not None:
-        # add mouse scrolling for Darwin, Windows and Linux
-        if OS == 'Windows' or OS == 'Darwin':
-            # with Windows and Mac OS (OS X)
-            parent.bind("<MouseWheel>", mode)
-        else:
-            # with Linux
-            parent.bind("<Button-4>", mode)
-            parent.bind("<Button-5>", mode)
-
-
-def show_long_desc(par_name, long_desc):
-    messagebox.showinfo(par_name, long_desc)
-
-
 class ImsilScrollFrame(BlancFrame):
     """
-    ImsilScrollFrame contains a scrollable area where is frame for basic
-    (common) parameters called self.content_frame_basic and a frame for
-    all other parameters called self.content_frame_adv.
+    In the initialization only the scrollable area is created. Use function
+    add_parameter to add new parameters to the frame.
     """
 
     def __init__(self, parent, index_var_list=None, *args, **kwargs):
@@ -67,8 +58,8 @@ class ImsilScrollFrame(BlancFrame):
             self.index_var_list = index_var_list
 
         # define number of columns:
-        #   the first two are for parameter name (Label) and value (Entry)
-        #   for each index variable there is a need of another two columns
+        #   the first two are for parameter name (Label) and value (Entry),
+        #   for each index variable there is a need of another two columns,
         #   at least, the info button is also in the grid (column 1)
         self.columns = 2 * (len(self.index_var_list) + 1) + 1
 
@@ -87,7 +78,7 @@ class ImsilScrollFrame(BlancFrame):
         self.vertical_scrollbar.grid(row=0, column=1, sticky="NES")
         self.vertical_scrollbar.config(command=self.main_canvas.yview)
         self.main_canvas.config(yscrollcommand=self.vertical_scrollbar.set)
-        bind_mouse_event(self.content_frame, self.mouse_wheel)
+        self.bind_mouse_event(self.content_frame)
 
         # create two frames in self.content_frame. First for basic parameters
         # and the second for advanced parameters
@@ -95,10 +86,9 @@ class ImsilScrollFrame(BlancFrame):
         self.content_frame_basic.grid(sticky="NESW")
 
         self.button_frame_show_adv = ShowAdvParButton(
-            self.content_frame, button_text=BTN_TEXT_SHOW_ADV,
-            init_state=ButtonState.SHOW_ALL)
+            self.content_frame, button_text=BTN_TEXT_HIDE_ADV)
         self.button_frame_show_adv.button.configure(command=self.toggle_adv)
-        bind_mouse_event(self.button_frame_show_adv.button, self.mouse_wheel)
+        self.bind_mouse_event(self.button_frame_show_adv.button)
 
         self.content_frame_adv = BlancFrame(self.content_frame)
 
@@ -107,9 +97,15 @@ class ImsilScrollFrame(BlancFrame):
         self.main_canvas.bind('<Configure>', self.update_frame_width)
 
     def update_frame_width(self, event):
+        """
+        Is automatically called, if window is resized
+        """
         self.main_canvas.itemconfig("self.content_frame", width=event.width)
 
     def update_scrollregion(self, event):
+        """
+        Is automatically called at scrolling
+        """
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
     def update_buttons_command(self, par_frame_index, par_name,
@@ -154,22 +150,27 @@ class ImsilScrollFrame(BlancFrame):
                                  index_var_list, default_value, short_desc,
                                  long_desc, is_bool, row_index):
         """
-        Add a row in the given parameter frame
-        (defined by the parameter frame index par_frame_index).
-        The parameter name will be taken from the parameter par_name.
-        index_var_list defines a list of index variables that are used by
-        this parameter.
-        Depending on is_bool the parameter will be placed in the basic
-        or not basic frame of the scrollframe.
-        row_index defines the row in which the parameter should be placed.
-        row_index start from "1" and is handled automatically by the
-        function update_buttons_command.
+        Take the parameter frame from the parameter frame list at the index
+        par_frame_index and fill a new row with the index row_index with tk
+        widgets as described in the module docstring. If there are already
+        widgets in this row, all elements in the rows with with index >=
+        row_index has to moved one row down to make place for the new row.
+
+        :par_frame_index: parameter frame index
+        :par_name: parameter name
+        :index_var_list: a list of index variables that are used by this
+        parameter
+        :default_value: default value of the parameter
+        :short_desc: short description of the parameter
+        :long_desc: long description of the parameter
+        :is_bool: true, if the parameter is of type bool, false else
+        :row_index: row number where the new parameter should be placed
         """
         par_frame = self.par_frame_list[par_frame_index]
         row_number = int(row_index)
 
         if row_number > 1:
-            # move elements one row to the button
+            # move elements one row down to make place for the new row
             for child in par_frame.winfo_children():
                 child_grid_row = child.grid_info()['row']
                 child_grid_column = child.grid_info()['column']
@@ -198,8 +199,8 @@ class ImsilScrollFrame(BlancFrame):
         # Add info button which show details about the parameter in a message
         button_info = self.add_button(parent=par_frame, btn_text="i", width=2)
         button_info.config(takefocus=False)
-        button_info.config(command=lambda: show_long_desc(par_name,
-                                                          long_desc))
+        button_info.config(
+            command=lambda: messagebox.showinfo(par_name, long_desc))
         button_info.grid(row=row_number, column=1)
         # config column width where the button is, so it does not take too
         # much white space
@@ -281,6 +282,22 @@ class ImsilScrollFrame(BlancFrame):
     def remove_content_in_par_frame(self, par_frame_index, par_name,
                                     index_var_list, default_value,
                                     short_desc, long_desc, is_bool, row_index):
+        """
+        Take the parameter frame from the parameter frame list at the index
+        par_frame_index and remove the row with the index row_index. If there
+        are widgets in rows with with the index greater row_index,
+        these widgets will moved one row up.
+
+        :par_frame_index: parameter frame index
+        :par_name: parameter name
+        :index_var_list: a list of index variables that are used by this
+        parameter
+        :default_value: default value of the parameter
+        :short_desc: short description of the parameter
+        :long_desc: long description of the parameter
+        :is_bool: true, if the parameter is of type bool, false else
+        :row_index: row number where the new parameter should be placed
+        """
         par_frame = self.par_frame_list[par_frame_index]
         row_number = int(row_index)
 
@@ -310,11 +327,26 @@ class ImsilScrollFrame(BlancFrame):
     def add_parameter(self, par_name, index_var_list=None, default_value="",
                       short_desc="", long_desc="", is_bool=False,
                       is_basic=True):
+        """
+        Create a new frame for the given parameter, add it to the parameter
+        frame list and add it to the scrollable frame to make it visible for
+        the user.
+
+        :param par_name: name of the parameter
+        :param index_var_list: list of all index variables for this parameter
+        :param default_value: default value of the parameter
+        :param short_desc: short description of the parameter
+        :param long_desc: long description of the parameter
+        :param is_bool: true, if the parameter is of type bool, false else
+        :param is_basic: true, if the parameter is basic, then it will be
+            placed to the basic content frame that is above the advanced
+            cotent frame. False, to add it to the advanced cotent frame
+        """
         if index_var_list is None:
             index_var_list = list()
         par_frame = BlancFrame(self.get_parent(is_basic=is_basic),
                                columns=self.columns, column_weight=15)
-        bind_mouse_event(par_frame, self.mouse_wheel)
+        self.bind_mouse_event(par_frame)
         self.par_frame_list.append(par_frame)
         self.add_content_in_par_frame(
             par_frame_index=len(self.par_frame_list) - 1,
@@ -328,7 +360,7 @@ class ImsilScrollFrame(BlancFrame):
 
     def add_button(self, parent, btn_text="Button", width=3):
         btn = tk.Button(parent, text=btn_text, width=width)
-        bind_mouse_event(btn, self.mouse_wheel)
+        self.bind_mouse_event(btn)
         return btn
 
     def add_label(self, parent, label_text, width,
@@ -339,7 +371,7 @@ class ImsilScrollFrame(BlancFrame):
         if tool_tip_text != "":
             balloon = Pmw.Balloon(label)
             balloon.bind(label, tool_tip_text)
-        bind_mouse_event(label, self.mouse_wheel)
+        self.bind_mouse_event(label)
         return label
 
     def add_entry(self, parent, par_name, entry_text, width,
@@ -356,7 +388,7 @@ class ImsilScrollFrame(BlancFrame):
         if tool_tip_text != "":
             balloon = Pmw.Balloon(entry)
             balloon.bind(entry, tool_tip_text)
-        bind_mouse_event(entry, self.mouse_wheel)
+        self.bind_mouse_event(entry)
         return entry
 
     def add_checkbutton(self, parent, par_name, width, cb_value="T",
@@ -374,19 +406,19 @@ class ImsilScrollFrame(BlancFrame):
         self.ui_data_list.add(par_name=par_name, tk_widget=checkbutton,
                               widget_variable=cb_string_var,
                               default_value=default_value)
-        bind_mouse_event(checkbutton, self.mouse_wheel)
+        self.bind_mouse_event(checkbutton)
         return checkbutton
 
     def update_if_obligatory_entry(self, par_name):
         """
-            Check for each parameter if "obligatory if" condition is true or
-            false and activate or deactivate the Entry of the parameter
+        Check for each tk.Entry if "obligatory if" condition is true or
+        false and set the state of the tk.Entry to activate or deactivate of
+        the parameter.
 
-        :param par_name:
-        :return:
+        :par_name: Name of a bool paramter
         """
-        value = self.ui_data_list.get_variable(par_name)
-        obligatory_if = str(par_name + "=" + value.get())
+        widget_variable = self.ui_data_list.get_variable(par_name)
+        obligatory_if = str(par_name + "=" + widget_variable.get())
 
         for ui_data in self.ui_data_list.data_list:
             if ui_data[1].winfo_class() == "Entry":
@@ -402,6 +434,9 @@ class ImsilScrollFrame(BlancFrame):
                         widget.config(state='disabled')
 
     def update_if_obligatory_entries(self):
+        """
+        Update the state of a new tk.Entry.
+        """
         for ui_data in self.ui_data_list.data_list:
             if ui_data[1].winfo_class() == "Checkbutton":
                 # for each flag, update all entries of the parameters
@@ -429,6 +464,22 @@ class ImsilScrollFrame(BlancFrame):
             return self.content_frame_basic
         else:
             return self.content_frame_adv
+
+    def bind_mouse_event(self, parent):
+        """
+        bind_mouse_event bind the mouse scrolling event with the mouse_wheel
+        function, which change depending on the scrolling value the y-view
+        of the main_canvas.
+        """
+        if parent is not None:
+            # add mouse scrolling evenet for Darwin, Windows and Linux
+            if OS == 'Windows' or OS == 'Darwin':
+                # with Windows and Mac OS (OS X)
+                parent.bind(sequence="<MouseWheel>", func=self.mouse_wheel)
+            else:
+                # with Linux
+                parent.bind(sequence="<Button-4>", func=self.mouse_wheel)
+                parent.bind(sequence="<Button-5>", func=self.mouse_wheel)
 
     def mouse_wheel(self, event):
         if OS == 'Linux':

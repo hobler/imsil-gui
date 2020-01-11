@@ -1,5 +1,10 @@
 """
-
+Classes:
+    :WelcomeWindow: The main window, where the user can config the input
+        parmeter editor.
+    :ImsilInputParameterEditor: Based on the two parameters (type of simulation
+        and existing input file) the IMSIL Input Parameter Editor will be
+        opened.
 """
 import os
 import sys
@@ -38,10 +43,9 @@ def read_existing_input_file(file_path):
 
 def center_window(tk_window):
     """
-    Place the given Tk to the center of the screen
+    Place the given Tk window to the center of the screen
 
     :param tk_window: a window of type tk.Tk
-    :return:
     """
     # Hide widget
     tk_window.withdraw()
@@ -64,14 +68,23 @@ def center_window(tk_window):
 
 class ImsilInputParameterEditor:
     """
-
+    The IMSIL Input Patameter Editor consists of a notebook with tabs,
+    where each tab corresponds to the database table.
     """
 
-    def __init__(self, input_file_path, type_of_simulation):
+    def __init__(self, type_of_simulation, input_file_path):
         """
+        In the initialization of the IMSIL Input Parameter Editor
+        a notebook is added to the window. The SqliteMaster class is used to
+        determinate the table names in the database. For each table name a
+        new tab is be added to the notebook. Each tab contains a frame of
+        the class DbFrame.
 
-        :param input_file_path:
-        :param type_of_simulation:
+        If there was passed a path to an input file, it will be read and the
+        parameter values will be placed into the Editor.
+
+        :param type_of_simulation: type of the simulation
+        :param input_file_path: path of an existing input file
         """
         if not os.path.isfile(DATABASE_FILE):
             sys.exit(DATABASE_FILE + " does not exist.")
@@ -81,17 +94,17 @@ class ImsilInputParameterEditor:
         root.resizable(False, False)
 
         # Create and place Notebook
-        nb = ttk.Notebook(root, width=900, height=600)
-        nb.grid(row=0, column=0, sticky="NESW")
+        self.nb = ttk.Notebook(root, width=900, height=600)
+        self.nb.grid(row=0, column=0, sticky="NESW")
 
         sqlite_master_table = SqliteMaster(DATABASE_FILE)
         for table_name in sqlite_master_table.get_table_names():
-            nb.add(DbFrame(parent=nb,
-                           db_file=DATABASE_FILE,
-                           table_name=table_name,
-                           type_of_simulation=type_of_simulation,
-                           name=table_name),
-                   text=table_name)
+            self.nb.add(DbFrame(parent=self.nb,
+                                db_file=DATABASE_FILE,
+                                table_name=table_name,
+                                type_of_simulation=type_of_simulation,
+                                name=table_name),
+                        text=table_name)
         center_window(root)
 
         # if the user select an IMSIL input file
@@ -103,65 +116,54 @@ class ImsilInputParameterEditor:
                 for key in input_file.file.keys():
                     for par_name in input_file.file[key]:
                         if not isinstance(par_name, OrderedDict):
-                            # print all parameters the name and value
-                            print("par_name: ", par_name, ", ",
-                                  "par_value: ",
-                                  input_file.file[key][par_name])
+                            # set parameter value in tab
+                            self.set_parameter_value(
+                                tab_name=key,
+                                parameter_name=par_name,
+                                parameter_value=input_file.file[key][par_name])
         root.mainloop()
 
-    @staticmethod
-    def get_all_parameter_values(parent):
+    def get_all_parameter_values(self):
         """
-        Go through all tabs in notebook and get changes
+        Go through all tabs in the notebook and use the ui_data_list with
+        the stored (defalt) values of the parameters to get all changes.
 
-        :param parent:
-        :return:
+        This function can be used later to generate the input file.
+
+        Currently this function is not in use!
         """
-        nb_tabs = parent.tabs()
-        if len(nb_tabs) > 1:
-            for nb_tab in nb_tabs:
-                frame = parent.nametowidget(nb_tab)
-                if hasattr(frame, 'get_ui_data_list'):
-                    # print(frame.get_ui_data_list())
-                    pass
+        for nb_tab in self.nb.tabs():
+            frame = self.nb.nametowidget(nb_tab)
+            if hasattr(frame.scroll_frame, 'ui_data_list'):
+                # frame_ui_data_list = frame.scroll_frame.ui_data_list
+                pass
 
-    @staticmethod
-    def set_parameter_value(notebook_widget, tab_name, parameter_name,
-                            parameter_value):
+    def set_parameter_value(self, tab_name, parameter_name, parameter_value):
         """
         Set value of specified parameter name in the tab of the notebook with
         the name tab_name.
 
-        Currently this function is not in use!
-
-        :param notebook_widget:
-        :param tab_name:
-        :param parameter_name:
-        :param parameter_value:
-        :return:
+        :param tab_name: name of the notebook tab as string
+        :param parameter_name: name of the parameter as string
+        :param parameter_value: name of the parameter value to be set
 
         EXAMPLE:
             set_parameter_value("setup", "ndim", "2")
-
-        Args:
-            notebook_widget:
-            tab_name:
-            parameter_name:
-            parameter_value:
         """
-        nb_tabs = notebook_widget.tabs()
-        # print(nb_tabs)
-        frame = notebook_widget.nametowidget(tab_name)
-        if frame:
-            ui_data_list = frame.get_ui_data_list()
-            par_variable = ui_data_list.get_variable(
-                parameter_name)
-            if par_variable is not None:
-                par_variable.set(parameter_value)
+        frame = self.nb.nametowidget(tab_name)
+        if frame is not None:
+            if hasattr(frame.scroll_frame, 'ui_data_list'):
+                par_variable = frame.scroll_frame.ui_data_list.get_variable(
+                    parameter_name)
+                if par_variable is not None:
+                    par_variable.set(parameter_value)
+                else:
+                    print("There is no parameter with the name " +
+                           parameter_name + " in tab " + tab_name)
             else:
-                print(
-                    "There is no parameter with the name " + parameter_name +
-                    " in tab " + tab_name)
+                print("Frame " + frame +
+                      " does not contains an attribute with the name "
+                      "ui_data_list")
         else:
             print("There is no tab with the name " + tab_name)
 
@@ -175,7 +177,7 @@ class WelcomeWindow(tk.Tk):
     existing IMSIL input file and a button to open the IMSIL input parameter
     editor.
 
-    @type of simulation: based on this option, the input file generator
+    @type of simulation: based on this option, the input parameter editor
     will have different parameters at the beginning of each notebook page.
     These parameters, so called "basic" parameters, that are for this
     type of simulation common, has to be defined in the database.
@@ -258,14 +260,14 @@ class WelcomeWindow(tk.Tk):
     def open_imsil_input_parameter_editor(self):
         """
         Close this window and open
-        the IMSIL input file generator with the specified parameters by
-        the user. These are the path of an existing input file and the
-        type of the simulation.
+        the IMSIL input parameter editor with the specified parameters by the
+        user. These are the type of the simulation and the path of an
+        existing input file and the .
         """
         self.destroy()
         ImsilInputParameterEditor(
-            input_file_path=self.choose_existing_file_variable.get(),
-            type_of_simulation=self.type_sim_combobox_variable.get()
+            type_of_simulation=self.type_sim_combobox_variable.get(),
+            input_file_path=self.choose_existing_file_variable.get()
         )
 
 

@@ -20,7 +20,7 @@ class ShowAdvParButton(BlancFrame):
     """
 
     def __init__(self, parent, button_text="",
-                 init_state=ButtonState.SHOW_BASICS, *args, **kwargs):
+                 init_state=ButtonState.SHOW_ALL, *args, **kwargs):
         super().__init__(parent, rows=1, columns=1, *args, **kwargs)
         self.state = init_state
         style = ttk.Style()

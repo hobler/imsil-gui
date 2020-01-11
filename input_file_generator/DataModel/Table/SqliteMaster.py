@@ -14,7 +14,7 @@ class SqliteMaster:
     Hold the master table of an sqlite database.
 
     Methods:
-    :get_table_names: retrieve all table names of the database.
+        :get_table_names: retrieve all table names of the database.
     """
     def __init__(self, db_file):
         self.table = load_database_table(db_file,

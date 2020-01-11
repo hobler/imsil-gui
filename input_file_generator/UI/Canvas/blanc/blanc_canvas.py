@@ -3,11 +3,22 @@ import tkinter as tk
 
 class BlancCanvas(tk.Canvas):
     """
-    Class for the blanc frame
+    Class for the blanc frame.
     """
 
     def __init__(self, parent, rows=1, columns=1,
                  set_grid_propagate=False, *args, **kwargs):
+        """
+        In the initialization of the blanc canvas the number of rows and
+        columns can be defined, finally the canvas is placed into the parent.
+
+        :param parent: tk widget, where this canvas has to be placed
+        :param rows: number of rows of the grid
+        :param columns: number of columns of the grid
+        :param set_grid_propagate: parameter for the grid_propagate function
+        :param args: is forwared to the super().__init__() function
+        :param kwargs: is forwared to the super().__init__() function
+        """
         super().__init__(parent, highlightthickness=0, *args, **kwargs)
         self.grid_propagate(set_grid_propagate)
         self.set_num_of_rows(rows)
