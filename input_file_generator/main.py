@@ -1,7 +1,7 @@
 """
 Classes:
     :WelcomeWindow: The main window, where the user can config the input
-        parmeter editor.
+        parameter editor.
     :ImsilInputParameterEditor: Based on the two parameters (type of simulation
         and existing input file) the IMSIL Input Parameter Editor will be
         opened.
@@ -68,8 +68,8 @@ def center_window(tk_window):
 
 class ImsilInputParameterEditor:
     """
-    The IMSIL Input Patameter Editor consists of a notebook with tabs,
-    where each tab corresponds to the database table.
+    The IMSIL Input Parameter Editor consists of a notebook with tabs,
+    where each tab corresponds to a database table.
     """
 
     def __init__(self, type_of_simulation, input_file_path):
@@ -77,10 +77,10 @@ class ImsilInputParameterEditor:
         In the initialization of the IMSIL Input Parameter Editor
         a notebook is added to the window. The SqliteMaster class is used to
         determinate the table names in the database. For each table name a
-        new tab is be added to the notebook. Each tab contains a frame of
+        new tab is added to the notebook. Each tab contains a frame of
         the class DbFrame.
 
-        If there was passed a path to an input file, it will be read and the
+        If a path to an input file is passed, it is read and the
         parameter values will be placed into the Editor.
 
         :param type_of_simulation: type of the simulation
@@ -107,12 +107,12 @@ class ImsilInputParameterEditor:
                         text=table_name)
         center_window(root)
 
-        # if the user select an IMSIL input file
+        # if the user has passed the name of an IMSIL input file
         if input_file_path != "":
             # read IMSIL input file
             input_file = read_existing_input_file(input_file_path)
             if input_file is not None:
-                # got through all parameters that are defined in the file
+                # go through all parameters that are defined in the file
                 for key in input_file.file.keys():
                     for par_name in input_file.file[key]:
                         if not isinstance(par_name, OrderedDict):
@@ -126,7 +126,7 @@ class ImsilInputParameterEditor:
     def get_all_parameter_values(self):
         """
         Go through all tabs in the notebook and use the ui_data_list with
-        the stored (defalt) values of the parameters to get all changes.
+        the stored (default) values of the parameters to get all changes.
 
         This function can be used later to generate the input file.
 
@@ -162,7 +162,7 @@ class ImsilInputParameterEditor:
                            parameter_name + " in tab " + tab_name)
             else:
                 print("Frame " + frame +
-                      " does not contains an attribute with the name "
+                      " does not contain an attribute with the name "
                       "ui_data_list")
         else:
             print("There is no tab with the name " + tab_name)
@@ -207,7 +207,7 @@ class WelcomeWindow(tk.Tk):
             justify=tk.LEFT,
         ).grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="NESW")
 
-        # Add Listbox with elements that can be choose by the user
+        # Add Listbox with elements that can be chosen by the user
         self.type_sim_combobox_variable = tk.StringVar()
         self.choose_type_sim_label = tk.Label(
             self.frame,
@@ -245,8 +245,8 @@ class WelcomeWindow(tk.Tk):
 
     def load_file(self):
         """
-        Open a dialog to pick up a file. After the user select a
-        file and click on the button "open" the filename will be copied
+        Open a dialog to pick up a file. After the user has selected a
+        file and clicked on the button "open", the filename is copied
         to the entry to show the user that the file was successfully
         selected.
         """

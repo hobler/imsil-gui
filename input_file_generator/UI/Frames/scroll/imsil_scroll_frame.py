@@ -1,14 +1,14 @@
 """
-This module defines a tk.Frame and create for each table row a row with
+This module defines a tk.Frame and creates for each table row a row with the
 following elements: a tk.Label with the parameter name, an info Button
-which pop up a window with a long description about the parameter,
+which pops up a window with a long description about the parameter when clicked,
 a tk.Entry that contains the parameter value (or if the parameter is of type
 boolean, then there is a tk.Checkbutton), for each index variable of the
 current database table there is a tk.Label and tk.Entry with the index
-varibale name and value. At least there are two tk.Buttons (+) and (-) to
-add and delete new paramters.
+variable name and value. At last there are two tk.Buttons (+) and (-) to
+add and delete new parameters.
 
-Furthermore the main tk.Frame contains a scrollable area where is a frame for
+Furthermore the main tk.Frame contains a scrollable area containing a frame for
 basic (common) parameters called self.content_frame_basic and a frame for
 all other parameters called self.content_frame_adv.
 With the show/hide Button the visibility of the frame with advanced parameters
@@ -60,7 +60,7 @@ class ImsilScrollFrame(BlancFrame):
         # define number of columns:
         #   the first two are for parameter name (Label) and value (Entry),
         #   for each index variable there is a need of another two columns,
-        #   at least, the info button is also in the grid (column 1)
+        #   the info button is also in the grid (column 1)
         self.columns = 2 * (len(self.index_var_list) + 1) + 1
 
         # use for every parameter a separate frame
@@ -153,8 +153,9 @@ class ImsilScrollFrame(BlancFrame):
         Take the parameter frame from the parameter frame list at the index
         par_frame_index and fill a new row with the index row_index with tk
         widgets as described in the module docstring. If there are already
-        widgets in this row, all elements in the rows with with index >=
-        row_index has to moved one row down to make place for the new row.
+        widgets in this row, all elements in the rows with index >=
+        row_index have to be moved down one row to make place for the new
+        row.
 
         :par_frame_index: parameter frame index
         :par_name: parameter name
@@ -196,7 +197,7 @@ class ImsilScrollFrame(BlancFrame):
                 tool_tip_text=short_desc)
         label.grid(row=row_number, column=0, sticky="NESW")
 
-        # Add info button which show details about the parameter in a message
+        # Add info button which shows details about the parameter in a message
         button_info = self.add_button(parent=par_frame, btn_text="i", width=2)
         button_info.config(takefocus=False)
         button_info.config(
@@ -209,32 +210,25 @@ class ImsilScrollFrame(BlancFrame):
         if is_bool:
             # Add Checkbutton for boolean parameter
             if len(self.index_var_list) > 0:
-                checkbutton = self.add_checkbutton(parent=par_frame,
-                                                   par_name=par_name,
-                                                   width=CHECKBUTTON_WIDTH,
-                                                   cb_value=default_value,
-                                                   default_value=default_value)
+                width = CHECKBUTTON_WIDTH
             else:
-                checkbutton = self.add_checkbutton(
-                    parent=par_frame,
-                    par_name=par_name,
-                    width=CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES,
-                    cb_value=default_value,
-                    default_value=default_value)
+                width = CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES
+            checkbutton = self.add_checkbutton(parent=par_frame,
+                                               par_name=par_name,
+                                               width=width,
+                                               cb_value=default_value,
+                                               default_value=default_value)
             checkbutton.grid(row=row_number, column=2, sticky="NESW")
         else:
             # Add Label for non boolean parameter
             if len(self.index_var_list) > 0:
-                entry = self.add_entry(parent=par_frame, par_name=par_name,
-                                       entry_text=default_value,
-                                       width=PARAMETER_NAME_ENTRY_WIDTH,
-                                       default_value=default_value)
+                width = PARAMETER_NAME_ENTRY_WIDTH
             else:
-                entry = self.add_entry(
-                    parent=par_frame, par_name=par_name,
-                    entry_text=default_value,
-                    width=PARAMETER_NAME_ENTRY_WIDTH_WITHOUT_INDEX_VARIABLES,
-                    default_value=default_value)
+                width = PARAMETER_NAME_ENTRY_WIDTH_WITHOUT_INDEX_VARIABLES
+            entry = self.add_entry(parent=par_frame, par_name=par_name,
+                                   entry_text=default_value,
+                                   width=width,
+                                   default_value=default_value)
             entry.grid(row=row_number, column=2, sticky="NESW")
 
         if len(self.index_var_list) > 0:
@@ -254,7 +248,7 @@ class ImsilScrollFrame(BlancFrame):
                            sticky="NESW")
                 if index_var not in index_var_list:
                     # Disable Entry of the index variable if current
-                    # parameter dont use it
+                    # parameter doesn't use it
                     entry.config(state='disabled')
 
             # Add "+" Button to the paramter, with which the user can add
@@ -267,7 +261,7 @@ class ImsilScrollFrame(BlancFrame):
             button_minus = self.add_button(parent=par_frame, btn_text="-")
             if row_number is 1:
                 # To prevent that the user can delete all parameters. The
-                # first parameter can not be deleted
+                # first parameter cannot be deleted
                 button_minus.config(state=tk.DISABLED)
             button_minus.grid(row=row_number, column=self.columns + 1)
 
@@ -285,8 +279,8 @@ class ImsilScrollFrame(BlancFrame):
         """
         Take the parameter frame from the parameter frame list at the index
         par_frame_index and remove the row with the index row_index. If there
-        are widgets in rows with with the index greater row_index,
-        these widgets will moved one row up.
+        are widgets in rows with index greater than row_index,
+        these widgets are moved one row up.
 
         :par_frame_index: parameter frame index
         :par_name: parameter name
@@ -340,7 +334,7 @@ class ImsilScrollFrame(BlancFrame):
         :param is_bool: true, if the parameter is of type bool, false else
         :param is_basic: true, if the parameter is basic, then it will be
             placed to the basic content frame that is above the advanced
-            cotent frame. False, to add it to the advanced cotent frame
+            content frame. False, to add it to the advanced content frame
         """
         if index_var_list is None:
             index_var_list = list()
@@ -412,7 +406,7 @@ class ImsilScrollFrame(BlancFrame):
     def update_if_obligatory_entry(self, par_name):
         """
         Check for each tk.Entry if "obligatory if" condition is true or
-        false and set the state of the tk.Entry to activate or deactivate of
+        false and set the state of the tk.Entry to activate or deactivate
         the parameter.
 
         :par_name: Name of a bool paramter
@@ -472,7 +466,7 @@ class ImsilScrollFrame(BlancFrame):
         of the main_canvas.
         """
         if parent is not None:
-            # add mouse scrolling evenet for Darwin, Windows and Linux
+            # add mouse scrolling event for Darwin, Windows and Linux
             if OS == 'Windows' or OS == 'Darwin':
                 # with Windows and Mac OS (OS X)
                 parent.bind(sequence="<MouseWheel>", func=self.mouse_wheel)

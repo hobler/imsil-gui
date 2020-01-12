@@ -11,7 +11,7 @@ DATABASE_BASIC_COL = 6
 
 class DatabaseTable:
     """
-    Hold data of each table in a database and contains methods to get
+    Hold data of a given table in a database and contains methods to get
     specific type of data.
 
     Methods:

@@ -16,8 +16,8 @@ class BlancCanvas(tk.Canvas):
         :param rows: number of rows of the grid
         :param columns: number of columns of the grid
         :param set_grid_propagate: parameter for the grid_propagate function
-        :param args: is forwared to the super().__init__() function
-        :param kwargs: is forwared to the super().__init__() function
+        :param args: is forwarded to the super().__init__() function
+        :param kwargs: is forwarded to the super().__init__() function
         """
         super().__init__(parent, highlightthickness=0, *args, **kwargs)
         self.grid_propagate(set_grid_propagate)
