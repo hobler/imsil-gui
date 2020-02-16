@@ -104,6 +104,12 @@ class DatabaseTable:
         else:
             return False
 
+    def is_index_var(self, table_row):
+        if "index variable" in self.get_type(table_row):
+            return True
+        else:
+            return False
+
     def regroup(self, table):
         # Sort the list alphabetically
         table = sorted(table)
@@ -112,6 +118,9 @@ class DatabaseTable:
         bool_table = []
         rest_table = []
         
+        # Iterate through every row and append the entries to the 
+        # correct table. At the end append the non-boolean table to the
+        # boolean table
         for row in table:
             if self.is_logical(row):
                 bool_table.append(row)

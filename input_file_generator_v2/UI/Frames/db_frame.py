@@ -49,7 +49,8 @@ class DbFrame(BlancFrame):
             short_desc=self.db_table.get_short_desc(table_row),
             long_desc=self.create_info_button_text(table_row),
             is_bool=self.db_table.is_logical(table_row),
-            is_basic=is_basic)
+            is_basic=is_basic,
+            is_index_var=self.db_table.is_index_var(table_row))
 
     def create_info_button_text(self, table_row):
         """
