@@ -33,16 +33,18 @@ BTN_TEXT_SHOW_ADV = MINUS + " Show advanced parameters " + MINUS
 BTN_TEXT_HIDE_ADV = MINUS + " Hide advanced parameters " + MINUS
 
 # configure elements width
-PARAMETER_NAME_LABEL_WIDTH = 15
-PARAMETER_NAME_LABEL_WIDTH_WITHOUT_INDEX_VARIABLES = 5
-PARAMETER_NAME_ENTRY_WIDTH = 35
-#PARAMETER_NAME_ENTRY_WIDTH_WITHOUT_INDEX_VARIABLES = 60
-PARAMETER_NAME_ENTRY_WIDTH_WITHOUT_INDEX_VARIABLES = 20
+PARAMETER_NAME_LABEL_WIDTH = 10
+#PARAMETER_NAME_LABEL_WIDTH_WITHOUT_INDEX_VARIABLES = 5
+#PARAMETER_NAME_ENTRY_WIDTH = 35
+PARAMETER_NAME_ENTRY_WIDTH = 33
+INFO_WIDTH = 10
+INFO_HEIGHT = 10
+#PARAMETER_NAME_ENTRY_WIDTH_WITHOUT_INDEX_VARIABLES = 20
 INDEX_VARIABLE_NAME_LABEL_WIDTH = 10
 INDEX_VARIABLE_NAME_ENTRY_WIDTH = 5
-CHECKBUTTON_WIDTH = 36
-#CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES = 61
-CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES = 21
+#CHECKBUTTON_WIDTH = 25
+CHECKBUTTON_WIDTH = 25
+#CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES = 21
 
 PARAMETERS_PER_ROW = 3
 
@@ -98,7 +100,7 @@ class ImsilScrollFrame(BlancFrame):
 
         # create two frames in self.content_frame. First for basic parameters
         # and the second for advanced parameters
-        self.content_frame_basic = BlancFrame(self.content_frame, columns=self.columns)
+        self.content_frame_basic = BlancFrame(self.content_frame)#, columns=self.columns)
         self.content_frame_basic.grid(sticky="NESW")
 
         self.button_frame_show_adv = ShowAdvParButton(
@@ -200,6 +202,66 @@ class ImsilScrollFrame(BlancFrame):
                     else:
                         child.grid(row=child_grid_row + 1,
                                    column=child_grid_column, sticky="NESW")
+        
+        # Add placeholder labels, so the columns are positioned correctly
+        # regardless of the number of entries in the row
+        p = list()
+        if not is_index_var and self.params_in_row == 0:            
+            p.append(self.add_label(parent=par_frame,
+                                 width=10,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=5,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=25,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=10,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=5,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=25,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=10,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=5,
+                                 label_text=""))
+            p.append(self.add_label(parent=par_frame,
+                                 width=25,
+                                 label_text=""))        
+            p[0].grid(row=row_number, column=0, sticky="NESW")
+            p[1].grid(row=row_number, column=1, sticky="NESW")
+            p[2].grid(row=row_number, column=2, sticky="NESW")
+            p[3].grid(row=row_number, column=3, sticky="NESW")
+            p[4].grid(row=row_number, column=4, sticky="NESW")
+            p[5].grid(row=row_number, column=5, sticky="NESW")
+            p[6].grid(row=row_number, column=6, sticky="NESW")
+            p[7].grid(row=row_number, column=7, sticky="NESW")
+            p[8].grid(row=row_number, column=8, sticky="NESW")
+            
+#            p[0].grid_forget()
+#            p[1].grid_forget()
+#            p[2].grid_forget()
+#            p[3].destroy()
+#            p[4].destroy()
+#            p[5].destroy()
+#            p[6].destroy()
+#            p[7].destroy()
+#            p[8].destroy()
+            
+        if not is_index_var:
+            #print(self.params_in_row)
+            #print(len(par_frame.winfo_children()))
+            children_widgets = par_frame.winfo_children()
+            children_widgets[0].destroy()
+            children_widgets[1].destroy()
+            children_widgets[2].destroy()
+        
         # Add Label with parameter name as text
         if len(self.index_var_list) > 0:
             label = self.add_label(parent=par_frame,
@@ -208,13 +270,13 @@ class ImsilScrollFrame(BlancFrame):
         else:
             label = self.add_label(
                 parent=par_frame,
-                width=PARAMETER_NAME_LABEL_WIDTH_WITHOUT_INDEX_VARIABLES,
+                width=PARAMETER_NAME_LABEL_WIDTH,
                 label_text=par_name)
         #print(0+PARAMETERS_PER_ROW*self.params_in_row)
         label.grid(row=row_number, column=0+PARAMETERS_PER_ROW*self.params_in_row, sticky="NESW")
 
         # Add info button which shows details about the parameter in a message
-        button_info = self.add_button(parent=par_frame,w=10,h=10, 
+        button_info = self.add_button(parent=par_frame,w=INFO_WIDTH,h=INFO_HEIGHT, 
                                       tool_tip_text=short_desc)
         self.photo=tk.PhotoImage(file="info_sign_1.gif")
         button_info.config(image=self.photo)
@@ -226,14 +288,14 @@ class ImsilScrollFrame(BlancFrame):
 
         # config column width where the button is, so it does not take too
         # much white space
-        par_frame.columnconfigure(1, weight=1)
+        #par_frame.columnconfigure(1, weight=1)
 
         if is_bool:
             # Add Checkbutton for boolean parameter
             if len(self.index_var_list) > 0:
                 width = CHECKBUTTON_WIDTH
             else:
-                width = CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES
+                width = CHECKBUTTON_WIDTH
             
             checkbutton = self.add_checkbutton(parent=par_frame,
                                                par_name=par_name,
@@ -246,7 +308,7 @@ class ImsilScrollFrame(BlancFrame):
             if len(self.index_var_list) > 0:
                 width = PARAMETER_NAME_ENTRY_WIDTH
             else:
-                width = PARAMETER_NAME_ENTRY_WIDTH_WITHOUT_INDEX_VARIABLES
+                width = PARAMETER_NAME_ENTRY_WIDTH
             
             entry = self.add_entry(parent=par_frame, par_name=par_name,
                                    entry_text=default_value,
@@ -297,6 +359,12 @@ class ImsilScrollFrame(BlancFrame):
                                     default_value=default_value,
                                     short_desc=short_desc,
                                     long_desc=long_desc, is_bool=is_bool)
+        
+#        if not is_index_var:
+#            #print(self.params_in_row)
+#            #print(len(par_frame.winfo_children()))
+#            children_widgets = par_frame.winfo_children()
+#            print(children_widgets)
 
     def remove_content_in_par_frame(self, par_frame_index, par_name,
                                     index_var_list, default_value,
@@ -388,7 +456,7 @@ class ImsilScrollFrame(BlancFrame):
         else:
             if self.params_in_row == 0:
                  par_frame = BlancFrame(self.get_parent(is_basic=is_basic),
-                        columns=self.columns, column_weight=15)
+                        columns=self.columns, column_weight=1)
                  self.bind_mouse_event(par_frame)
                  self.par_frame_list.append(par_frame)
                  self.add_content_in_par_frame(
@@ -446,7 +514,8 @@ class ImsilScrollFrame(BlancFrame):
         self.bind_mouse_event(btn)
         return btn
 
-    def add_label(self, parent, label_text, width, label_text_anchor=tk.E):
+    def add_label(self, parent, label_text, width, 
+                  label_text_anchor=tk.W):
         label = tk.Label(parent, text=label_text,
                          width=width,
                          anchor=label_text_anchor)
@@ -470,7 +539,8 @@ class ImsilScrollFrame(BlancFrame):
         self.bind_mouse_event(entry)
         return entry
 
-    def add_checkbutton(self, parent, par_name, width, cb_value="T",
+    def add_checkbutton(self, parent, par_name, width, 
+                        cb_value="T",
                         default_value="",
                         on_value="T", off_value="F"):
         cb_string_var = tk.StringVar()
