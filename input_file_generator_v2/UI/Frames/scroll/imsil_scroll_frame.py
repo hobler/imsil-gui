@@ -23,30 +23,23 @@ from tkinter import Widget
 
 from DataModel.DataList import DataList
 from UI.Canvas.blanc.blanc_canvas import BlancCanvas
-from UI.Widgets.ShowAdvParButton import ShowAdvParButton, ButtonState
 from UI.Frames.blanc.blanc_frame import BlancFrame
 
 OS = platform.system()
 
-MINUS = "-----------------------------------------"
-BTN_TEXT_SHOW_ADV = MINUS + " Show advanced parameters " + MINUS
-BTN_TEXT_HIDE_ADV = MINUS + " Hide advanced parameters " + MINUS
 
-# configure elements width
-PARAMETER_NAME_LABEL_WIDTH = 10
-#PARAMETER_NAME_LABEL_WIDTH_WITHOUT_INDEX_VARIABLES = 5
-#PARAMETER_NAME_ENTRY_WIDTH = 35
-PARAMETER_NAME_ENTRY_WIDTH = 33
+# Configure elements width
 INFO_WIDTH = 10
 INFO_HEIGHT = 10
-#PARAMETER_NAME_ENTRY_WIDTH_WITHOUT_INDEX_VARIABLES = 20
-INDEX_VARIABLE_NAME_LABEL_WIDTH = 10
-INDEX_VARIABLE_NAME_ENTRY_WIDTH = 5
-#CHECKBUTTON_WIDTH = 25
-CHECKBUTTON_WIDTH = 25
-#CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES = 21
+ARROW_WIDTH = 25
+ARROW_HEIGHT = 25
 
-PARAMETERS_PER_ROW = 3
+# Set the number of parameters per row for each type and the elements
+# per parameter (the number of columns needed for 1 parameter)
+BOOL_PARAMETERS_PER_ROW = 5
+ENTRY_PARAMETERS_PER_ROW = 3
+INDEX_PARAMETERS_PER_ROW = 1
+ELEMENTS_PER_PARAMETER = 3
 
 class ImsilScrollFrame(BlancFrame):
     """
@@ -64,30 +57,26 @@ class ImsilScrollFrame(BlancFrame):
             self.index_var_list = index_var_list
             
 
-        # define number of columns:
-        #   the first two are for parameter name (Label) and value (Entry),
-        #   for each index variable there is a need of another two columns,
-        #   the info button is also in the grid (column 1)
-        # If the page has no index variable array, set the number of columns
-        # to 9 so 3 element can be positioned with label, info button and
-        # entry. Otherwise calculate the length based on the number of 
-        # index variables.
-        if len(self.index_var_list) == 0:
-            self.columns = 9;
-        else:
-            self.columns = 2 * (len(self.index_var_list) + 1) + 1
+        # Define the number of columns as the product of the constants
+        # defining the parameters per row and the elements per parameter.        
+        self.columns_b = BOOL_PARAMETERS_PER_ROW * ELEMENTS_PER_PARAMETER
+        self.columns_e = ENTRY_PARAMETERS_PER_ROW * ELEMENTS_PER_PARAMETER
+        # For index variable arrays set the number of rows according
+        # to the number of elements in the array (2 per element and 4
+        # additional ones for the label, info and the expand buttons)
+        self.columns_i =  2 * len(self.index_var_list) + 4
 
         # Define the counter variable to track the number of parameters in
         # the current row
         self.params_in_row = 0;
 
-        # use for every parameter a separate frame
+        # Use a separate frame for the three groups of parameters
         self.par_frame_list = list()
         self.ui_data_list = DataList()
 
         # build the scrolling area
-        self.main_canvas = BlancCanvas(self, columns=1)
-        self.content_frame = BlancFrame(self.main_canvas)
+        self.main_canvas = BlancCanvas(self, columns=1, width=890)
+        self.content_frame = BlancFrame(self.main_canvas, frame_index=0)
         # @create_window: parameter 'tags' is later required to change the
         # window size
         self.main_canvas.create_window(0, 0, window=self.content_frame,
@@ -98,17 +87,22 @@ class ImsilScrollFrame(BlancFrame):
         self.main_canvas.config(yscrollcommand=self.vertical_scrollbar.set)
         self.bind_mouse_event(self.content_frame)
 
-        # create two frames in self.content_frame. First for basic parameters
-        # and the second for advanced parameters
-        self.content_frame_basic = BlancFrame(self.content_frame)#, columns=self.columns)
-        self.content_frame_basic.grid(sticky="NESW")
+        # Create three frames for the three different parameter types
+        self.content_frame_bool = BlancFrame(self.content_frame, columns = self.columns_b, frame_index=1)
+        self.content_frame_bool.grid(sticky="NESW")
+        self.num_bools = 0
 
-        self.button_frame_show_adv = ShowAdvParButton(
-            self.content_frame, button_text=BTN_TEXT_HIDE_ADV)
-        self.button_frame_show_adv.button.configure(command=self.toggle_adv)
-        self.bind_mouse_event(self.button_frame_show_adv.button)
-
-        self.content_frame_adv = BlancFrame(self.content_frame)
+        self.content_frame_entry = BlancFrame(self.content_frame, columns = self.columns_e, frame_index=2)
+        self.content_frame_entry.grid(sticky="NESW")
+        self.num_entries = 0
+        
+        self.content_frame_index = BlancFrame(self.content_frame, columns = self.columns_i, frame_index=3)
+        self.content_frame_index.grid(sticky="NESW")
+        self.num_index = 0
+        
+        self.par_frame_list.append(self.content_frame_bool)
+        self.par_frame_list.append(self.content_frame_entry)
+        self.par_frame_list.append(self.content_frame_index)
 
         self.content_frame.update_idletasks()
         self.content_frame.bind("<Configure>", self.update_scrollregion)
@@ -139,10 +133,10 @@ class ImsilScrollFrame(BlancFrame):
         for child in par_frame.winfo_children():
             if child.winfo_class() == 'Button':
                 child_grid_row = child.grid_info()['row']
-                if '+' in child.cget('text'):
+                if 'r' in child.cget('text'):
                     child.config(
-                        command=lambda row_index=str(child_grid_row + 1):
-                        self.add_content_in_par_frame(
+                        command=lambda row_index=child_grid_row:
+                        self.open_index_var_r(
                             par_frame_index=par_frame_index, par_name=par_name,
                             index_var_list=index_var_list,
                             default_value=default_value,
@@ -152,6 +146,19 @@ class ImsilScrollFrame(BlancFrame):
                             is_index_var=False
                         )
                     )
+                if 'l' in child.cget('text'):
+                    child.config(
+                        command=lambda row_index=child_grid_row:
+                        self.close_index_var_l(
+                            par_frame_index=par_frame_index, par_name=par_name,
+                            index_var_list=index_var_list,
+                            default_value=default_value,
+                            short_desc=short_desc,
+                            long_desc=long_desc, is_bool=is_bool,
+                            row_index=row_index,
+                            is_index_var=False
+                        )
+                    )                        
                 if '-' in child.cget('text'):
                     child.config(
                         command=lambda row_index=str(child_grid_row):
@@ -164,6 +171,124 @@ class ImsilScrollFrame(BlancFrame):
                             row_index=row_index
                         )
                     )
+
+    def open_index_var_r(self, par_frame_index, par_name,
+                                 index_var_list, default_value, short_desc,
+                                 long_desc, is_bool, is_index_var, row_index):
+        
+        row_number = row_index
+        par_frame = self.par_frame_list[par_frame_index]
+#        print("Hi")
+#        print(par_frame)
+        temp_column_index = 0
+        # add for each index variable a Label and an Entry
+        for index_var in self.index_var_list:
+            temp_column_index += 2
+            label = self.add_label(parent=par_frame,
+                                   label_text=index_var)
+            label.grid(row=row_number, column=temp_column_index,
+                       sticky="NESW")
+            entry = self.add_entry(parent=par_frame, par_name=par_name,
+                                   entry_text="")
+            entry.grid(row=row_number, column=temp_column_index + 1,
+                       sticky="NESW")
+            if index_var not in index_var_list:
+                # Disable Entry of the index variable if current
+                # parameter doesn't use it
+                entry.config(state='disabled')
+#    
+#        par_frame.update()
+#        print(par_frame.winfo_children())
+        #print(par_frame.children.values())
+#        par_frame.children.update()
+#        for widget in par_frame.children.values():
+#            widget_grid_row = widget.grid_info()['row']
+#            widget_grid_column = widget.grid_info()['column']
+#            
+#            print(widget_grid_row, widget_grid_column)
+                
+        button_l = self.add_button(parent=par_frame, btn_text="l",w=ARROW_WIDTH,h=ARROW_HEIGHT)
+        self.photo_l=tk.PhotoImage(file="arrow_l.gif")
+        button_l.config(image=self.photo_l)
+        button_l.image = self.photo_l;
+        button_l.config(takefocus=False)
+        button_l.grid(row=row_number, column=self.columns_i - 1)
+        
+        
+        self.update_buttons_command(par_frame_index=par_frame_index,
+                            par_name=par_name,
+                            index_var_list=index_var_list,
+                            default_value=default_value,
+                            short_desc=short_desc,
+                            long_desc=long_desc, is_bool=is_bool)
+        
+        
+    def close_index_var_l(self, par_frame_index, par_name,
+                                 index_var_list, default_value, short_desc,
+                                 long_desc, is_bool, is_index_var, row_index):        
+
+        #tk.Frame.winfo_children.
+        row_number = row_index
+        par_frame = self.par_frame_list[par_frame_index]
+        temp_column_index = 0
+        par_frame.update()
+        
+        for widget in par_frame.children.values():            
+            print(widget.grid_info())
+        
+        # add for each index variable a Label and an Entry
+        for widget in par_frame.children.values():            
+            #print(widget)
+            widget_grid_row = widget.grid_info()['row']
+            widget_grid_column = widget.grid_info()['column']
+            
+#            print(widget_grid_row, widget_grid_column)
+
+            if widget_grid_row < row_number:
+                continue
+            if widget_grid_row > row_number:
+                continue
+
+            if widget_grid_column < 2:
+                continue
+            
+            if widget_grid_column >=self.columns_i-2:
+                continue
+            #print(i, widget)
+            
+            widget.grid_forget() 
+            
+            if widget_grid_row == row_number and widget_grid_column == 3:
+                widget.grid(row=row_number, column=2,sticky="NESW")
+            
+#            par_frame.
+#            temp_column_index += 2
+#            label = self.add_label(parent=par_frame,
+#                                   label_text=index_var)
+#            label.grid(row=row_number, column=temp_column_index,
+#                       sticky="NESW")
+#            entry = self.add_entry(parent=par_frame, par_name=par_name,
+#                                   entry_text="")
+#            entry.grid(row=row_number, column=temp_column_index + 1,
+#                       sticky="NESW")
+#            if index_var not in index_var_list:
+#                # Disable Entry of the index variable if current
+#                # parameter doesn't use it
+#                entry.config(state='disabled')
+                
+        button_r = self.add_button(parent=par_frame, btn_text="r",w=ARROW_WIDTH,h=ARROW_HEIGHT)
+        self.photo_r=tk.PhotoImage(file="arrow_r.gif")
+        button_r.config(image=self.photo_r)
+        button_r.image = self.photo_r;
+        button_r.config(takefocus=False)
+        button_r.grid(row=row_number, column=self.columns_i - 1)   
+        
+        self.update_buttons_command(par_frame_index=par_frame_index,
+                            par_name=par_name,
+                            index_var_list=index_var_list,
+                            default_value=default_value,
+                            short_desc=short_desc,
+                            long_desc=long_desc, is_bool=is_bool)        
 
     def add_content_in_par_frame(self, par_frame_index, par_name,
                                  index_var_list, default_value, short_desc,
@@ -189,168 +314,143 @@ class ImsilScrollFrame(BlancFrame):
         par_frame = self.par_frame_list[par_frame_index]
         row_number = int(row_index)
                 
-        if row_number > 1:
-            # move elements one row down to make place for the new row
-            for child in par_frame.winfo_children():
-                child_grid_row = child.grid_info()['row']
-                child_grid_column = child.grid_info()['column']
-                if child_grid_row >= row_number:
-                    child.grid_forget()
-                    if child.winfo_class() == 'Button':
-                        child.grid(row=child_grid_row + 1,
-                                   column=child_grid_column)
-                    else:
-                        child.grid(row=child_grid_row + 1,
-                                   column=child_grid_column, sticky="NESW")
+#        if row_number > 1:
+#            # move elements one row down to make place for the new row
+#            for child in par_frame.winfo_children():
+#                child_grid_row = child.grid_info()['row']
+#                child_grid_column = child.grid_info()['column']
+#                if child_grid_row >= row_number:
+#                    child.grid_forget()
+#                    if child.winfo_class() == 'Button':
+#                        child.grid(row=child_grid_row + 1,
+#                                   column=child_grid_column)
+#                    else:
+#                        child.grid(row=child_grid_row + 1,
+#                                   column=child_grid_column, sticky="NESW")
         
-        # Add placeholder labels, so the columns are positioned correctly
-        # regardless of the number of entries in the row
-        p = list()
-        if not is_index_var and self.params_in_row == 0:            
-            p.append(self.add_label(parent=par_frame,
-                                 width=10,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=5,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=25,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=10,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=5,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=25,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=10,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=5,
-                                 label_text=""))
-            p.append(self.add_label(parent=par_frame,
-                                 width=25,
-                                 label_text=""))        
-            p[0].grid(row=row_number, column=0, sticky="NESW")
-            p[1].grid(row=row_number, column=1, sticky="NESW")
-            p[2].grid(row=row_number, column=2, sticky="NESW")
-            p[3].grid(row=row_number, column=3, sticky="NESW")
-            p[4].grid(row=row_number, column=4, sticky="NESW")
-            p[5].grid(row=row_number, column=5, sticky="NESW")
-            p[6].grid(row=row_number, column=6, sticky="NESW")
-            p[7].grid(row=row_number, column=7, sticky="NESW")
-            p[8].grid(row=row_number, column=8, sticky="NESW")
+               
+        if is_index_var:
             
-#            p[0].grid_forget()
-#            p[1].grid_forget()
-#            p[2].grid_forget()
-#            p[3].destroy()
-#            p[4].destroy()
-#            p[5].destroy()
-#            p[6].destroy()
-#            p[7].destroy()
-#            p[8].destroy()
+#            par_frame = BlancFrame(self.content_frame, columns = self.columns_i, frame_index=3)
+#            self.content_frame_index.grid(sticky="NESW")
+#            self.num_index = 0
             
-        if not is_index_var:
-            #print(self.params_in_row)
-            #print(len(par_frame.winfo_children()))
-            children_widgets = par_frame.winfo_children()
-            children_widgets[0].destroy()
-            children_widgets[1].destroy()
-            children_widgets[2].destroy()
-        
-        # Add Label with parameter name as text
-        if len(self.index_var_list) > 0:
-            label = self.add_label(parent=par_frame,
-                                   width=PARAMETER_NAME_LABEL_WIDTH,
-                                   label_text=par_name)
-        else:
             label = self.add_label(
-                parent=par_frame,
-                width=PARAMETER_NAME_LABEL_WIDTH,
-                label_text=par_name)
-        #print(0+PARAMETERS_PER_ROW*self.params_in_row)
-        label.grid(row=row_number, column=0+PARAMETERS_PER_ROW*self.params_in_row, sticky="NESW")
+                    parent=par_frame,
+                    label_text=par_name)
 
-        # Add info button which shows details about the parameter in a message
-        button_info = self.add_button(parent=par_frame,w=INFO_WIDTH,h=INFO_HEIGHT, 
-                                      tool_tip_text=short_desc)
-        self.photo=tk.PhotoImage(file="info_sign_1.gif")
-        button_info.config(image=self.photo)
-        button_info.image = self.photo;
-        button_info.config(takefocus=False)
-        button_info.config(
-            command=lambda: messagebox.showinfo(par_name, long_desc))
-        button_info.grid(row=row_number, column=1+PARAMETERS_PER_ROW*self.params_in_row)
-
-        # config column width where the button is, so it does not take too
-        # much white space
-        #par_frame.columnconfigure(1, weight=1)
-
-        if is_bool:
-            # Add Checkbutton for boolean parameter
-            if len(self.index_var_list) > 0:
-                width = CHECKBUTTON_WIDTH
-            else:
-                width = CHECKBUTTON_WIDTH
+            label.grid(row=row_number, column=0, sticky="NESW")
+    
+            # Add info button which shows details about the parameter in a message
+            button_info = self.add_button(parent=par_frame,w=INFO_WIDTH,h=INFO_HEIGHT, 
+                                          tool_tip_text=short_desc)
+            self.photo=tk.PhotoImage(file="info_sign_1.gif")
+            button_info.config(image=self.photo)
+            button_info.image = self.photo;
+            button_info.config(takefocus=False)
+            button_info.config(
+                command=lambda: messagebox.showinfo(par_name, long_desc))
+            button_info.grid(row=row_number, column=1, sticky="W")
             
-            checkbutton = self.add_checkbutton(parent=par_frame,
-                                               par_name=par_name,
-                                               width=width,
-                                               cb_value=default_value,
-                                               default_value=default_value)
-            checkbutton.grid(row=row_number, column=2+PARAMETERS_PER_ROW*self.params_in_row, sticky="NESW")
-        else:
-            # Add Label for non boolean parameter
-            if len(self.index_var_list) > 0:
-                width = PARAMETER_NAME_ENTRY_WIDTH
-            else:
-                width = PARAMETER_NAME_ENTRY_WIDTH
+            
+#            temp_column_index = 0
+#            # add for each index variable a Label and an Entry
+#            for index_var in self.index_var_list:
+#                temp_column_index += 2
+#                label = self.add_label(parent=par_frame,
+#                                       label_text=index_var)
+#                label.grid(row=row_number, column=temp_column_index,
+#                           sticky="NESW")
+#                entry = self.add_entry(parent=par_frame, par_name=par_name,
+#                                       entry_text="")
+#                entry.grid(row=row_number, column=temp_column_index + 1,
+#                           sticky="NESW")
+#                if index_var not in index_var_list:
+#                    # Disable Entry of the index variable if current
+#                    # parameter doesn't use it
+#                    entry.config(state='disabled')
             
             entry = self.add_entry(parent=par_frame, par_name=par_name,
-                                   entry_text=default_value,
-                                   width=width,
-                                   default_value=default_value)
-            entry.grid(row=row_number, column=2+PARAMETERS_PER_ROW*self.params_in_row, sticky="NESW")
-        
-
-        #if len(self.index_var_list) > 0:
-        if is_index_var:
-            temp_column_index = 1
-            # add for each index variable a Label and an Entry
-            for index_var in self.index_var_list:
-                temp_column_index += 2
-                label = self.add_label(parent=par_frame,
-                                       width=INDEX_VARIABLE_NAME_LABEL_WIDTH,
-                                       label_text=index_var)
-                label.grid(row=row_number, column=temp_column_index,
-                           sticky="NESW")
-                entry = self.add_entry(parent=par_frame, par_name=par_name,
-                                       width=INDEX_VARIABLE_NAME_ENTRY_WIDTH,
                                        entry_text="")
-                entry.grid(row=row_number, column=temp_column_index + 1,
+            entry.grid(row=row_number, column=2,
                            sticky="NESW")
-                if index_var not in index_var_list:
-                    # Disable Entry of the index variable if current
-                    # parameter doesn't use it
-                    entry.config(state='disabled')
 
             # Add "+" Button to the paramter, with which the user can add
             # a new parameter with the same name (is necessary, only if
             # there are available index variables)
-            button_plus = self.add_button(parent=par_frame, btn_text="+")
-            button_plus.grid(row=row_number, column=self.columns)
+            button_d = self.add_button(parent=par_frame, btn_text="d",w=ARROW_WIDTH,h=ARROW_HEIGHT)
+            self.photo_d=tk.PhotoImage(file="arrow_d.gif")
+            button_d.config(image=self.photo_d)
+            button_d.image = self.photo_d;
+            button_d.config(takefocus=False)
+            button_d.grid(row=row_number, column=self.columns_i - 2)
+            
+            button_r = self.add_button(parent=par_frame, btn_text="r",w=ARROW_WIDTH,h=ARROW_HEIGHT)
+            self.photo_r=tk.PhotoImage(file="arrow_r.gif")
+            button_r.config(image=self.photo_r)
+            button_r.image = self.photo_r;
+            button_r.config(takefocus=False)
+            button_r.grid(row=row_number, column=self.columns_i - 1)
 
-            # Add "-" Button with which the user can delete a paramter
-            button_minus = self.add_button(parent=par_frame, btn_text="-")
-            if row_number is 1:
-                # To prevent that the user can delete all parameters. The
-                # first parameter cannot be deleted
-                button_minus.config(state=tk.DISABLED)
-            button_minus.grid(row=row_number, column=self.columns + 1)
+
+
+#            # Add "-" Button with which the user can delete a paramter
+#            button_minus = self.add_button(parent=par_frame, btn_text="-")
+#            if row_number is 1:
+#                # To prevent that the user can delete all parameters. The
+#                # first parameter cannot be deleted
+#                button_minus.config(state=tk.DISABLED)
+#            button_minus.grid(row=row_number, column=self.columns_i - 1)
+        # If the parameter is a boolean (Checkbutton)
+        elif is_bool:
+            # Add Checkbutton for boolean parameter            
+            checkbutton = self.add_checkbutton(parent=par_frame,
+                                               par_name=par_name,
+                                               #width=width,
+                                               cb_value=default_value,
+                                               default_value=default_value)
+            checkbutton.grid(row=row_number, column=0+ELEMENTS_PER_PARAMETER*self.params_in_row, sticky="NESW")
+            
+            label = self.add_label(
+                    parent=par_frame,
+                    label_text=par_name)
+            
+            label.grid(row=row_number, column=1+ELEMENTS_PER_PARAMETER*self.params_in_row, sticky="NESW")
+    
+            # Add info button which shows details about the parameter in a message
+            button_info = self.add_button(parent=par_frame,w=INFO_WIDTH,h=INFO_HEIGHT, 
+                                          tool_tip_text=short_desc)
+            self.photo=tk.PhotoImage(file="info_sign_1.gif")
+            button_info.config(image=self.photo)
+            button_info.image = self.photo;
+            button_info.config(takefocus=False)
+            button_info.config(
+                command=lambda: messagebox.showinfo(par_name, long_desc))
+            button_info.grid(row=row_number, column=2+ELEMENTS_PER_PARAMETER*self.params_in_row, sticky="W")
+            
+        else:
+            label = self.add_label(parent=par_frame,
+                       label_text=par_name)
+            
+            label.grid(row=row_number, column=0+ELEMENTS_PER_PARAMETER*self.params_in_row, sticky="NESW")
+    
+            # Add info button which shows details about the parameter in a message
+            button_info = self.add_button(parent=par_frame,w=INFO_WIDTH,h=INFO_HEIGHT, 
+                                          tool_tip_text=short_desc)
+            self.photo=tk.PhotoImage(file="info_sign_1.gif")
+            button_info.config(image=self.photo)
+            button_info.image = self.photo;
+            button_info.config(takefocus=False)
+            button_info.config(
+                command=lambda: messagebox.showinfo(par_name, long_desc))
+            button_info.grid(row=row_number, column=1+ELEMENTS_PER_PARAMETER*self.params_in_row)            
+            
+            entry = self.add_entry(parent=par_frame, par_name=par_name,
+                                   entry_text=default_value,
+                                   #width=width,
+                                   default_value=default_value)
+            entry.grid(row=row_number, column=2+ELEMENTS_PER_PARAMETER*self.params_in_row, sticky="NESW")        
+        
 
         # update buttons command
         self.update_buttons_command(par_frame_index=par_frame_index,
@@ -413,7 +513,7 @@ class ImsilScrollFrame(BlancFrame):
 
     def add_parameter(self, par_name, index_var_list=None, default_value="",
                       short_desc="", long_desc="", is_bool=False,
-                      is_basic=True, is_index_var=False):
+                      is_index_var=False):
         """
         Create a new frame for the given parameter, add it to the parameter
         frame list and add it to the scrollable frame to make it visible for
@@ -438,72 +538,57 @@ class ImsilScrollFrame(BlancFrame):
         # page of the notebook
         #if index_var_list:
         if is_index_var:
-            self.params_in_row = 0;            
-            par_frame = BlancFrame(self.get_parent(is_basic=is_basic),
-                                   columns=self.columns, column_weight=15)
+            self.params_in_row = 0
+            par_frame = self.content_frame_index
             self.bind_mouse_event(par_frame)
-            self.par_frame_list.append(par_frame)
             self.add_content_in_par_frame(
-                par_frame_index=len(self.par_frame_list) - 1,
+                par_frame_index=2,
                 par_name=par_name,
                 index_var_list=index_var_list,
                 default_value=default_value,
                 short_desc=short_desc,
                 long_desc=long_desc,
                 is_bool=is_bool,
-                row_index="1",
+                row_index= self.num_index//INDEX_PARAMETERS_PER_ROW,
                 is_index_var=is_index_var)
+            self.num_index += 1
+        elif is_bool:
+            if self.num_bools == 0:
+                self.params_in_row = 0
+            par_frame = self.content_frame_bool
+            self.bind_mouse_event(par_frame)
+            self.add_content_in_par_frame(
+                     par_frame_index=0,
+                     par_name=par_name,
+                     index_var_list=index_var_list,
+                     default_value=default_value,
+                     short_desc=short_desc,
+                     long_desc=long_desc,
+                     is_bool=is_bool,
+                     row_index= self.num_bools//BOOL_PARAMETERS_PER_ROW,
+                     is_index_var=is_index_var)
+            self.num_bools += 1
+            self.params_in_row += 1
+            self.params_in_row = self.params_in_row%BOOL_PARAMETERS_PER_ROW          
         else:
-            if self.params_in_row == 0:
-                 par_frame = BlancFrame(self.get_parent(is_basic=is_basic),
-                        columns=self.columns, column_weight=1)
-                 self.bind_mouse_event(par_frame)
-                 self.par_frame_list.append(par_frame)
-                 self.add_content_in_par_frame(
-                         par_frame_index=len(self.par_frame_list) - 1,
-                         par_name=par_name,
-                         index_var_list=index_var_list,
-                         default_value=default_value,
-                         short_desc=short_desc,
-                         long_desc=long_desc,
-                         is_bool=is_bool,
-                         row_index="1",
-                         is_index_var=is_index_var)
-                 self.params_in_row += 1
-            # If the next parameter is advanced but the current frame is
-            # basic, start a new frame
-            elif self.content_frame._nametowidget(name=self.par_frame_list[-1].winfo_parent()) != self.get_parent(is_basic=is_basic):
-                 self.params_in_row = 0 
-                 par_frame = BlancFrame(self.get_parent(is_basic=is_basic),
-                        columns=self.columns, column_weight=15)
-                 self.bind_mouse_event(par_frame)
-                 self.par_frame_list.append(par_frame)
-                 self.add_content_in_par_frame(
-                         par_frame_index=len(self.par_frame_list) - 1,
-                         par_name=par_name,
-                         index_var_list=index_var_list,
-                         default_value=default_value,
-                         short_desc=short_desc,
-                         long_desc=long_desc,
-                         is_bool=is_bool,
-                         row_index="1",
-                         is_index_var=is_index_var)
-                 self.params_in_row += 1               
-            else:
-                self.add_content_in_par_frame(
-                    par_frame_index=len(self.par_frame_list) - 1,
-                    par_name=par_name,
-                    index_var_list=index_var_list,
-                    default_value=default_value,
-                    short_desc=short_desc,
-                    long_desc=long_desc,
-                    is_bool=is_bool,
-                    row_index="1",
-                    is_index_var=is_index_var)
-                self.params_in_row += 1       
-                self.params_in_row = self.params_in_row%PARAMETERS_PER_ROW
+            if self.num_entries == 0:
+                self.params_in_row = 0
+            par_frame = self.content_frame_entry
+            self.bind_mouse_event(par_frame)
+            self.add_content_in_par_frame(
+                par_frame_index=1,
+                par_name=par_name,
+                index_var_list=index_var_list,
+                default_value=default_value,
+                short_desc=short_desc,
+                long_desc=long_desc,
+                is_bool=is_bool,
+                row_index= self.num_entries//ENTRY_PARAMETERS_PER_ROW,
+                is_index_var=is_index_var)
+            self.num_entries += 1
+            self.params_in_row += 1       
+            self.params_in_row = self.params_in_row%ENTRY_PARAMETERS_PER_ROW
                             
-
                 
 
     def add_button(self,parent,btn_text="Button",w=3,h=3,tool_tip_text = None):
@@ -514,19 +599,18 @@ class ImsilScrollFrame(BlancFrame):
         self.bind_mouse_event(btn)
         return btn
 
-    def add_label(self, parent, label_text, width, 
+    def add_label(self, parent, label_text, 
                   label_text_anchor=tk.W):
         label = tk.Label(parent, text=label_text,
-                         width=width,
                          anchor=label_text_anchor)
         self.bind_mouse_event(label)
         return label
 
-    def add_entry(self, parent, par_name, entry_text, width,
+    def add_entry(self, parent, par_name, entry_text,
                   default_value="", tool_tip_text="",
                   disabledbackground="gray", disabledforeground="white"):
         entry_string_var = tk.StringVar(value=entry_text)
-        entry = tk.Entry(parent, textvariable=entry_string_var, width=width,
+        entry = tk.Entry(parent, textvariable=entry_string_var,
                          disabledbackground=disabledbackground,
                          disabledforeground=disabledforeground)
         self.ui_data_list.add(par_name=par_name, tk_widget=entry,
@@ -539,14 +623,13 @@ class ImsilScrollFrame(BlancFrame):
         self.bind_mouse_event(entry)
         return entry
 
-    def add_checkbutton(self, parent, par_name, width, 
+    def add_checkbutton(self, parent, par_name, 
                         cb_value="T",
                         default_value="",
                         on_value="T", off_value="F"):
         cb_string_var = tk.StringVar()
         checkbutton = tk.Checkbutton(parent, text="",
                                      variable=cb_string_var,
-                                     width=width,
                                      onvalue=on_value,
                                      offvalue=off_value)
         cb_string_var.set(cb_value)
@@ -591,28 +674,19 @@ class ImsilScrollFrame(BlancFrame):
                 # for each flag, update all entries of the parameters
                 self.update_if_obligatory_entry(par_name=ui_data[0])
 
-    def show_basic(self):
-        self.button_frame_show_adv.button.configure(
-            text=BTN_TEXT_SHOW_ADV)
-        self.content_frame_adv.grid_forget()
 
-    def show_all(self):
-        self.button_frame_show_adv.button.configure(
-            text=BTN_TEXT_HIDE_ADV)
-        self.content_frame_adv.grid(sticky="NESW")
-
-    def toggle_adv(self):
-        if self.button_frame_show_adv.is_state_show_basic():
-            self.show_all()
-        else:
-            self.show_basic()
-        self.button_frame_show_adv.toggle_state()
-
-    def get_parent(self, is_basic=True):
-        if is_basic is True:
-            return self.content_frame_basic
-        else:
-            return self.content_frame_adv
+#    def toggle_adv(self):
+#        if self.button_frame_show_adv.is_state_show_basic():
+#            self.show_all()
+#        else:
+#            self.show_basic()
+#        self.button_frame_show_adv.toggle_state()
+#
+#    def get_parent(self, is_basic=True):
+#        if is_basic is True:
+#            return self.content_frame_basic
+#        else:
+#            return self.content_frame_adv
 
     def bind_mouse_event(self, parent):
         """

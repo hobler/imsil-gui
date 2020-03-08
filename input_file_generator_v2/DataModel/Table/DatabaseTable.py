@@ -68,19 +68,11 @@ class DatabaseTable:
                         index_vars_list.append(index_var)
         return index_vars_list
 
-    def get_basics(self):
-        basic_list = list()
-        for table_row in self.table:
-            if self.get_basic(table_row) == "T":
-                basic_list.append(table_row)
-        return basic_list
-
-    def get_advanced(self):
-        adv_list = list()
-        for table_row in self.table:
-            if self.get_basic(table_row) != "T":
-                adv_list.append(table_row)
-        return adv_list
+    def get_rows(self):
+        rows_list = list()
+        for table_row in self.table:    
+            rows_list.append(table_row)
+        return rows_list
 
     def get_index_vars_for_par(self, par_name):
         index_vars_list = list()
@@ -114,20 +106,25 @@ class DatabaseTable:
         # Sort the list alphabetically
         table = sorted(table)
         
-        # Rearrange the list so the boolean values come first
+        # Rearrange the list so the boolean values come first, followed
+        # by the entries and finally the index variable arrays
         bool_table = []
-        rest_table = []
+        entry_table = []
+        index_table = []
         
         # Iterate through every row and append the entries to the 
-        # correct table. At the end append the non-boolean table to the
-        # boolean table
+        # correct table.
         for row in table:
             if self.is_logical(row):
                 bool_table.append(row)
+            elif self.is_index_var(row):
+                index_table.append(row)
             else:
-                rest_table.append(row)
-                
-        bool_table.extend(rest_table)
+                entry_table.append(row)
+               
+        # Merges the tables together in the right order and return them
+        entry_table.extend(index_table)
+        bool_table.extend(entry_table)
         
         return bool_table
         
