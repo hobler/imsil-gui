@@ -15,17 +15,17 @@ class DbFrame(BlancFrame):
     With ImsilScrollFrame you can add parameters
     """
 
-    def __init__(self, parent, db_file, table_name, type_of_simulation,
-                 *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self,parent,db_file,table_name,type_of_simulation,
+                 *args,**kwargs):
+        super().__init__(parent,*args,**kwargs)
 
         # Get data from database
-        self.db_table = DatabaseTable(db_file, table_name)
+        self.db_table = DatabaseTable(db_file,table_name)
         self.index_var_list = self.db_table.get_all_index_vars()
         self.table_rows = self.db_table.get_rows()
 
         # Create a scrollframe specifically developed for this project
-        self.scroll_frame = ImsilScrollFrame(self, self.index_var_list)
+        self.scroll_frame = ImsilScrollFrame(self,self.index_var_list)
 
         # Regroup the parameters
         self.table_rows = self.db_table.regroup(self.table_rows)
@@ -37,7 +37,7 @@ class DbFrame(BlancFrame):
 
     def add_parameter(self, table_row):
         """
-        Add a parameter to DbFrame
+        Add a parameter to the scroll frame
         """
         par_name = self.db_table.get_name(table_row)
         self.scroll_frame.add_parameter(
@@ -51,14 +51,14 @@ class DbFrame(BlancFrame):
 
     def create_info_button_text(self, table_row):
         """
-        Create a string which contains all information that should be shown to
-        the user by pressing the info button
+        Create a string which contains all information that should be
+        shown to the user by pressing the info button.
         """
         return "Description:\n\n" + \
                self.db_table.get_long_desc(table_row).rstrip() + "\n\n" \
-               "Type:\n\n" + \
+               "Type: " + \
                self.db_table.get_type(table_row).rstrip() + "\n\n" \
-               "Default value:\n\n" + \
+               "Default value: " + \
                self.db_table.get_default_value(table_row).rstrip() + "\n\n" \
-               "Range:\n\n" + \
+               "Range: " + \
                self.db_table.get_range(table_row).rstrip()

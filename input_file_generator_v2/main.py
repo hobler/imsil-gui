@@ -30,8 +30,8 @@ def read_existing_input_file(file_path):
     input file and filling the GUI with the parameter values from the 
     file.
 
-    :param file_path:   path of an IMSIL input file
-    :return:    InputFile instance if file exist, otherwise None
+    :param file_path: path of an IMSIL input file
+    :return: InputFile instance if file exist, otherwise None
     """
     if os.path.isfile(file_path):
         input_file = InputFile(file_path)
@@ -43,32 +43,37 @@ def read_existing_input_file(file_path):
 
 def center_window(tk_window):
     """
-    Place the given Tk window to the center of the screen
+    Place the given Tk window in the center of the screen.
 
     :param tk_window: a window of type tk.Tk
     """
     # Hide widget
     tk_window.withdraw()
-    tk_window.update_idletasks()  # Update "requested size" from geometry manager
+    # Update "requested size" from geometry manager
+    tk_window.update_idletasks()  
 
-    # Gets the requested values of the height and widht.
+    # Get the requested values of the width and height
     window_width = tk_window.winfo_reqwidth()
     window_height = tk_window.winfo_reqheight()
 
-    # Gets both half the screen width/height and window width/height
-    position_right = int(tk_window.winfo_screenwidth() / 2 - window_width / 2)
-    position_down = int(tk_window.winfo_screenheight() / 2 - window_height / 2)
+    # Calculate the position of the upper left corner of the window by
+    # subtracting half ot the window width/heigh from half the screen 
+    # width/height.
+    pos_x = int(tk_window.winfo_screenwidth()/2 - window_width/2)
+    pos_y = int(tk_window.winfo_screenheight()/2 - window_height/2)
 
-    # Positions the window in the center of the page.
-    tk_window.geometry("+{}+{}".format(position_right, position_down))
+    # Center the window, by setting the x and y position of the upper
+    # left corner
+    tk_window.geometry("+{}+{}".format(pos_x, pos_y))
 
     # Show widget
     tk_window.deiconify()
 
 
+
 class ImsilInputParameterEditor:
     """
-    This is a class for the Imsil Input Parameter Editor.
+    This is the class for the Imsil Input Parameter Editor.
     
     The IMSIL Input Parameter Editor consists of a notebook with tabs,
     where each tab corresponds to a database table.
@@ -78,7 +83,7 @@ class ImsilInputParameterEditor:
         """
         In the initialization of the IMSIL Input Parameter Editor a 
         notebook is added to the window. The SqliteMaster class is used
-        to determinate the table names in the database. For each table 
+        to determine the table names in the database. For each table 
         name a new tab is added to the notebook. Each tab contains a 
         frame of the class DbFrame.
 
@@ -90,21 +95,21 @@ class ImsilInputParameterEditor:
         """
         if not os.path.isfile(DATABASE_FILE):
             sys.exit(DATABASE_FILE + " does not exist.")
-
-        root = tk.Tk()
-        # Adjust the title, disable resizing and center the window
-        root.title('IMSIL Input Parameter Editor')
-        root.resizable(False, False)
-        center_window(root)
         
-        # Add loading message
-        label = tk.Label(root, text = "Loading data.")
+        root = tk.Tk() # Create the root Window
+        root.title('IMSIL Input Parameter Editor') # Set the title
+        root.resizable(False,False) # Disable resizing
+        center_window(root) # Center the window
+        
+        # Add a loading message (becomes visible after the user presses
+        # the button to Open the Editor in the Welcome Window)
+        label = tk.Label(root,text="Loading data.")
         label.pack()
 
         # Create the Notebook
-        self.nb = ttk.Notebook(root, width=900, height=600)
+        self.nb = ttk.Notebook(root,width=900,height=600)
         
-        # Add the necessary pages
+        # Add the necessary tabs
         sqlite_master_table = SqliteMaster(DATABASE_FILE)
         for table_name in sqlite_master_table.get_table_names():
             self.nb.add(DbFrame(parent=self.nb,
@@ -114,7 +119,7 @@ class ImsilInputParameterEditor:
                                 name=table_name),
                         text=table_name)
         
-        # Remove loading message
+        # Remove the loading message
         label.pack_forget()
         # Place the notebook
         self.nb.grid(row=0, column=0, sticky="NESW")
@@ -135,9 +140,10 @@ class ImsilInputParameterEditor:
                                 parameter_name=par_name,
                                 parameter_value=input_file.file[key][par_name])
         
-        # Center the window        
+        # Center the window again, since it changed size
         center_window(root)
         root.mainloop()
+
 
     def get_all_parameter_values(self):
         """
@@ -154,6 +160,7 @@ class ImsilInputParameterEditor:
             if hasattr(frame.scroll_frame, 'ui_data_list'):
                 # frame_ui_data_list = frame.scroll_frame.ui_data_list
                 pass
+
 
     def set_parameter_value(self, tab_name, parameter_name, parameter_value):
         """
@@ -185,9 +192,10 @@ class ImsilInputParameterEditor:
             print("There is no tab with the name " + tab_name)
 
 
+
 class WelcomeWindow(tk.Tk):
     """
-    This is a class for the welcome window.
+    This is the class for the welcome window.
 
     It contains a header text, a welcome message, a combobox where the
     user can select a specific type of simulation, an option to load an
@@ -200,74 +208,77 @@ class WelcomeWindow(tk.Tk):
     are for this type of simulation common, has to be defined in the 
     database.
     """
-    WINDOW_WIDTH = 500
+    WINDOW_WIDTH = 500 # Width of the Window
 
     def __init__(self):
         super().__init__()
-        self.title("Welcome")
-        self.resizable(False, False)
-        self.frame = BlancFrame(self, columns=3)
+        self.title("Welcome") # Set the title of the window
+        self.resizable(False,False) # Disable resizing
+        self.frame = BlancFrame(self,columns=3) # Create a frame
 
-        # Add header
+        # Add a header
         self.header_label = tk.Label(
             self.frame,
             font="Helvetica 18 bold",
             text="IMSIL input file generator",
-        ).grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="NESW")
-
-        # Add welcome message
-        welcome_text = ("Welcome to the input file generator for IMSIL. With" 
-                        "this tool you can generate an input file for IMSIL."
-                         "You can also edit an existing input file by loading"
-                         "it in this window below.")
+        ).grid(row=0,column=0,columnspan=3,padx=10,pady=10,sticky="NESW")
+        
+        # Set the welcome message text
+        welcome_text = ("Welcome to the input file generator for IMSIL."
+                        " With this tool you can generate an input file"
+                        " for IMSIL. You can also edit an existing input"
+                        " file by loading it in this window below.")
+        # Add the welcome message
         self.welcome_message_label = tk.Label(
             self.frame, 
             wraplength=self.WINDOW_WIDTH, 
             anchor=tk.NW,
             text=welcome_text,
             justify=tk.LEFT,
-        ).grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="NESW")
+        ).grid(row=1,column=0,columnspan=3,padx=10,pady=10,sticky="NESW")
 
-        # Add Listbox with elements that can be chosen by the user
+        # Add a Listbox with elements that can be chosen by the user
         self.type_sim_combobox_variable = tk.StringVar()
         self.choose_type_sim_label = tk.Label(
             self.frame,
             text="Choose type of simulation:"
-        ).grid(row=2, column=0, padx=5, sticky="NES")
+        ).grid(row=2,column=0,padx=5,pady=0,sticky="NES")
         self.type_sim_combobox = ttk.Combobox(
             self.frame, 
             values=["", "any"],
             textvariable=self.type_sim_combobox_variable
-        ).grid(row=2, column=1, columnspan=2, padx=(0, 10), sticky="NESW")
+        ).grid(row=2,column=1,columnspan=2,padx=(0,10),pady=0,sticky="NESW")
 
-        # Add entry with button where the user can choose an existing file
+        # Add a label, an entry to display the file to be loaded and a
+        # button to load an existing file
         self.choose_existing_file_label = tk.Label(
             self.frame,
             text="Load existing input file:"
-        ).grid(row=3, column=0, padx=5, pady=5, sticky="NES")
+        ).grid(row=3,column=0,padx=5,pady=0,sticky="NES")
         self.choose_existing_file_variable = tk.StringVar()
         self.choose_existing_file_entry = tk.Entry(
             self.frame, 
             textvariable=self.choose_existing_file_variable
-        ).grid(row=3, column=1, pady=5, sticky="NESW")
+        ).grid(row=3,column=1,padx=0,pady=5,sticky="NESW")
         self.choose_existing_file_button = tk.Button(
             self.frame, 
             text="Load",
             command=self.load_file
-        ).grid(row=3, column=2, pady=5, padx=(0, 10), sticky="NESW")
+        ).grid(row=3,column=2,padx=(5,10),pady=4,sticky="NESW")
 
-        # Add button to open the imsil input parameter editor
+        # Add a button to open the IMSIL input parameter editor
         self.btn_continue = tk.Button(
             self.frame, 
             text='Open IMSIL input parameter editor', 
             padx=10,
             pady=10,
             command=self.open_imsil_input_parameter_editor             
-        ).grid(row=4, column=0, columnspan=3, padx=10, pady=10,sticky="NESW")
+        ).grid(row=4,column=0,columnspan=3,padx=10,pady=10,sticky="NESW")
 
-        # center the window and show it
+        # Center the window and show it
         center_window(self)
         self.mainloop()
+
 
     def load_file(self):
         """
@@ -283,13 +294,15 @@ class WelcomeWindow(tk.Tk):
             self.choose_existing_file_variable.set(loaded_file.name)
             loaded_file.close()
 
+
     def open_imsil_input_parameter_editor(self):
         """
-        Close this window and open the IMSIL input parameter editor 
-        with the specified parameters by the user. These are the type
-        of the simulation and the path of an existing input file.
+        Close the Welcome window and open the IMSIL input parameter 
+        editor with the parameters specified by the user. These are 
+        the type of simulation and the path of an existing input file.
         """
-        self.destroy()
+        self.destroy() # Close the current Window
+        # Open the ImsilInputParameterEditor
         ImsilInputParameterEditor(
             type_of_simulation=self.type_sim_combobox_variable.get(),
             input_file_path=self.choose_existing_file_variable.get()
