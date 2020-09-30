@@ -1,5 +1,6 @@
 from Support.database_functions import load_database_table
 
+# The Column indices for the database entries
 DATABASE_NAME_COL = 0
 DATABASE_SHORT_DESC_COL = 1
 DATABASE_LONG_DESC_COL = 2
@@ -11,7 +12,7 @@ DATABASE_BASIC_COL = 6
 
 class DatabaseTable:
     """
-    Hold data of a given table in a database and contains methods to 
+    Holds data of a given table in a database and contains methods to 
     get specific type of data.
 
     Methods:
@@ -20,8 +21,10 @@ class DatabaseTable:
         :get_short_desc: return the short description of the parameter
         :get_long_desc: return the long description of the parameter
         :get_type: return the type of the parameter
+        :get_default_value: return the default value of the parameter
         :get_range: return the range of the parameter
         :get_basic: return all parameters that are marked as basic
+        :get_table: return the table itself
         :get_rows: return a list holding all rows of the database
         :get_all_index_vars: return all index array variables from the 
                              database table                         
@@ -66,26 +69,25 @@ class DatabaseTable:
         return self.table
     
     def get_rows(self):    
-        rows_list = list() # Create empty list
+        rows_list = []
         # Append every row/parameter of the database to the list
         for table_row in self.table:    
             rows_list.append(table_row) 
         return rows_list
 
     def get_all_index_vars(self):
-        index_vars_list = [] # Create empty list
+        index_vars_list = []
         # Iterate through every row/parameter of the current table
         for db_row in self.table:
-            type_value = self.get_type(db_row) # Get type of parameter
+            type_value = self.get_type(db_row)
             # If the parameter is an index variable add it to the list. 
             # The type_value has a format of: "index variable array
-            # (name_of_parameter) of datatype_of_parameter"
+            # (name_of_parameters) of datatype_of_parameter"
             if self.is_index_var(db_row):
-                # Retrieve the name of the elements of the index 
-                # variable array, by slicing the part between ( and ).
+                # Retrieve the name of the parameter(s)
                 index_vars = type_value[type_value.index("(")+1:
                                         type_value.index(")")]
-                # Iterate through every element
+                # Iterate through every parameter
                 for index_var in index_vars.split(","):
                     index_var = index_var.strip() # Remove whitespaces
                     # Add the element to the list
@@ -95,18 +97,17 @@ class DatabaseTable:
 
 
     def get_index_vars_for_par(self, par_name):
-        index_vars_list = [] # Create empty list
+        index_vars_list = []
         # Iterate through every row/parameter of the current table
         for db_row in self.table:
             # Only check for the specified parameter
             if par_name is self.get_name(db_row):
-                type_value = self.get_type(db_row) # Get type of parameter
+                type_value = self.get_type(db_row)
                 if self.is_index_var(db_row):
-                    # Retrieve the name of the elements of the index 
-                    # variable array, by slicing the part between ( and ).
+                    # Retrieve the name of the parameter(s)
                     index_vars = type_value[type_value.index("(")+1:
                                             type_value.index(")")]
-                    # Iterate through every element
+                    # Iterate through every parameter
                     for index_var in index_vars.split(","):
                         index_var = index_var.strip() # Remove whitespaces
                         # Add the element to the list
@@ -126,18 +127,17 @@ class DatabaseTable:
             return True
         else:
             return False
-
     
     def regroup(self, table):
         # Sort the list alphabetically
         table = sorted(table)
                 
-        bool_table = [] # Create empty list
-        entry_table = [] # Create empty list
-        index_table = [] # Create empty list
+        bool_table = []
+        entry_table = []
+        index_table = []
         
         # Iterate through every row and append the entries to the 
-        # correct list.
+        # corresponding list.
         for row in table:
             if self.is_logical(row):
                 bool_table.append(row)

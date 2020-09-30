@@ -15,18 +15,26 @@ with the following elements:
 import platform
 import Pmw
 import tkinter as tk
-#from tkinter import ttk
 from tkinter import messagebox
-#from tkinter import Widget
 
 from DataModel.DataList import DataList
 from UI.Canvas.blanc.blanc_canvas import BlancCanvas
 from UI.Frames.blanc.blanc_frame import BlancFrame
 
+from UI.Frames.blanc.blanc_frame import WELCOME as WELCOME
+#from UI.Frames.blanc.blanc_frame import DEFAULT as DEFAULT
+from UI.Frames.blanc.blanc_frame import MAIN as MAIN
+from UI.Frames.blanc.blanc_frame import BOOLEAN as BOOLEAN
+from UI.Frames.blanc.blanc_frame import ENTRY as ENTRY
+from UI.Frames.blanc.blanc_frame import INDEX_COLLAPSE as INDEX_COLLAPSE
+from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_R as INDEX_EXPAND_R
+from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_D as INDEX_EXPAND_D
+from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_RD as INDEX_EXPAND_RD
+
 OS = platform.system()
 
 
-# Configure elements width
+# Configure the width of the widgets
 INFO_WIDTH = 10 # Info Button width
 INFO_HEIGHT = 10 # Info Button height
 ARROW_WIDTH = 25 # Width of arrow to expand index variable array
@@ -37,19 +45,17 @@ ARROW_HEIGHT = 25 # Height of arrow to expand index variable array
 # and thus they can't be aligned by using weights
 INDEX_NAME_WIDTH = 8
 
-# Set the number of parameters per row for each type 
-BOOL_PARAMETERS_PER_ROW = 4
-ENTRY_PARAMETERS_PER_ROW = 2
-INDEX_PARAMETERS_PER_ROW = 1
-# Set the number of elements (columns) per parameter. Currently three
+# Number of parameters per row for each type of parameter
+BOOL_PARAMS_PER_ROW = 4
+ENTRY_PARAMS_PER_ROW = 2
+INDEX_PARAMS_PER_ROW = 1
+# Number of elements (columns) per parameter. Currently three
 # elements are used: name, info button, entry/checkbox
-ELEMENTS_PER_PARAMETER = 3
+ELEMENTS_PER_PARAM = 3
 
-# TODO: adjust accordingly
-# These variables serve as placeholders to implement the index variable
-# array editor
-N_R = 3 # Number of horizontal elements
-N_ATOM = 4 # Number of vertical elements
+# The number of elements for Index Variable Array parameters
+# 1 Label & 1 Info Button (+ Entry turned on & off)
+NUM_ELEMS = 2 
 
 
 class ImsilScrollFrame(BlancFrame):
@@ -58,49 +64,52 @@ class ImsilScrollFrame(BlancFrame):
     function add_parameter to add new parameters to the frame.
     """
 
-    def __init__(self, parent, index_var_list=None, *args, **kwargs):
+    def __init__(self, parent, index_var_list=None, nr=2, natom=3, 
+                 *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-
+        
         # Save all index variables in a list
         if index_var_list is None:
             self.index_var_list = list()
         else:
             self.index_var_list = index_var_list
             
+        # Assign the number of Regions and Atoms
+        self.n_r = nr.get()
+        self.n_atom = natom.get()        
 
         # Define the number of columns for the boolean and entry 
         # parameters
-        self.columns_b = BOOL_PARAMETERS_PER_ROW * ELEMENTS_PER_PARAMETER
-        self.columns_e = ENTRY_PARAMETERS_PER_ROW * ELEMENTS_PER_PARAMETER
-        # For index variable arrays set the number of columns according
-        # to the number of elements in the array (2 per element and 5
-        # additional ones for the label, info, entry and expand buttons)
-        self.columns_i =  2 * N_ATOM + 5
+        self.columns_b = BOOL_PARAMS_PER_ROW * ELEMENTS_PER_PARAM
+        self.columns_e = ENTRY_PARAMS_PER_ROW * ELEMENTS_PER_PARAM
+        # Define the number of columns for index variable arrays 
+        # (1 Label, 1 Info, 1 Entry, 1 Column Header, 2 Buttons)
+        self.columns_i = 6 + self.n_atom
 
         # Define the counter variable to track the number of parameters
         # in the current row
-        self.params_in_row = 0;
+        self.params_in_row = 0
         # Initialize the counter variables for each type of parameter
         self.num_bools = 0
         self.num_entries = 0
         self.num_index = 0
 
-        # Use a separate frame for the two groups of parameters and a
-        # separate frame for each index variable array parameter
+        # Use a separate frame for boolean and entry type parameters
+        # and a separate frame for each index variable array parameter
         self.par_frame_list = []
         self.ui_data_list = DataList()
 
         # Build the scrolling area
-        self.main_canvas = BlancCanvas(self,columns=1,width=890)
-        self.content_frame = BlancFrame(self.main_canvas,frame_id=0)
-        # @create_window: parameter 'tags' is later required to change 
+        self.main_canvas = BlancCanvas(self, columns=1, width=890)
+        self.content_frame = BlancFrame(self.main_canvas, frame_id=MAIN)
+        # @create_window: parameter 'tags' is later required to change
         # the window size
-        self.main_canvas.create_window(0,0,
+        self.main_canvas.create_window(0, 0,
                                        window=self.content_frame,
                                        tags="self.content_frame", 
                                        anchor="nw")
-        self.vertical_scrollbar = tk.Scrollbar(self,orient=tk.VERTICAL)
-        self.vertical_scrollbar.grid(row=0,column=1,sticky="NES")
+        self.vertical_scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vertical_scrollbar.grid(row=0, column=1, sticky="NES")
         self.vertical_scrollbar.config(command=self.main_canvas.yview)
         self.main_canvas.config(yscrollcommand=self.vertical_scrollbar.set)
         self.bind_mouse_event(self.content_frame)
@@ -108,37 +117,32 @@ class ImsilScrollFrame(BlancFrame):
         # Create the frames for the boolean and entry type parameters
         self.content_frame_bool = BlancFrame(self.content_frame,
                                              columns=self.columns_b,
-                                             frame_id=1)
+                                             frame_id=BOOLEAN)
         self.content_frame_bool.grid(sticky="NESW")
         
 
         self.content_frame_entry = BlancFrame(self.content_frame,
                                               columns=self.columns_e,
-                                              frame_id=2)
+                                              frame_id=ENTRY)
         self.content_frame_entry.grid(sticky="NESW")
         
-        # Set the frame index for index variable array type parameters
-        self.index_var_frame_id = 3
-#        self.content_frame_index = BlancFrame(self.content_frame, columns = self.columns_i, frame_index=3)
-#        self.content_frame_index.grid(sticky="NESW")        
+        # Set the frame id for index variable array type parameters
+        self.index_var_frame_id = INDEX_COLLAPSE
 
         # Add the two frames to the list of frames
         self.par_frame_list.append(self.content_frame_bool)
         self.par_frame_list.append(self.content_frame_entry)
-#        self.par_frame_list.append(self.content_frame_index)
 
         # Update the UI
         self.content_frame.update_idletasks()
         self.content_frame.bind("<Configure>", self.update_scrollregion)
         self.main_canvas.bind('<Configure>', self.update_frame_width)
 
-
     def update_frame_width(self, event):
         """
         Is automatically called, if window is resized
         """
         self.main_canvas.itemconfig("self.content_frame", width=event.width)
-
 
     def update_scrollregion(self, event):
         """
@@ -147,8 +151,8 @@ class ImsilScrollFrame(BlancFrame):
         self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
 
 
-    def update_buttons_command(self,par_frame_index,par_name,index_var_list,
-                               default_value,short_desc,long_desc,is_bool):
+    def update_buttons_command(self, par_frame_index, par_name, index_var_list,
+                               default_value, short_desc, long_desc, is_bool):
         """
         Go through each widget in the parameter frame and update the 
         parameter values of the button commands. This is necessary to
@@ -160,7 +164,7 @@ class ImsilScrollFrame(BlancFrame):
             if child.winfo_class() == 'Button':
                 child_grid_row = child.grid_info()['row']
                 # If it is a down arrow button (marked with 'd')
-                if 'd' in child.cget('text'):
+                if 'd' == child.cget('text'):
                     child.config(
                         command=lambda row_index=child_grid_row:
                         self.open_index_var_d(
@@ -176,7 +180,7 @@ class ImsilScrollFrame(BlancFrame):
                         )
                     )
                 # If it is an up arrow button (marked with 'u')
-                if 'u' in child.cget('text'):
+                if 'u' == child.cget('text'):
                     child.config(
                         command=lambda row_index=child_grid_row:
                         self.close_index_var_u(
@@ -192,7 +196,7 @@ class ImsilScrollFrame(BlancFrame):
                         )
                     ) 
                 # If it is a right arrow button (marked with 'r')
-                if 'r' in child.cget('text'):
+                if 'r' == child.cget('text'):
                     child.config(
                         command=lambda row_index=child_grid_row:
                         self.open_index_var_r(
@@ -208,7 +212,7 @@ class ImsilScrollFrame(BlancFrame):
                         )
                     )
                 # If it is a left arrow button (marked with 'l')
-                if 'l' in child.cget('text'):
+                if 'l' == child.cget('text'):
                     child.config(
                         command=lambda row_index=child_grid_row:
                         self.close_index_var_l(
@@ -224,37 +228,89 @@ class ImsilScrollFrame(BlancFrame):
                         )
                     )            
 
-    """
+
+    def open_index_var_r(self, par_frame_index, par_name, index_var_list, 
+                         default_value, short_desc, long_desc, is_bool,
+                         is_index_var, row_index):
+        """
         This method is used to expand the array of an index variable
         array parameter horizontally/to the right.
-    """
-    def open_index_var_r(self,par_frame_index,par_name,index_var_list, 
-                         default_value,short_desc,long_desc,is_bool,
-                         is_index_var,row_index):
+        """
         # Assign the corresponding frame    
-        par_frame = self.par_frame_list[par_frame_index]
+        par_frame = self.par_frame_list[par_frame_index]    
 
-        # Iterate through all widgets (in the order they have been 
-        # added before)
-        for i,widget in enumerate(par_frame.children.values()):
-            # Skip the main Label and info button
-            if i<2:
-                continue
-            # Hide the single Entry
-            elif i==2:
-                widget.grid_forget()
-            # Show all other horizontal widgets (the first pair starts 
-            # at i=2+1 and the last pair ends at 2 + 2*N_ATOM)
-            elif i<(3+2*N_ATOM):
-                widget.grid(row=0,column=i,stick="NESW")
-            # Save the right button handle to change it
-            elif widget.winfo_class()=="Button" and 'r' in widget.cget('text'):
-                    right_arrow_btn = widget
-            # Disable the down button
-            elif widget.winfo_class()=="Button" and 'd' in widget.cget('text'):
-                    widget.config(state='disabled')
-                                         
-# TODO: change accordingl later   
+        # Iterate through every widget
+        for i,widget in enumerate(par_frame.children.values()):            
+            if widget.winfo_class() == "Button" :
+                # If the down Button is visible, the array is collapsed
+                if 'd' == widget.cget('text'):
+                    IS_DOWN = False
+                # If the up Button is visible, the array is expanded
+                elif 'u' == widget.cget('text'):
+                    IS_DOWN = True
+                # Get the right Button
+                elif 'r' == widget.cget('text'):
+                    right_arrow_btn = widget    
+
+        # If the array is collapsed currently
+        if not IS_DOWN:
+            # Iterate through every widget, and change their value, to
+            # match the value of the single Entry
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Get the value of the single Entry
+                elif i == NUM_ELEMS:
+                    curr_val = widget.get()                    
+                # Set the value of all other Entry widgets
+                elif (curr_val != "Multiple values" and 
+                          i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1) and 
+                          widget.winfo_class() == "Entry"):
+                    widget.delete(0, "end")  # Delete
+                    widget.insert(0, curr_val)  # Readd 
+            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Hide the single Entry
+                elif i == NUM_ELEMS:
+                    widget.grid_forget()
+                # Show the first row with the Header for the Atoms
+                elif i < ((NUM_ELEMS+1) + (self.n_atom+1)):
+                    widget.grid(row=0, column=i, stick="NESW")
+                # Show the second row with the Label for the Region and
+                # the Entries for the Atoms
+                elif i < ((NUM_ELEMS+1) + 2*(self.n_atom+1)):
+                    widget.grid(row=1, column=i-(self.n_atom+1), stick="NESW")
+        # If the array is expanded downwards
+        else:
+            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Hide all other elements (except the two arrow Buttons)
+                elif i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1):
+                    widget.grid_forget()
+            # Iterate through every widget, and readd them
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Hide the single Entry
+                elif i == NUM_ELEMS:
+                    widget.grid_forget()        
+                # Show all other widgets
+                elif i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1):
+                    # Calculate the current row and column
+                    curr_row = (i - (NUM_ELEMS+1)) // (self.n_atom+1)
+                    curr_col = i - curr_row*(self.n_atom+1)
+                    # Place the widget
+                    widget.grid(row=curr_row, column=curr_col, stick="NESW")
+                                        
+# TODO: change accordingly later   
 #        # Create a temporary variable to fill the columns
 #        tmp_column_index = 1       
 #        # Add a Label and an Entry for each index variable
@@ -291,39 +347,92 @@ class ImsilScrollFrame(BlancFrame):
                                     long_desc=long_desc,
                                     is_bool=is_bool)
         
-        # Update the UI to match the configuration for the expanded case
-        par_frame.update_grid_columnconfigure(frame_id=4)
+        # If the array is expanded downwards currently
+        if IS_DOWN:
+            # Update the UI to match the configuration for the expanded case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_EXPAND_RD)
+        else:
+            # Update the UI to match the configuration for the expanded case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_EXPAND_R)
         
-    """
-        This method is used to collapse the array of an index variable
-        array parameter horizontally/to the left.
-    """
-    def close_index_var_l(self,par_frame_index,par_name,index_var_list,
-                          default_value, short_desc,long_desc, is_bool,
-                          is_index_var,row_index):        
+    def close_index_var_l(self, par_frame_index, par_name, index_var_list,
+                          default_value, short_desc, long_desc, is_bool,
+                          is_index_var, row_index):        
+        """
+            This method is used to collapse the array of an index variable
+            array parameter horizontally/to the left.
+        """
         # Assign the corresponding frame 
         par_frame = self.par_frame_list[par_frame_index]        
 
-        # Iterate through all widgets (in the order they have been 
-        # added before)
+        # Iterate through every widget
+        for i,widget in enumerate(par_frame.children.values()):            
+            if widget.winfo_class() == "Button":
+                # If the down Button is visible, the array is collapsed
+                if 'd' == widget.cget('text'):
+                    IS_DOWN = False
+                # If the up Button is visible, the array is expanded
+                elif 'u' == widget.cget('text'):
+                    IS_DOWN = True
+                # Get the left Button
+                elif 'l' == widget.cget('text'):
+                    left_arrow_btn = widget
+
+        # Iterate through every widget
         for i,widget in enumerate(par_frame.children.values()):
             # Skip the main Label and info button
-            if i<2:
+            if i < NUM_ELEMS:
                 continue
             # Show the single Entry
-            elif i==2:
-                widget.grid(row=row_index,column=2,sticky="NESW")
-            # Hide all other horizontal widgets (the first pair starts 
-            # at i=2+1 and the last pair ends at i=2+2*N_ATOM)
-            elif i<(3+2*N_ATOM):
-                widget.grid_forget()
-            # Save the left button handle to change it
-            elif widget.winfo_class()=="Button" and 'l' in widget.cget('text'):
-                    left_arrow_btn = widget
-            # Enable the down button
-            elif widget.winfo_class()=="Button" and 'd' in widget.cget('text'):
-                    widget.config(state='active')                    
+            elif i == NUM_ELEMS:
+                widget.grid(row=row_index, column=NUM_ELEMS, sticky="NESW")
+            # Hide all other widgets
+            elif i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1):
+                widget.grid_forget()                  
                 
+        # If the array is expanded downwards readd the widgets
+        if IS_DOWN:
+            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Hide the single Entry
+                elif i == NUM_ELEMS:
+                    widget.grid_forget()
+                elif (i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1) and 
+                      ((i - (NUM_ELEMS+1)) % (self.n_atom+1) == 0 or 
+                       (i - (NUM_ELEMS+1)) % (self.n_atom+1) == 1)):
+                    # Calculate the current row and column
+                    curr_row = (i - (NUM_ELEMS+1)) // (self.n_atom+1)
+                    curr_col = i - curr_row*(self.n_atom+1)
+                    # Place the widget
+                    widget.grid(row=curr_row, column=curr_col, stick="NESW")
+        # Otherwise check, if all Entry values are the same
+        else:
+            items = []
+            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Get the reference of the single Entry
+                elif i == NUM_ELEMS:
+                    curr_widget = widget                  
+                # Get the value of all other Entry widgets
+                elif (i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1) and 
+                          widget.winfo_class() == "Entry"):
+                    items.append(widget.get())  # Delete
+
+            # If all values are the same
+            if all(items[0] == item for item in items):
+                curr_widget.delete(0, "end")  # Delete
+                curr_widget.insert(0, items[0])  # Readd 
+            else:
+                curr_widget.delete(0, "end")  # Delete
+                curr_widget.insert(0, "Multiple values")  # Readd 
+                
+            
         # Change the left arrow button to the right arrow button          
         btn_r = left_arrow_btn
         self.photo_r=tk.PhotoImage(file="arrow_r.gif")
@@ -342,48 +451,89 @@ class ImsilScrollFrame(BlancFrame):
                             long_desc=long_desc,
                             is_bool=is_bool)
         
-        # Update the UI to match the configuration for the collapsed case
-        par_frame.update_grid_columnconfigure(frame_id=3)
-
-
-    """
+        # If the array is expanded downwards currently
+        if IS_DOWN:
+            # Update the UI to match the configuration for the expanded case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_EXPAND_D)
+        else:
+            # Update the UI to match the configuration for the collapsed case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_COLLAPSE)
+    
+    def open_index_var_d(self, par_frame_index, par_name, index_var_list, 
+                         default_value, short_desc, long_desc, is_bool,
+                         is_index_var, row_index):
+        """
         This method is used to expand the array of an index variable
         array parameter vertically/down.
-    """
-    def open_index_var_d(self,par_frame_index,par_name,index_var_list, 
-                         default_value,short_desc,long_desc,is_bool,
-                         is_index_var,row_index):
+        """
         # Assign the corresponding frame    
         par_frame = self.par_frame_list[par_frame_index]
 
-        # Initialize counter variable
-        tmp_index = 0        
-        # Iterate through all widgets (in the order they have been 
-        # added before)
-        for i,widget in enumerate(par_frame.children.values()):
-            # Skip the main Label and info button
-            if i<2:
-                continue
-            # Hide the single Entry
-            elif i==2:
-                widget.grid_forget()
-            # Save the down button handle to change it
-            elif widget.winfo_class()=="Button" and 'd' in widget.cget('text'):
-                    down_arrow_btn = widget
-            # Disable the right button
-            elif widget.winfo_class()=="Button" and 'r' in widget.cget('text'):
-                    widget.config(state='disabled')
-            # Show the vertical Labels and Entries. They first pair 
-            # starts after the button at i=4+2*N_ATOM. All widgets
-            # afterwards are vertical widgets.
-            elif i>(4+2*N_ATOM):
-                # Place the Labels in the 3rd column
-                if widget.winfo_class()=="Label":
-                    widget.grid(row=tmp_index,column=3,stick="NESW")
-                # Place the Entries in the 4th column
-                if widget.winfo_class()=="Entry":
-                    widget.grid(row=tmp_index,column=4,stick="NESW")
-                    tmp_index += 1 # Increase the row number       
+        # Iterate through every widget
+        for i,widget in enumerate(par_frame.children.values()):            
+            if widget.winfo_class() == "Button":
+                # If the right Button is visible, the array is collapsed
+                if 'r' == widget.cget('text'):
+                    IS_RIGHT = False
+                # If the left Button is visible, the array is expanded
+                elif 'l' == widget.cget('text'):
+                    IS_RIGHT = True
+                # Get the down Button
+                elif 'd' == widget.cget('text'):
+                    down_arrow_btn = widget    
+
+        # If the is collapsed currently    
+        if not IS_RIGHT:
+            # Iterate through every widget, and change their value, to
+            # match the value of the single Entry
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Get the value of the single Entry
+                elif i == NUM_ELEMS:
+                    curr_val = widget.get()                    
+                # Set the value of all other widgets
+                elif (curr_val != "Multiple values" and 
+                          i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1) and 
+                          widget.winfo_class() == "Entry"):
+                    widget.delete(0, "end")  # Delete
+                    widget.insert(0, curr_val)  # Readd 
+            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Hide the single Entry
+                elif i == NUM_ELEMS:
+                    widget.grid_forget()
+                elif (i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1) and 
+                      ((i - (NUM_ELEMS+1)) % (self.n_atom+1) == 0 or 
+                       (i - (NUM_ELEMS+1)) % (self.n_atom+1) == 1)):
+                    # Calculate the current row and column
+                    curr_row = (i - (NUM_ELEMS+1)) // (self.n_atom+1)
+                    curr_col = i - curr_row*(self.n_atom+1)
+                    # Place the widget
+                    widget.grid(row=curr_row, column=curr_col, stick="NESW")
+        # If the array is expanded to the right
+        else:
+#            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Hide the single Entry
+                elif i == NUM_ELEMS:
+                    widget.grid_forget()        
+                # Show all other widgets below the 2nd row (the widgets
+                # in the first and second row are visible already)
+                elif (i >= ((NUM_ELEMS+1) + 2*(self.n_atom+1)) and
+                      i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1)):
+                    # Calculate the current row and column
+                    curr_row = (i - (NUM_ELEMS+1)) // (self.n_atom+1)
+                    curr_col = i - curr_row*(self.n_atom+1)
+                    # Place the widget
+                    widget.grid(row=curr_row, column=curr_col, stick="NESW")    
                 
         # Change the down arrow button to an up arrow button
         btn_u = down_arrow_btn
@@ -403,40 +553,96 @@ class ImsilScrollFrame(BlancFrame):
                                     long_desc=long_desc,
                                     is_bool=is_bool)
         
-        # Update the UI to match the configuration for the expanded case
-        par_frame.update_grid_rowconfigure(frame_id=5)
-        
-    """
+        # If the array is expanded to the right currently
+        if IS_RIGHT:
+            # Update the UI to match the configuration for the expanded case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_EXPAND_RD)
+        else:
+            # Update the UI to match the configuration for the expanded case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_EXPAND_D)        
+
+    def close_index_var_u(self, par_frame_index, par_name, index_var_list,
+                          default_value, short_desc, long_desc, is_bool,
+                          is_index_var, row_index):
+        """
         This method is used to collapse the array of an index variable
         array parameter vertically/up.
-    """
-    def close_index_var_u(self,par_frame_index,par_name,index_var_list,
-                          default_value, short_desc,long_desc, is_bool,
-                          is_index_var,row_index):        
+        """
         # Assign the corresponding frame 
         par_frame = self.par_frame_list[par_frame_index]        
 
-        # Iterate through all widgets (in the order they have been 
-        # added before)
+        # Iterate through every widget
+        for i,widget in enumerate(par_frame.children.values()):            
+            if widget.winfo_class() == "Button":
+                # If the right Button is visible, the array is collapsed
+                if 'r' == widget.cget('text'):
+                    IS_RIGHT = False
+                # If the left Button is visible, the array is collapsed
+                elif 'l' == widget.cget('text'):
+                    IS_RIGHT = True
+                # Get the up Button
+                elif 'u' == widget.cget('text'):
+                    up_arrow_btn = widget
+
+        # Iterate through every widget
         for i,widget in enumerate(par_frame.children.values()):
             # Skip the main Label and info button
-            if i<2:
+            if i < NUM_ELEMS:
                 continue
             # Show the single Entry
-            elif i==2:
-                widget.grid(row=row_index,column=2,sticky="NESW")
+            elif i == NUM_ELEMS:
+                widget.grid(row=row_index, column=NUM_ELEMS, sticky="NESW")
             # Hide the vertical Labels and Entries. They first pair 
             # starts after the button at i=4+2*N_ATOM. All widgets
             # afterwards are vertical widgets.
-            elif i>(4+2*N_ATOM):
+            elif i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1):
                 widget.grid_forget()
             # Save the up button handle to change it
-            elif widget.winfo_class()=="Button" and 'u' in widget.cget('text'):
+            elif widget.winfo_class() == "Button" and 'u' == widget.cget('text'):
                     up_arrow_btn = widget
-            # Enable the right button
-            elif widget.winfo_class()=="Button" and 'r' in widget.cget('text'):
-                    widget.config(state='active')                    
-                
+                  
+        # If the array is expanded to the right, readd the widgets
+        if IS_RIGHT:
+            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Hide the single Entry
+                elif i == NUM_ELEMS:
+                    widget.grid_forget()
+                # Show the first row with the Header for the Atoms
+                elif i < ((NUM_ELEMS+1) + (self.n_atom+1)):
+                    widget.grid(row=0, column=i, stick="NESW")
+                # Show the second row with the Label for the Region and
+                # the Entries for the Atoms
+                elif i < ((NUM_ELEMS+1) + 2*(self.n_atom+1)):
+                    widget.grid(row=1, column=i-(self.n_atom+1), stick="NESW")            
+        # Otherwise check, if all Entry values are the same
+        else:
+            items = []
+            # Iterate through every widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info button
+                if i < NUM_ELEMS:
+                    continue
+                # Get the reference of the single Entry
+                elif i == NUM_ELEMS:
+                    curr_widget = widget                  
+                # Get the value of all other Entry widgets
+                elif (i < (NUM_ELEMS+1) + (self.n_r+1)*(self.n_atom+1) and 
+                          widget.winfo_class() == "Entry"):
+                    items.append(widget.get())  # Delete
+
+            # If all values are the same
+            if all(items[0] == item for item in items):
+                curr_widget.delete(0, "end")  # Delete
+                curr_widget.insert(0, items[0])  # Readd 
+            else:
+                curr_widget.delete(0, "end")  # Delete
+                curr_widget.insert(0, "Multiple values")  # Readd 
+        
+        
         # Change the up arrow button to the down arrow button          
         btn_d = up_arrow_btn
         self.photo_d=tk.PhotoImage(file="arrow_d.gif")
@@ -454,24 +660,22 @@ class ImsilScrollFrame(BlancFrame):
                             short_desc=short_desc,
                             long_desc=long_desc,
                             is_bool=is_bool)
+            
         
-        # Update the UI to match the configuration for the collapsed case
-        par_frame.update_grid_columnconfigure(frame_id=3)
+        # If the array is expanded to the right currently
+        if IS_RIGHT:
+            # Update the UI to match the configuration for the expanded case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_EXPAND_R)
+        else:
+            # Update the UI to match the configuration for the expanded case
+            par_frame.update_grid_columnconfigure(frame_id=INDEX_COLLAPSE)
 
-
-    def add_content_in_par_frame(self,par_name,index_var_list,default_value,
-                                 short_desc,long_desc,is_bool,is_index_var,
-                                 row_index):        
-        
+    def add_content_in_par_frame(self, par_name, index_var_list, default_value,
+                                 short_desc, long_desc, is_bool, is_index_var,
+                                 row_index):                
         """
-        Take the parameter frame from the parameter frame list at the index
-        par_frame_index and fill a new row with the index row_index with tk
-        widgets as described in the module docstring. If there are already
-        widgets in this row, all elements in the rows with index >=
-        row_index have to be moved down one row to make place for the new
-        row.
+        Add the parameter to the corresponding content Frame.
 
-        :par_frame_index: parameter frame index
         :par_name: parameter name
         :index_var_list: a list of index variables that are used by this
                          parameter
@@ -479,35 +683,35 @@ class ImsilScrollFrame(BlancFrame):
         :short_desc: short description of the parameter
         :long_desc: long description of the parameter
         :is_bool: true, if the parameter is of type bool, false else
+        :is_index_var: true, if the parameter is of type bool, false else
         :row_index: row number where the new parameter should be placed
         """  
 
         # Check the type of the parameter               
         if is_index_var:    
-            # In case of index variable arrays, create a new frame for
+            # In case of index variable arrays, create a new Frame for
             # every parameter
             par_frame = BlancFrame(self.content_frame,
-                                   rows=N_R,
+                                   rows=self.n_r,
                                    columns=self.columns_i,
                                    frame_id=self.index_var_frame_id)
             par_frame.grid(sticky="NESW")
             self.bind_mouse_event(par_frame)
-            # Add the new frame to the list of frames
+            # Add the new Frame to the list of Frames
             self.par_frame_list.append(par_frame)
-            # Determine the index of the current frame in the list of
-            # frames
-            curr_frame_index = len(self.par_frame_list)-1
+            # Determine the index of the current frame
+            curr_frame_index = len(self.par_frame_list) - 1
             
             # Add the label for the parameter
-            label = self.add_label(parent=par_frame,label_text=par_name,
+            label = self.add_label(parent=par_frame, label_text=par_name,
                                    width=INDEX_NAME_WIDTH)
-            label.grid(row=row_index,column=0, sticky="NESW")
+            label.grid(row=row_index, column=0, sticky="NESW")
     
             # Add the info button for the parameter
             btn_info = self.add_button(parent=par_frame,
-                                          w=INFO_WIDTH,
-                                          h=INFO_HEIGHT, 
-                                          tool_tip_text=short_desc)
+                                       w=INFO_WIDTH,
+                                       h=INFO_HEIGHT, 
+                                       tool_tip_text=short_desc)
             self.photo=tk.PhotoImage(file="info_sign_1.gif")
             btn_info.config(image=self.photo)
             btn_info.image = self.photo;
@@ -517,33 +721,45 @@ class ImsilScrollFrame(BlancFrame):
             btn_info.grid(row=row_index,column=1,sticky="W")
                     
             # Add the Entry for the parameter  
-            entry = self.add_entry(parent=par_frame,par_name=par_name,
+            entry = self.add_entry(parent=par_frame, par_name=par_name,
                                    entry_text="")
-            entry.grid(row=row_index,column=2,sticky="NESW")
+            entry.grid(row=row_index, column=2, sticky="NESW")
 
-            # Add additional (horizontal) labels and entries. They are
-            # added to the frame but not placed within the grid. They
-            # get placed, when the user expands the array.
-            for i in range(N_ATOM):
+            # Fill the Header row for the ATOMS
+            if(self.n_atom > 1):
+                for i in range(self.n_atom + 1):
+                    # The first Label should be empty
+                    if i == 0:
+                        # Add the Label
+                        label = self.add_label(parent=par_frame,
+                                               label_text="")
+                    else:                        
+                        # Add the Label
+                        label = self.add_label(parent=par_frame,
+                                               label_text="ATOM " + str(i))
+            
+            # Add a new row with a Label for the Region and Entries
+            # for every Atom
+            for i in range(self.n_r):
                 # Add the Label
                 label = self.add_label(parent=par_frame,
-                                       label_text="ATOM " + str(i+1))
-                # Add the Entry
-                entry = self.add_entry(parent=par_frame,par_name=par_name,
-                                       entry_text="")
-
-            # Add two arrow Buttons in the last two columns, used to 
-            # expand the array
-            button_d = self.add_button(parent=par_frame,btn_text="d",
-                                       w=ARROW_WIDTH,h=ARROW_HEIGHT)
+                                       label_text="REGION " + str(i+1))
+                for i in range(self.n_atom):
+                    # Add the Entry
+                    entry = self.add_entry(parent=par_frame, par_name=par_name,
+                                           entry_text="")                
+ 
+            # Add the two arrow Buttons in the last two columns
+            button_d = self.add_button(parent=par_frame, btn_text="d",
+                                       w=ARROW_WIDTH, h=ARROW_HEIGHT)
             self.photo_d=tk.PhotoImage(file="arrow_d.gif")
             button_d.config(image=self.photo_d)
             button_d.image = self.photo_d;
             button_d.config(takefocus=False)
-            button_d.grid(row=row_index,column=self.columns_i - 2)
+            button_d.grid(row=row_index ,column=self.columns_i - 2)
             
-            button_r = self.add_button(parent=par_frame,btn_text="r",
-                                       w=ARROW_WIDTH,h=ARROW_HEIGHT)
+            button_r = self.add_button(parent=par_frame, btn_text="r",
+                                       w=ARROW_WIDTH, h=ARROW_HEIGHT)
             self.photo_r=tk.PhotoImage(file="arrow_r.gif")
             button_r.config(image=self.photo_r)
             button_r.image = self.photo_r;
@@ -557,21 +773,10 @@ class ImsilScrollFrame(BlancFrame):
                                         default_value=default_value,
                                         short_desc=short_desc,
                                         long_desc=long_desc, 
-                                        is_bool=is_bool)
-            
-            # Add additional (vertical) labels and entries. They are
-            # added to the frame but not placed within the grid. They
-            # get placed, when the user expands the array.
-            for i in range(N_R):
-                # Add the Label
-                label = self.add_label(parent=par_frame,
-                                       label_text="REGION " + str(i+1))
-                # Add the Entry
-                entry = self.add_entry(parent=par_frame,par_name=par_name,
-                                       entry_text="")
+                                        is_bool=is_bool)        
         # If the parameter is a boolean (Checkbutton)
         elif is_bool:
-            # Set the boolean frame as the parent frame
+            # Set the boolean Frame as the parent frame
             par_frame = self.content_frame_bool
             
             # Add the Checkbutton for the parameter            
@@ -580,13 +785,13 @@ class ImsilScrollFrame(BlancFrame):
                                                cb_value=default_value,
                                                default_value=default_value)
             checkbutton.grid(row=row_index,
-                             column=ELEMENTS_PER_PARAMETER*self.params_in_row,
+                             column=ELEMENTS_PER_PARAM*self.params_in_row,
                              sticky="NESW")
             
             # Add the label for the parameter
             label = self.add_label(parent=par_frame,label_text=par_name)            
             label.grid(row=row_index,
-                       column=1+ELEMENTS_PER_PARAMETER*self.params_in_row,
+                       column=1 + ELEMENTS_PER_PARAM*self.params_in_row,
                        sticky="NESW")
     
             # Add the info button for the parameter
@@ -599,9 +804,9 @@ class ImsilScrollFrame(BlancFrame):
             btn_info.image = self.photo;
             btn_info.config(takefocus=False)
             btn_info.config(
-                    command=lambda: messagebox.showinfo(par_name,long_desc))
+                    command=lambda: messagebox.showinfo(par_name, long_desc))
             btn_info.grid(row=row_index,
-                          column=2+ELEMENTS_PER_PARAMETER*self.params_in_row,
+                          column=2 + ELEMENTS_PER_PARAM*self.params_in_row,
                           sticky="W")            
         # If the parameter is an Entry
         else:
@@ -609,9 +814,9 @@ class ImsilScrollFrame(BlancFrame):
             par_frame = self.content_frame_entry
             
             # Add the label for the parameter
-            label = self.add_label(parent=par_frame,label_text=par_name)        
+            label = self.add_label(parent=par_frame, label_text=par_name)        
             label.grid(row=row_index,
-                       column=ELEMENTS_PER_PARAMETER*self.params_in_row,
+                       column=ELEMENTS_PER_PARAM*self.params_in_row,
                        sticky="NESW")
     
             # Add the info button for the parameter
@@ -626,21 +831,20 @@ class ImsilScrollFrame(BlancFrame):
             btn_info.config(
                 command=lambda: messagebox.showinfo(par_name, long_desc))
             btn_info.grid(row=row_index,
-                          column=1+ELEMENTS_PER_PARAMETER*self.params_in_row,
+                          column=1 + ELEMENTS_PER_PARAM*self.params_in_row,
                           sticky="W")            
             
             # Add the Entry for the parameter  
-            entry = self.add_entry(parent=par_frame,par_name=par_name,
+            entry = self.add_entry(parent=par_frame, par_name=par_name,
                                    entry_text=default_value,
                                    default_value=default_value)
             entry.grid(row=row_index,
-                       column=2+ELEMENTS_PER_PARAMETER*self.params_in_row,
+                       column=2 + ELEMENTS_PER_PARAM*self.params_in_row,
                        sticky="NESW")
                 
-
-    def add_parameter(self,par_name,index_var_list=None,default_value="",
-                      short_desc="",long_desc="",
-                      is_bool=False,is_index_var=False):
+    def add_parameter(self, par_name, index_var_list=None, default_value="",
+                      short_desc="", long_desc="",
+                      is_bool=False, is_index_var=False):
         """
         Create a new frame for the given parameter, add it to the 
         parameter frame list and add it to the scrollable frame to make
@@ -673,7 +877,7 @@ class ImsilScrollFrame(BlancFrame):
                 short_desc=short_desc,
                 long_desc=long_desc,
                 is_bool=is_bool,
-                row_index= 0,#self.num_index//INDEX_PARAMETERS_PER_ROW,
+                row_index=0,
                 is_index_var=is_index_var)
             # Increase the counter
             self.num_index += 1
@@ -692,13 +896,13 @@ class ImsilScrollFrame(BlancFrame):
                      short_desc=short_desc,
                      long_desc=long_desc,
                      is_bool=is_bool,
-                     row_index= self.num_bools//BOOL_PARAMETERS_PER_ROW,
+                     row_index= self.num_bools // BOOL_PARAMS_PER_ROW,
                      is_index_var=is_index_var)
             # Increase counters
             self.num_bools += 1
             self.params_in_row += 1
             # Fold the counter at the end of the row
-            self.params_in_row = self.params_in_row%BOOL_PARAMETERS_PER_ROW          
+            self.params_in_row = self.params_in_row % BOOL_PARAMS_PER_ROW          
         else:
             # If the parameter is the first entry, reset the counter
             if self.num_entries == 0:
@@ -714,43 +918,59 @@ class ImsilScrollFrame(BlancFrame):
                 short_desc=short_desc,
                 long_desc=long_desc,
                 is_bool=is_bool,
-                row_index= self.num_entries//ENTRY_PARAMETERS_PER_ROW,
+                row_index= self.num_entries // ENTRY_PARAMS_PER_ROW,
                 is_index_var=is_index_var)
             # Increase counters
             self.num_entries += 1
             self.params_in_row += 1
             # Fold the counter at the end of the row
-            self.params_in_row = self.params_in_row%ENTRY_PARAMETERS_PER_ROW
+            self.params_in_row = self.params_in_row % ENTRY_PARAMS_PER_ROW
                             
                 
-
-    def add_button(self,parent,btn_text="Button",w=3,h=3,tool_tip_text=None):
-        btn = tk.Button(parent,text=btn_text,width=w,height=h)
+    def add_button(self, parent, btn_text="Button", w=3, h=3, 
+                   tool_tip_text=None):
+        btn = tk.Button(parent, text=btn_text, width=w, height=h)
         if tool_tip_text != None:
             balloon = Pmw.Balloon(btn)
             balloon.bind(btn, tool_tip_text)
         self.bind_mouse_event(btn)
         return btn
 
-    def add_label(self,parent,label_text,label_text_anchor=tk.W,width=None):
+    def add_label(self, parent, label_text, label_text_anchor=tk.W, width=None):
         if width is None:
-            label = tk.Label(parent,text=label_text,
-                         anchor=label_text_anchor)
+            label = tk.Label(parent, text=label_text, anchor=label_text_anchor)
         else:
-            label = tk.Label(parent,text=label_text,
-                         anchor=label_text_anchor,width=width)
+            label = tk.Label(parent, text=label_text, 
+                             anchor=label_text_anchor, width=width)
                 
         self.bind_mouse_event(label)
         return label
 
-    def add_entry(self,parent,par_name,entry_text,
-                  default_value="",tool_tip_text="",
-                  disabledbackground="gray",disabledforeground="white"):
+    def add_entry(self, parent, par_name, entry_text, default_value="",
+                  tool_tip_text="", disabledbackground="gray", 
+                  disabledforeground="white"):
+        
+        # Change the entry text and default value of NR and NATOM, to 
+        # the values specified in the welcome screen, if the datatype
+        # of the default value is not an int (if it is, it should be 
+        # kept as its likely the value from the specified file)
+        if par_name == 'NR':
+            if not isinstance(default_value, int):
+                entry_text = str(self.n_r)
+                default_value = self.n_r
+        elif par_name == 'NATOM':
+            if not isinstance(default_value, int):
+                entry_text = str(self.n_atom)
+                default_value = self.n_atom
+        
         entry_string_var = tk.StringVar(value=entry_text)
-        entry = tk.Entry(parent,textvariable=entry_string_var,
+                
+        entry = tk.Entry(parent, 
+                         textvariable=entry_string_var,
                          disabledbackground=disabledbackground,
                          disabledforeground=disabledforeground)
-        self.ui_data_list.add(par_name=par_name,tk_widget=entry,
+        self.ui_data_list.add(par_name=par_name, 
+                              tk_widget=entry,
                               widget_variable=entry_string_var,
                               default_value=default_value)
         self.update_if_obligatory_entries()
@@ -760,12 +980,10 @@ class ImsilScrollFrame(BlancFrame):
         self.bind_mouse_event(entry)
         return entry
 
-    def add_checkbutton(self, parent,par_name, 
-                        cb_value="T",
-                        default_value="",
-                        on_value="T",off_value="F"):
+    def add_checkbutton(self, parent, par_name, cb_value="T",
+                        default_value="", on_value="T", off_value="F"):
         cb_string_var = tk.StringVar()
-        checkbutton = tk.Checkbutton(parent,text="",
+        checkbutton = tk.Checkbutton(parent, text="",
                                      variable=cb_string_var,
                                      onvalue=on_value,
                                      offvalue=off_value)
@@ -793,11 +1011,13 @@ class ImsilScrollFrame(BlancFrame):
             if ui_data[1].winfo_class() == "Entry":
                 item_name = ui_data[0]
                 default_value = ui_data[3]
-                if obligatory_if in default_value:
+                if isinstance(default_value, str) and \
+                    obligatory_if in default_value:
                     widgets = self.ui_data_list.get_widgets(item_name)
                     for widget in widgets:
                         widget.config(state='normal')
-                elif par_name in default_value:
+                elif isinstance(default_value, str) and \
+                    par_name in default_value:
                     widgets = self.ui_data_list.get_widgets(item_name)
                     for widget in widgets:
                         widget.config(state='disabled')
@@ -810,7 +1030,6 @@ class ImsilScrollFrame(BlancFrame):
             if ui_data[1].winfo_class() == "Checkbutton":
                 # for each flag, update all entries of the parameters
                 self.update_if_obligatory_entry(par_name=ui_data[0])
-
 
 #    def toggle_adv(self):
 #        if self.button_frame_show_adv.is_state_show_basic():
