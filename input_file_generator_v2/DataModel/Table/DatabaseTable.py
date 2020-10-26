@@ -13,7 +13,7 @@ DATABASE_BASIC_COL = 6
 class DatabaseTable:
     """
     Holds data of a given table in a database and contains methods to 
-    get specific type of data.
+    get specific attributes or sequences of this data.
 
     Methods:
         :__get_cell_text__: return text in specified table row & column
@@ -26,14 +26,14 @@ class DatabaseTable:
         :get_basic: return all parameters that are marked as basic
         :get_table: return the table itself
         :get_rows: return a list holding all rows of the database
-        :get_all_index_vars: return all index array variables from the 
-                             database table                         
+#        :get_all_index_vars: return all index array variables from the 
+#                             database table                         
         :get_index_vars_for_par: return all index variables for the 
             specified parameter
         :is_logical: return True if the parameter is a boolean
         :is_index_var: return True if the parameter is an index 
                        variable array
-        :regroup: regroup all parameters in three categories
+        :regroup: regroup all parameters in the three categories
     """
     def __init__(self, database_file, table_name):
         self.table = load_database_table(database_file, table_name)
@@ -75,26 +75,25 @@ class DatabaseTable:
             rows_list.append(table_row) 
         return rows_list
 
-    def get_all_index_vars(self):
-        index_vars_list = []
-        # Iterate through every row/parameter of the current table
-        for db_row in self.table:
-            type_value = self.get_type(db_row)
-            # If the parameter is an index variable add it to the list. 
-            # The type_value has a format of: "index variable array
-            # (name_of_parameters) of datatype_of_parameter"
-            if self.is_index_var(db_row):
-                # Retrieve the name of the parameter(s)
-                index_vars = type_value[type_value.index("(")+1:
-                                        type_value.index(")")]
-                # Iterate through every parameter
-                for index_var in index_vars.split(","):
-                    index_var = index_var.strip() # Remove whitespaces
-                    # Add the element to the list
-                    if index_var not in index_vars_list:
-                        index_vars_list.append(index_var)                   
-        return index_vars_list
-
+#    def get_all_index_vars(self):
+#        index_vars_list = []
+#        # Iterate through every row/parameter of the current table
+#        for db_row in self.table:
+#            type_value = self.get_type(db_row)
+#            # If the parameter is an index variable add it to the list. 
+#            # The type_value has a format of: "index variable array
+#            # (name_of_parameters) of datatype_of_parameter"
+#            if self.is_index_var(db_row):
+#                # Retrieve the name of the parameter(s)
+#                index_vars = type_value[type_value.index("(")+1:
+#                                        type_value.index(")")]
+#                # Iterate through every parameter
+#                for index_var in index_vars.split(","):
+#                    index_var = index_var.strip() # Remove whitespaces
+#                    # Add the element to the list
+#                    if index_var not in index_vars_list:
+#                        index_vars_list.append(index_var)
+#        return index_vars_list
 
     def get_index_vars_for_par(self, par_name):
         index_vars_list = []
@@ -104,16 +103,20 @@ class DatabaseTable:
             if par_name is self.get_name(db_row):
                 type_value = self.get_type(db_row)
                 if self.is_index_var(db_row):
-                    # Retrieve the name of the parameter(s)
+                    # Retrieve the name of the parameter(s). 
+                    # The type_value variable has a format of: 
+                    # "index variable array (name_of_parameters) of
+                    # datatype_of_parameter"
                     index_vars = type_value[type_value.index("(")+1:
                                             type_value.index(")")]
                     # Iterate through every parameter
                     for index_var in index_vars.split(","):
-                        index_var = index_var.strip() # Remove whitespaces
+                        index_var = index_var.strip()  # Remove blanks
                         # Add the element to the list
                         if index_var not in index_vars_list:
                             index_vars_list.append(index_var)
                 break # Only check specified parameter
+        
         return index_vars_list
 
     def is_logical(self, table_row):
@@ -131,13 +134,14 @@ class DatabaseTable:
     def regroup(self, table):
         # Sort the list alphabetically
         table = sorted(table)
-                
+        
+        # Create empty lists for all of the categories
         bool_table = []
         entry_table = []
         index_table = []
         
         # Iterate through every row and append the entries to the 
-        # corresponding list.
+        # corresponding list
         for row in table:
             if self.is_logical(row):
                 bool_table.append(row)
@@ -147,12 +151,9 @@ class DatabaseTable:
                 entry_table.append(row)
               
         # Rearrange the list so the boolean values come first, followed
-        # by the entries and finally the index variable arrays                
+        # by the entries and finally the index variable arrays
         entry_table.extend(index_table)
         bool_table.extend(entry_table)
         
         return bool_table
-        
-        
-        
         

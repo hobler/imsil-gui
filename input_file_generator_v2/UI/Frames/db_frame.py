@@ -13,19 +13,16 @@ class DbFrame(BlancFrame):
     DbFrame is a Frame which contains an ImsilScrollFrame to display
     the parameters.
     """
-
     def __init__(self, parent, db_file, table_name, type_of_simulation, 
                  nr, natom, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
         # Get data from database
         self.db_table = DatabaseTable(db_file, table_name)
-        self.index_var_list = self.db_table.get_all_index_vars()
         self.table_rows = self.db_table.get_rows()
 
         # Create a scrollframe specifically developed for this project
-        self.scroll_frame = ImsilScrollFrame(self, self.index_var_list, 
-                                             nr, natom)
+        self.scroll_frame = ImsilScrollFrame(self, nr, natom)
 
         # Regroup the parameters
         self.table_rows = self.db_table.regroup(self.table_rows)
@@ -34,10 +31,12 @@ class DbFrame(BlancFrame):
         for table_row in self.table_rows:
             self.add_parameter(table_row)
 
-
     def add_parameter(self, table_row):
         """
         Add a parameter to the scroll frame.
+        
+        :param table_row: the row holding all data of the parameter to
+                          be added
         """
         par_name = self.db_table.get_name(table_row)
         self.scroll_frame.add_parameter(
@@ -53,8 +52,11 @@ class DbFrame(BlancFrame):
         """
         Create the info message text.
         
-        Create a string which contains all information that should be
+        Create a string, which contains all information that should be
         shown to the user by pressing the info button.
+        
+        :param table_row: the row holding all data of the parameter for
+                          which the info text should be added
         """
         return ("Description:\n\n" 
                 + self.db_table.get_long_desc(table_row).rstrip() 

@@ -17,6 +17,7 @@ from DataModel.InputFile import InputFile
 from DataModel.Table.SqliteMaster import SqliteMaster
 from UI.Frames.blanc.blanc_frame import BlancFrame
 from UI.Frames.db_frame import DbFrame
+from UI.Frames.blanc.blanc_frame import WELCOME as WELCOME
 
 DATABASE_FILE = "parameters.db"
 
@@ -59,8 +60,7 @@ def center_window(tk_window):
     pos_x = int(tk_window.winfo_screenwidth()/2 - window_width/2)
     pos_y = int(tk_window.winfo_screenheight()/2 - window_height/2)
 
-    # Center the window, by setting the x and y position of the upper
-    # left corner
+    # Center the window
     tk_window.geometry("+{}+{}".format(pos_x, pos_y))
 
     # Show widget
@@ -79,29 +79,30 @@ class ImsilInputParameterEditor:
         """
         In the initialization of the IMSIL Input Parameter Editor a 
         notebook is added to the window. The SqliteMaster class is used
-        to determine the table names in the database. For each table 
-        name a new tab is added as a DbFrame to the notebook. 
+        to determine the table names in the database. For each table a
+        new tab is added as a DbFrame to the notebook. 
 
         If a path to an input file is passed, it is read and the 
         parameter values will be placed into the Editor.
 
         :param type_of_simulation: type of the simulation
         :param input_file_path: path of an existing input file
-        :param nr: the number of regions for index var arrays
-        :param natom: the number of atoms for index var arrays
+        :param nr: the number of regions for index variable arrays
+        :param natom: the number of atoms for index variable arrays
         """
         if not os.path.isfile(DATABASE_FILE):
             sys.exit(DATABASE_FILE + " does not exist.")
         
-        # Create the root window, adjust its title, make it non-resizable
-        # and center it
+        # Create the root window, adjust its title, make it 
+        # non-resizable and center it
         root = tk.Tk()
         root.title('IMSIL Input Parameter Editor')
         root.resizable(False,False)
         center_window(root)
         
         # Add a loading message (becomes visible after the user presses
-        # the button to Open the Editor in the Welcome Window)
+        # the button to open the IMSIL Input Parameter Editor in the 
+        # Welcome Window)
         label = tk.Label(root, text="Loading data.")
         label.pack()
 
@@ -125,10 +126,9 @@ class ImsilInputParameterEditor:
         # Place the notebook
         self.nb.grid(row=0, column=0, sticky="NESW")
         
-
         # If the user has passed the name of an IMSIL input file
         if input_file_path != "":
-            # read IMSIL input file
+            # Read IMSIL input file
             input_file = read_existing_input_file(input_file_path)
             if input_file is not None:
                 # Go through all params that are defined in the file
@@ -163,8 +163,7 @@ class ImsilInputParameterEditor:
 
     def set_parameter_value(self, tab_name, parameter_name, parameter_value):
         """
-        Set value of specified parameter in the specified tab of the 
-        notebook.
+        Set the value of a parameter in the specified tab of the notebook.
 
         :param tab_name: name of the notebook tab as string
         :param parameter_name: name of the parameter as string
@@ -184,7 +183,8 @@ class ImsilInputParameterEditor:
                     print("There is no parameter with the name " 
                           + parameter_name + " in tab " + tab_name)
             else:
-                print("Frame " + frame 
+                print("Frame " 
+                      + frame 
                       + " does not contain an attribute with the name"
                       + " ui_data_list")
         else:
@@ -204,23 +204,23 @@ class WelcomeWindow(tk.Tk):
     @type of simulation: based on this option, the input parameter 
     editor will have different parameters at the beginning of each 
     notebook page. These parameters, so called "basic" parameters, that
-    are for this type of simulation common, has to be defined in the 
+    are for this type of simulation common, have to be defined in the 
     database.
     """
-    WINDOW_WIDTH = 470 # Width of the Window
+    WINDOW_WIDTH = 470
 
     def __init__(self):
         super().__init__()
         self.title("Welcome")
         self.resizable(False,False)
-        self.frame = BlancFrame(self,columns=3)  # Create a frame
+        self.frame = BlancFrame(self,columns=3)
 
         # Add a header
-        self.header_label = tk.Label(
-            self.frame,
-            font="Helvetica 18 bold",
-            text="IMSIL input file generator",
-        ).grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="NESW")
+        self.header_label = tk.Label(self.frame,
+                                     font="Helvetica 18 bold",
+                                     text="IMSIL input file generator")
+        self.header_label.grid(row=0, column=0, columnspan=3, 
+                               padx=10, pady=10, sticky="NESW")
         
         # Set the welcome message text
         welcome_text = ("Welcome to the input file generator for IMSIL."
@@ -228,80 +228,79 @@ class WelcomeWindow(tk.Tk):
                         " for IMSIL. You can also edit an existing input"
                         " file by loading it in this window below.")
         # Add the welcome message
-        self.welcome_message_label = tk.Label(
-            self.frame, 
-            wraplength=self.WINDOW_WIDTH, 
-            anchor=tk.NW,
-            text=welcome_text,
-            justify=tk.LEFT,
-        ).grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="NESW")
+        self.welcome_message_label = tk.Label(self.frame, 
+                                              wraplength=self.WINDOW_WIDTH, 
+                                              anchor=tk.NW,
+                                              text=welcome_text,
+                                              justify=tk.LEFT)
+        self.welcome_message_label.grid(row=1, column=0, columnspan=3, 
+                                        padx=10, pady=10, sticky="NESW")
 
         # Add a Listbox with elements that can be chosen by the user
         self.type_sim_combobox_variable = tk.StringVar()
-        self.choose_type_sim_label = tk.Label(
-            self.frame,
-            text="Choose type of simulation:"
-        ).grid(row=2, column=0, padx=5, pady=0, sticky="NES")
+        self.choose_type_sim_label = tk.Label(self.frame,
+                                              text="Choose type of simulation:")
+        self.choose_type_sim_label.grid(row=2, column=0, 
+                                        padx=5, pady=0, sticky="NES")
         self.type_sim_combobox = ttk.Combobox(
-            self.frame, 
-            values=["", "any"],
-            textvariable=self.type_sim_combobox_variable
-        ).grid(row=2, column=1, columnspan=2, 
-               padx=(0, 10), pady=0, sticky="NESW")
+                self.frame, 
+                values=["", "any"],
+                textvariable=self.type_sim_combobox_variable)
+        self.type_sim_combobox.grid(row=2, column=1, columnspan=2, 
+                                    padx=(0, 10), pady=0, sticky="NESW")
 
         # Add a Label, an Entry to display the file to be loaded and a
         # Button to load an existing file
         self.choose_existing_file_label = tk.Label(
-            self.frame,
-            text="Load existing input file:"
-        ).grid(row=3, column=0, padx=5, pady=0, sticky="NES")
+                self.frame,
+                text="Load existing input file:")
+        self.choose_existing_file_label.grid(row=3, column=0, 
+                                             padx=5, pady=0, sticky="NES")
         self.choose_existing_file_variable = tk.StringVar()
         self.choose_existing_file_entry = tk.Entry(
             self.frame, 
-            textvariable=self.choose_existing_file_variable
-        ).grid(row=3, column=1, padx=0, pady=5, sticky="NESW")
-        self.choose_existing_file_button = tk.Button(
-            self.frame, 
-            text="Load",
-            command=self.load_file
-        ).grid(row=3, column=2, padx=(5, 10), pady=4, sticky="NESW")
-
-        
-        # Add a Label, and an Entry for both N_R and N_ATOM, defining
-        # the number of rows and columns for index variable arrays 
-        # respectively
-        # Add a new Frame, so the positions can be adjusted
-        self.var_frame = BlancFrame(self.frame, columns=4, frame_id = -2) # TODO
-        self.var_frame.grid(row=4, column=0, columnspan=4, 
-                            padx=(5, 10), pady=4, sticky="NESW")
-        self.nr_label = tk.Label(
-            self.var_frame,
-            text="NR:"
-        ).grid(row=0, column=0, padx=5, pady=0, sticky="NES")
-        self.nr_var = tk.IntVar()
-        self.nr_entry = tk.Entry(
-            self.var_frame, 
-            textvariable=self.nr_var
-        ).grid(row=0, column=1, padx=0, pady=0, sticky="NESW")
-        self.natom_label = tk.Label(
-            self.var_frame,
-            text="NATOM:"
-        ).grid(row=0, column=2, padx=5, pady=0, sticky="NES")
-        self.natom_var = tk.IntVar()
-        self.natom_entry = tk.Entry(
-            self.var_frame, 
-            textvariable=self.natom_var
-        ).grid(row=0, column=3, padx=(0, 5), pady=0, sticky="NESW")
-
+            textvariable=self.choose_existing_file_variable)
+        self.choose_existing_file_entry.grid(row=3, column=1, 
+                                             padx=0, pady=5, sticky="NESW")
+        self.choose_existing_file_button = tk.Button(self.frame, 
+                                                     text="Load",
+                                                     command=self.load_file)
+        self.choose_existing_file_button.grid(row=3, column=2, padx=(5, 10), 
+                                              pady=4, sticky="NESW")
 
         # Add a button to open the IMSIL input parameter editor
+        # (The Button has to be added before the callback function)
         self.btn_continue = tk.Button(
             self.frame, 
-            text='Open IMSIL input parameter editor', 
+            text='Open IMSIL input parameter editor',
             padx=10,
             pady=10,
-            command=self.open_imsil_input_parameter_editor             
-        ).grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="NESW")
+            command=self.open_imsil_input_parameter_editor)
+        self.btn_continue.grid(row=5, column=0, columnspan=3,
+                               padx=10, pady=10, sticky="NESW")
+        
+        # Add a Label, and an Entry for both N_R and N_ATOM within a
+        # new Frame, so the positions can be adjusted
+        self.var_frame = BlancFrame(self.frame, columns=4, frame_id=WELCOME)
+        self.var_frame.grid(row=4, column=0, columnspan=4, 
+                            padx=(5, 10), pady=4, sticky="NESW")
+        self.nr_label = tk.Label(self.var_frame,text="Number of Regions:")
+        self.nr_label.grid(row=0, column=0, padx=5, pady=0, sticky="NES")
+        self.nr_var = tk.IntVar()
+        self.natom_var = tk.IntVar()  # Define before the callback
+        self.nr_entry = tk.Entry(self.var_frame, 
+                                 textvariable=self.nr_var,
+                                 validate="focusout", 
+                                 validatecommand=self.callback_for_button)
+        self.nr_entry.grid(row=0, column=1, padx=0, pady=0, sticky="NESW")
+        self.natom_label = tk.Label(self.var_frame,text="Number of Atoms:")
+        self.natom_label.grid(row=0, column=2, padx=5, pady=0, sticky="NES")
+        self.natom_entry = tk.Entry(self.var_frame, 
+                                    textvariable=self.natom_var,
+                                    validate="focusout", 
+                                    validatecommand=self.callback_for_button)
+        self.natom_entry.grid(row=0, column=3, padx=(0, 5), pady=0, 
+                              sticky="NESW")
 
         # Center the window and show it
         center_window(self)
@@ -311,7 +310,7 @@ class WelcomeWindow(tk.Tk):
         """
         Open the specified file.
         
-        Open a dialog to pick up a file. After the user has selected a
+        Open a dialog to pick a file. After the user has selected a 
         file and clicked on the button "open", the filename is copied
         to the entry to show the user that the file was successfully
         selected.
@@ -321,25 +320,80 @@ class WelcomeWindow(tk.Tk):
             title="Select IMSIL input file")
         if loaded_file:
             self.choose_existing_file_variable.set(loaded_file.name)
-            loaded_file.close()
+#
+            input_file_path = self.choose_existing_file_variable.get()
+            if input_file_path != "":
+                # read IMSIL input file
+                input_file = read_existing_input_file(input_file_path)
+                if input_file is not None:
+                    # Go through all params that are defined in the file
+                    for key in input_file.file.keys():
+                        print(key)
+                        for par_name in input_file.file[key]:
+                            if not isinstance(par_name, OrderedDict):
+                                # set parameter value in tab
+                                if par_name == "NR":
+                                    print("HI")  # TODO
+                        
+        loaded_file.close()
+
+    def callback_for_button(self):
+        """
+        Enable/disable the Button for the Imsil Input Parameter Editor.
+        
+        If both the Number of Regions and the Number of Atoms values 
+        are different from 0, enable the Imsil Input Parameter Editor
+        Button, otherwise disable it.
+        """          
+        try:
+            if self.natom_var.get() != 0 and self.nr_var.get() != 0:
+                self.btn_continue.config(state='active')
+            else:
+                self.btn_continue.config(state='disabled')
+        except Exception:
+            # This Exception is triggered for invalid values or empty
+            # Entry fields
+            self.btn_continue.config(state='disabled')
+        
+        return True
 
     def open_imsil_input_parameter_editor(self):
         """
         Open the Imsil Input Parameter Editor.
         
-        Close the Welcome window and open the IMSIL input parameter 
-        editor with the parameters specified by the user. These are 
-        the type of simulation and the path of an existing input file.
+        Close the Welcome window and open the IMSIL Input Parameter 
+        Editor with the parameters (type of simulation and the path of
+        an existing input file) specified by the user.
         """
+        
+        # Check if both the Number of Regions and the Number of Atoms 
+        # values are different from 0. If yes, enable the Imsil Input 
+        # Parameter Editor Button and proceed, otherwise disable it, 
+        # show an error message and stay at the welcome window.
+        error_title = "Invalid Value"
+        error_text = ("Please enter valid values (>0) for both Number "
+                     "of Regions and Number of Atoms!")
+        try:
+            if self.natom_var.get() != 0 and self.nr_var.get() != 0:
+                self.btn_continue.config(state='active')
+            else:
+                tk.messagebox.showerror(title=error_title, message=error_text)
+                self.btn_continue.config(state='disabled')
+                return True
+        except Exception:
+            tk.messagebox.showerror(title=error_title, message=error_text)
+            self.btn_continue.config(state='disabled')
+            return True    
+        
         self.destroy() # Close the current Window
         # Open the ImsilInputParameterEditor
         ImsilInputParameterEditor(
             type_of_simulation=self.type_sim_combobox_variable.get(),
             input_file_path=self.choose_existing_file_variable.get(),
             nr=self.nr_var,
-            natom=self.natom_var
-        )
+            natom=self.natom_var)
 
 
 if __name__ == '__main__':
     welcome_window = WelcomeWindow()
+    

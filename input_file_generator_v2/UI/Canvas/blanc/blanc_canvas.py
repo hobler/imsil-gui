@@ -6,8 +6,8 @@ class BlancCanvas(tk.Canvas):
     Class for use within the BlancFrame.
     """
 
-    def __init__(self, parent, rows=1, columns=1,
-                 set_grid_propagate=False, *args, **kwargs):
+    def __init__(self, parent, rows=1, columns=1, set_grid_propagate=False,
+                 *args, **kwargs):
         """
         In the initialization of the blanc canvas the number of rows 
         and columns can be defined, finally the canvas is placed into
