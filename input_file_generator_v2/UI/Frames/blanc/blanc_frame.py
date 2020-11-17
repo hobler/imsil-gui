@@ -49,6 +49,9 @@ class BlancFrame(tk.Frame):
         self.update_grid_columnconfigure(frame_id)
         self.grid_propagate(set_grid_propagate)
         self.grid(sticky="NESW")
+        # An Array to save the values of the index variable array elements
+        self.values = []
+        
 
     def update_grid_rowconfigure(self, frame_id):
         if self.rows > 0:            

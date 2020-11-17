@@ -2,7 +2,7 @@
 This module defines several tk.Frames and creates a row for each 
 parameter with the following elements: 
     - a tk.Label with the parameter name, 
-    - an Info Button which displays the short description of the 
+    - an info Button which displays the short description of the 
       parameter when hovered and opens a window with the long
       description when clicked
     - a tk.Entry that contains the parameter value (or a tk.Checkbutton
@@ -33,8 +33,8 @@ from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_RD as INDEX_EXPAND_RD
 OS = platform.system()
 
 # Configure the width and height of the widgets
-INFO_WIDTH = 10 # Info Button width
-INFO_HEIGHT = 10 # Info Button height
+info_WIDTH = 10 # info Button width
+info_HEIGHT = 10 # info Button height
 ARROW_WIDTH = 20 # Width of the arrow (and '+'/'-') Button(s)
 ARROW_HEIGHT = 20 # Height of the arrow (and '+'/'-') Button(s)
 
@@ -42,17 +42,19 @@ ARROW_HEIGHT = 20 # Height of the arrow (and '+'/'-') Button(s)
 # of a width is necessary, since every parameter has a separate frame
 # and thus they can't be aligned by only using weights
 INDEX_NAME_WIDTH = 8
+INDEX_LABEL_WIDTH_1D = 8
+INDEX_LABEL_WIDTH_2D = 12
 
 # Number of parameters per row for each type of parameter
 BOOL_PARAMS_PER_ROW = 4
 ENTRY_PARAMS_PER_ROW = 2
 INDEX_PARAMS_PER_ROW = 1
 # Number of elements (columns) per parameter. Currently three
-# elements are used: Label, Info Button, Entry/Checkbox
+# elements are used: Label, info Button, Entry/Checkbox
 ELEMENTS_PER_PARAM = 3
 
 # The number of fixed elements for index variable array parameters:
-# 1 Label & 1 Info Button (+ Entry turned on & off)
+# 1 Label & 1 info Button (+ Entry turned on & off)
 NUM_ELEMS = 2 
 
 
@@ -219,8 +221,8 @@ class ImsilScrollFrame(BlancFrame):
                 m = 1
                 n = self.n_atom
             elif "REGION" in index_var_list and "geom" in str(par_frame):
-                # Create an NR x 1 array in the geom tab
-                m = self.n_r
+                # Create an NR x 1 array in the geom tab 
+                m = self.n_r + 1  # Add 1 row for REGION 0
                 n = 1
             elif "REGION" in index_var_list:
                 # Create a 1 x NR array
@@ -338,6 +340,56 @@ class ImsilScrollFrame(BlancFrame):
             else:            
                 par_frame.update_grid_columnconfigure(INDEX_COLLAPSE_2D)
 
+    def save_entry_values(self, par_frame, m ,n, init=False, IS_POINT=False):
+        """
+        This method is used to save the values of the index variable
+        array elements so they can be kept track of 
+        
+        :param par_frame: the parent Frame
+        TODO: a
+        """
+        
+        if IS_POINT:
+            par_frame.values = [[ None for y in range(n-1) ] for x in range(m)]
+        
+            j = 0
+            # Iterate through every widget, and change their value, to
+            # match the value of the single Entry
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                # Save the value of all other Entry widgets
+                elif widget.winfo_class() == "Entry":
+                    curr_val = widget.get()                
+                    # Do not overwrite the old values with the text 
+                    # "Multiple values"
+                    if curr_val != "Multiple values":                
+                        par_frame.values[j//(n-1)][j%(n-1)]  = curr_val
+                    j += 1
+            return
+            
+        # If the Array needs to be initialized and it is not the POINT array
+        if not par_frame.values:
+            par_frame.values = [[ None for y in range(n) ] for x in range(m)]
+        
+        if not init or any(None in x for x in par_frame.values):            
+            j = 0
+            # Iterate through every widget, and change their value, to
+            # match the value of the single Entry
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label and info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                # Save the value of all other Entry widgets
+                elif widget.winfo_class() == "Entry":
+                    curr_val = widget.get()                
+                    # Do not overwrite the old values with the text 
+                    # "Multiple values"
+                    if curr_val != "Multiple values":                
+                        par_frame.values[j//n][j%n]  = curr_val
+                    j += 1                    
+
     def set_entry_values(self, par_frame):
         """
         This method is used to set the values of the index variable
@@ -348,7 +400,7 @@ class ImsilScrollFrame(BlancFrame):
         # Iterate through every widget, and change their value, to
         # match the value of the single Entry
         for i,widget in enumerate(par_frame.children.values()):
-            # Skip the main Label and info button
+            # Skip the main Label and info Button
             if i < NUM_ELEMS:
                 continue
             # Get the value of the single Entry
@@ -358,7 +410,12 @@ class ImsilScrollFrame(BlancFrame):
             elif (curr_val != "Multiple values" and 
                   widget.winfo_class() == "Entry"):
                 widget.delete(0, "end")  # Delete
-                widget.insert(0, curr_val)  # Readd 
+                widget.insert(0, curr_val)  # Readd
+        
+        if curr_val != "Multiple values":
+            return False
+        else:
+            return True
                 
     def set_entry_value(self, par_frame, m, n):
         """
@@ -372,7 +429,7 @@ class ImsilScrollFrame(BlancFrame):
         items = []
         # Iterate through every widget
         for i,widget in enumerate(par_frame.children.values()):
-            # Skip the main Label and Info Button
+            # Skip the main Label and info Button
             if i < NUM_ELEMS:
                 continue
             # Get the reference of the single Entry
@@ -381,7 +438,7 @@ class ImsilScrollFrame(BlancFrame):
             # Get the value of all other Entry widgets
             elif (i < (NUM_ELEMS+1) + (m+1)*(n+1) and 
                       widget.winfo_class() == "Entry"):
-                items.append(widget.get())  # Delete
+                items.append(widget.get())
 
         curr_widget.delete(0, "end")  # Delete
         # If all values are the same
@@ -433,8 +490,10 @@ class ImsilScrollFrame(BlancFrame):
         # If the array is collapsed currently
         if not IS_DOWN:
             # Set the Entry values to match the single Entry
-            self.set_entry_values(par_frame)
-            # Iterate through every widget
+            init =self.set_entry_values(par_frame)
+            # Initialize the array with the Entry values
+            self.save_entry_values(par_frame, m, n, init, IS_POINT)
+            # Iterate through every widget and place them
             for i,widget in enumerate(par_frame.children.values()):
                 # Skip the main Label and info button
                 if i < NUM_ELEMS:
@@ -448,22 +507,81 @@ class ImsilScrollFrame(BlancFrame):
                 # Show the second row with the values
                 elif i < ((NUM_ELEMS+1) + 2*(n+1)):
                     widget.grid(row=1, column=i - (n+1), sticky="NESW")
+                    
+            # Iterate through every widget and update values
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label, info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                elif widget.winfo_class() == "Entry" and widget.grid_info():
+                    # Current row and column in the grid
+                    curr_row = widget.grid_info()['row']
+                    curr_col = widget.grid_info()['column']
+                    # Row and column in the array
+                    row = curr_row - 1
+                    col = curr_col - (NUM_ELEMS+2)
+                    # Array with all elements from current column
+                    items = [x[col] for x in par_frame.values]
+                    
+                    # If all items are the same, set the value
+                    if all(items[0] == item for item in items):                    
+                        widget.delete(0, "end")  # Delete
+                        widget.insert(0, items[0])  # Readd
+                    # Otherwise set the first Entry to "Multiple values"
+                    else:
+                        widget.delete(0, "end")  # Delete
+                        widget.insert(0, "Multiple values")  # Readd
         # If the array is expanded downwards
         else:
-            # Hide every widget except the main Label and Info Button
+            # Iterate through every (already placed) widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label, info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                elif widget.winfo_class() == "Entry" and widget.grid_info():
+                    # Current row and column in the grid
+                    curr_row = widget.grid_info()['row']
+                    curr_col = widget.grid_info()['column']
+                    # Row and column in the array
+                    row = curr_row - 1
+                    col = curr_col - (NUM_ELEMS+2)
+                    # Current widget value
+                    curr_value = widget.get()
+                    # If the value of the first Entry was "Multiple 
+                    # values", replace it with the value when expanding
+                    if curr_value == "Multiple values":
+                        widget.delete(0, "end")  # Delete
+                        widget.insert(0, par_frame.values[row][col])  # Readd
+                    # Otherwise set all values in the current row, to
+                    # match the value of the first Entry
+                    else:
+                        for j in range(len(par_frame.values[row])):
+                            par_frame.values[row][j] = curr_value
+            # Hide every widget except the main Label and info Button
             self.hide_widgets(par_frame, m, n)
             # Iterate through every widget, and readd them
             for i,widget in enumerate(par_frame.children.values()):
-                # Skip the main Label, the Info Button and the Entry
+                # Skip the main Label, the info Button and the Entry
                 if i <= NUM_ELEMS:
                     continue
                 # Show all other widgets
                 elif i < (NUM_ELEMS+1) + (m+1)*(n+1):
-                    # Calculate the current row and column
+                    # Calculate the current row and column in the grid
                     curr_row = (i - (NUM_ELEMS+1)) // (n+1)
                     curr_col = i - curr_row*(n+1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
+                    
+                    if widget.winfo_class() == "Entry" and widget.grid_info():
+                        # Row and column in the array
+                        row = curr_row - 1
+                        col = curr_col - (NUM_ELEMS+2)
+                        # Current widget value
+                        curr_value = widget.get()
+                        # If the current widget value is not up to date
+                        if curr_value != par_frame.values[row][col]:
+                            widget.delete(0, "end")  # Delete
+                            widget.insert(0, par_frame.values[row][col])  # Readd
                 
         # Change the right arrow button to a left arrow button
         self.set_button(right_arrow_btn, "arrow_l.gif", "l")
@@ -489,14 +607,17 @@ class ImsilScrollFrame(BlancFrame):
         # Get the dimensions for the array to be created
         dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)
 
-        # Hide every widget except the main Label and Info Button and
-        # show the Entry
-        self.hide_widgets(par_frame, m, n, True, row_index)                
+        # Save the current values of the index variable array
+        self.save_entry_values(par_frame, m, n, False, IS_POINT)
+
         # If the array is expanded downwards readd the widgets
         if IS_DOWN:
+            # Hide every widget except the main Label and info Button
+            # and show the Entry
+            self.hide_widgets(par_frame, m, n, True, row_index)
             # Iterate through every widget
             for i,widget in enumerate(par_frame.children.values()):
-                # Skip the main Label, the Info Button and the Entry
+                # Skip the main Label, the info Button and the Entry
                 if i < NUM_ELEMS:
                     continue
                 # Hide the single Entry
@@ -510,8 +631,46 @@ class ImsilScrollFrame(BlancFrame):
                     curr_col = i - curr_row*(n+1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
-        # Otherwise check, if all Entry values are the same
+                    
+                    # Because of the if condition above, only the first
+                    # Entries from each row are checked
+                    if widget.winfo_class() == "Entry":
+                        # Get the values of the according row (row num
+                        # minus 1 because the first row is a Header)
+                        items = par_frame.values[curr_row-1]
+                        # If not all elements of the row have the same 
+                        # value, set the value of the first Entries to
+                        # "Multiple values" 
+                        if not all(items[0] == item for item in items):
+                            widget.delete(0, "end")  # Delete
+                            widget.insert(0, "Multiple values")  # Readd
+        # Otherwise check, if all Entry values are the same and update
+        # the saved Entry values
         else:
+            # Iterate through every (already placed) widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label, info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                elif widget.winfo_class() == "Entry" and widget.grid_info():
+                    # Current row and column in the grid
+                    curr_row = widget.grid_info()['row']
+                    curr_col = widget.grid_info()['column']
+                    # Row and column in the array
+                    row = curr_row - 1
+                    col = curr_col - (NUM_ELEMS+2)
+                    # Current widget value
+                    curr_value = widget.get()
+                    # If the value of the first Entry is not "Multiple 
+                    # values", but a value, set all values of the column
+                    # to match the value of the first Entry
+                    if curr_value != "Multiple values":
+                        for j in range(len(par_frame.values)):                            
+                            par_frame.values[j][col] = curr_value
+            # Hide every widget except the main Label and info Button
+            # and show the Entry
+            self.hide_widgets(par_frame, m, n, True, row_index)
+            
             self.set_entry_value(par_frame, m, n)
             
         # Change the left arrow button to the right arrow button
@@ -541,7 +700,9 @@ class ImsilScrollFrame(BlancFrame):
         # If the array is collapsed currently    
         if not IS_RIGHT:
             # Set the Entry values to match the single Entry
-            self.set_entry_values(par_frame)
+            init = self.set_entry_values(par_frame)
+            # Save the Entry values
+            self.save_entry_values(par_frame, m, n, init, IS_POINT)
             # Iterate through every widget
             for i,widget in enumerate(par_frame.children.values()):
                 # Skip the main Label and info button
@@ -559,11 +720,59 @@ class ImsilScrollFrame(BlancFrame):
                     curr_col = i - curr_row*(n+1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
+                    
+            # Iterate through every widget and update values
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label, info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                elif widget.winfo_class() == "Entry" and widget.grid_info():
+                    # Current row and column in the grid
+                    curr_row = widget.grid_info()['row']
+                    curr_col = widget.grid_info()['column']
+                    # Row and column in the array
+                    row = curr_row - 1
+                    col = curr_col - (NUM_ELEMS+2)
+                    # Array with all elements from current row
+                    items = par_frame.values[row]
+                    
+                    # If all items are the same, set the value
+                    if all(items[0] == item for item in items):                    
+                        widget.delete(0, "end")  # Delete
+                        widget.insert(0, items[0])  # Readd
+                    # Otherwise set the first Entry to "Multiple values"
+                    else:
+                        widget.delete(0, "end")  # Delete
+                        widget.insert(0, "Multiple values")  # Readd
         # If the array is expanded to the right
-        else:
+        else:                              
+            # Iterate through every (already placed) widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label, info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                elif widget.winfo_class() == "Entry" and widget.grid_info():
+                    # Current row and column in the grid
+                    curr_row = widget.grid_info()['row']
+                    curr_col = widget.grid_info()['column']
+                    # Row and column in the array
+                    row = curr_row - 1
+                    col = curr_col - (NUM_ELEMS+2)
+                    # Current widget value
+                    curr_value = widget.get()
+                    # If the value of the first Entry was "Multiple 
+                    # values", replace it with the value when expanding
+                    if curr_value == "Multiple values":
+                        widget.delete(0, "end")  # Delete
+                        widget.insert(0, par_frame.values[row][col])  # Readd
+                    # Otherwise set all values in the current column, 
+                    # to match the value of the first Entry
+                    else:
+                        for j in range(len(par_frame.values)):
+                            par_frame.values[j][col] = curr_value
             # Iterate through every widget
             for i,widget in enumerate(par_frame.children.values()):
-                # Skip the main Label and info button
+                # Skip the main Label and info Button
                 if i < NUM_ELEMS:
                     continue
                 # Hide the single Entry
@@ -578,6 +787,17 @@ class ImsilScrollFrame(BlancFrame):
                     curr_col = i - curr_row*(n+1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
+                    
+                    if widget.winfo_class() == "Entry" and widget.grid_info():
+                        # Row and column in the array
+                        row = curr_row - 1
+                        col = curr_col - (NUM_ELEMS+2)
+                        # Current widget value
+                        curr_value = widget.get()
+                        # If the current widget value is not up to date
+                        if curr_value != par_frame.values[row][col]:
+                            widget.delete(0, "end")  # Delete
+                            widget.insert(0, par_frame.values[row][col])  # Readd
                 
         # Change the down arrow button to an up arrow button
         self.set_button(down_arrow_btn, "arrow_u.gif", "u")
@@ -603,11 +823,13 @@ class ImsilScrollFrame(BlancFrame):
         # Get the dimensions for the array to be created
         dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)
 
-        # Hide every widget except the main Label and Info Button and
-        # show the Entry
-        self.hide_widgets(par_frame, m, n, True, row_index)                  
+        self.save_entry_values(par_frame, m, n, False, IS_POINT)
+
         # If the array is expanded to the right, readd the widgets
         if IS_RIGHT:
+            # Hide every widget except the main Label and info Button and
+            # show the Entry
+            self.hide_widgets(par_frame, m, n, True, row_index)  
             # Iterate through every widget
             for i,widget in enumerate(par_frame.children.values()):
                 # Skip the main Label and info button
@@ -623,8 +845,49 @@ class ImsilScrollFrame(BlancFrame):
                 # the Entries for the Atoms
                 elif i < ((NUM_ELEMS+1) + 2*(n+1)):
                     widget.grid(row=1, column=i-(n+1), sticky="NESW")
+                
+                    # Because of the if condition above, only 
+                    # the Entries of the first row are checked
+                    if widget.winfo_class() == "Entry":
+                        # Get the values of the according column (column
+                        # num minus (n+1) + (NUM_ELEMS+2) because the 
+                        # first row is a Header and the first Entry 
+                        # column is at NUM_ELEMS + 2 )
+                        col = i-(n+1)-(NUM_ELEMS+2)
+                        items = [x[col] for x in par_frame.values]
+                        # If not all elements of the column have the  
+                        # same value, set the value of the first Entries
+                        # to "Multiple values" 
+                        if not all(items[0] == item for item in items):
+                            widget.delete(0, "end")  # Delete
+                            widget.insert(0, "Multiple values")  # Readd
+                    
         # Otherwise check, if all Entry values are the same
         else:
+            # Iterate through every (already placed) widget
+            for i,widget in enumerate(par_frame.children.values()):
+                # Skip the main Label, info Button and the single Entry
+                if i <= NUM_ELEMS:
+                    continue
+                elif widget.winfo_class() == "Entry" and widget.grid_info():
+                    # Current row and column in the grid
+                    curr_row = widget.grid_info()['row']
+                    curr_col = widget.grid_info()['column']
+                    # Row and column in the array
+                    row = curr_row - 1
+                    col = curr_col - (NUM_ELEMS+2)
+                    # Current widget value
+                    curr_value = widget.get()
+                    # If the value of the first Entry is not "Multiple 
+                    # values", but a value, set all values of the row
+                    # to match the value of the first Entry
+                    if curr_value != "Multiple values":
+                        for j in range(len(par_frame.values[row])):                            
+                            par_frame.values[row][j] = curr_value
+            # Hide every widget except the main Label and info Button
+            # and show the Entry
+            self.hide_widgets(par_frame, m, n, True, row_index)
+            
             self.set_entry_value(par_frame, m, n)
                 
         # Change the up arrow button to the down arrow button
@@ -702,11 +965,11 @@ class ImsilScrollFrame(BlancFrame):
             
         # If the array is expanded downwards
         if IS_DOWN:
-            # Hide every widget except the main Label and Info Button
+            # Hide every widget except the main Label and info Button
             self.hide_widgets(par_frame, m, n)
             # Iterate through every widget, and readd them
             for i,widget in enumerate(par_frame.children.values()):
-                # Skip the main Label, the Info Button and the Entry
+                # Skip the main Label, the info Button and the Entry
                 if i <= NUM_ELEMS:
                     continue
                 # Show all other widgets
@@ -759,11 +1022,11 @@ class ImsilScrollFrame(BlancFrame):
         # Get the dimensions for the array to be created
         dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)
  
-        # Hide every widget except the main Label and Info Button
+        # Hide every widget except the main Label and info Button
         self.hide_widgets(par_frame, m, n)
         # Iterate through every widget, and readd them
         for i,widget in enumerate(par_frame.children.values()):
-            # Skip the main Label, the Info Button and the Entry
+            # Skip the main Label, the info Button and the Entry
             if i <= NUM_ELEMS:
                 continue
             # Show all other widgets
@@ -815,7 +1078,7 @@ class ImsilScrollFrame(BlancFrame):
                 elif ("REGION" in index_var_list and 
                       "geom" in str(self.content_frame)):
                     # Create an NR x 1 array
-                    num_rows = 1 + self.n_r  # Header+nr rows
+                    num_rows = 2 + self.n_r  # HeaderREGION0+nr rows
                     num_columns = 5 + 1  # 3Fix+Header+Button+Column
                 elif "REGION" in index_var_list:
                     # Create a 1 x NR array
@@ -856,10 +1119,10 @@ class ImsilScrollFrame(BlancFrame):
                                    width=INDEX_NAME_WIDTH)
             label.grid(row=row_index, column=0, sticky="NESW")
     
-            # Add the Info Button for the parameter
+            # Add the info Button for the parameter
             btn_info = self.add_button(parent=par_frame,
-                                       w=INFO_WIDTH,
-                                       h=INFO_HEIGHT, 
+                                       w=info_WIDTH,
+                                       h=info_HEIGHT, 
                                        tool_tip_text=short_desc)
             self.photo=tk.PhotoImage(file="info_sign_1.gif")
             btn_info.config(image=self.photo)
@@ -877,7 +1140,8 @@ class ImsilScrollFrame(BlancFrame):
             # Get the number of elements for the current parameter
             dim = len(index_var_list)
             # Set the Header text
-            header_text = '/'.join(index_var_list)
+            header_text = '\\'.join(index_var_list)
+            header_text = header_text.replace("REGION", "Region")
             header_text = header_text.replace("ATOM1", "Ion")
             header_text = header_text.replace("ATOM2", "Target")
             # Set the number of rows and columns of the array
@@ -886,7 +1150,8 @@ class ImsilScrollFrame(BlancFrame):
                     # Create a 1 x NATOM array
                     # Fill the Header row with Labels for the ATOMS
                     label = self.add_label(parent=par_frame,
-                                           label_text=header_text)
+                                           label_text=header_text,
+                                           width=INDEX_LABEL_WIDTH_1D)
                     for i in range(self.n_atom):
                         label = self.add_label(parent=par_frame,
                                                label_text="ATOM " + str(i+1))
@@ -905,11 +1170,13 @@ class ImsilScrollFrame(BlancFrame):
                     # Create an NR x 1 array
                     # Fill the Header row with Labels for the REGIONS
                     label = self.add_label(parent=par_frame,
-                                           label_text=header_text)
+                                           label_text=header_text,
+                                           width=INDEX_LABEL_WIDTH_1D)
                     label = self.add_label(parent=par_frame, label_text="")                    
                     # Add new rows with a Label and Entry
-                    for i in range(self.n_r):
-                        label_text = "REGION " + str(i+1)
+                    # Add an extra row REGION 0
+                    for i in range(self.n_r+1):
+                        label_text = "REGION " + str(i)
                         label = self.add_label(parent=par_frame,
                                                label_text=label_text)
                         entry = self.add_entry(parent=par_frame, 
@@ -924,7 +1191,8 @@ class ImsilScrollFrame(BlancFrame):
                     # Create a 1 x NR array
                     # Fill the Header row with Labels for the REGIONS
                     label = self.add_label(parent=par_frame,
-                                           label_text=header_text)
+                                           label_text=header_text,
+                                           width=INDEX_LABEL_WIDTH_1D)
                     for i in range(self.n_r):                        
                         label = self.add_label(parent=par_frame,
                                                label_text="REGION " + str(i+1))                    
@@ -943,7 +1211,8 @@ class ImsilScrollFrame(BlancFrame):
                     # Create a special array for POINT
                     # Fill the Header row for the POINTS
                     label = self.add_label(parent=par_frame,
-                                           label_text=header_text)
+                                           label_text=header_text,
+                                           width=INDEX_LABEL_WIDTH_1D)
                     label = self.add_label(parent=par_frame, label_text="")
                     label = self.add_label(parent=par_frame, label_text="")                    
                     # Add a new row with a Label for the Region and Entry
@@ -972,7 +1241,8 @@ class ImsilScrollFrame(BlancFrame):
                     # Create an NR x NATOM array
                     # Fill the Header row for the ATOMS
                     label = self.add_label(parent=par_frame,
-                                           label_text=header_text)
+                                           label_text=header_text,
+                                           width=INDEX_LABEL_WIDTH_2D)
                     for i in range(self.n_atom):
                         label = self.add_label(parent=par_frame,
                                                label_text="ATOM " + str(i+1))                    
@@ -998,7 +1268,8 @@ class ImsilScrollFrame(BlancFrame):
                     # Create an NATOM x NATOM array
                     # Fill the Header row for the ATOMS
                     label = self.add_label(parent=par_frame,
-                                           label_text=header_text)
+                                           label_text=header_text,
+                                           width=INDEX_LABEL_WIDTH_2D)
                     for i in range(self.n_atom):
                         label = self.add_label(parent=par_frame,
                                                label_text="ATOM " + str(i+1))                    
@@ -1043,10 +1314,10 @@ class ImsilScrollFrame(BlancFrame):
                        column=1 + ELEMENTS_PER_PARAM*self.params_in_row,
                        sticky="NESW")
     
-            # Add the Info Button for the parameter
+            # Add the info Button for the parameter
             btn_info = self.add_button(parent=par_frame,
-                                       w=INFO_WIDTH,
-                                       h=INFO_HEIGHT, 
+                                       w=info_WIDTH,
+                                       h=info_HEIGHT, 
                                        tool_tip_text=short_desc)
             self.photo=tk.PhotoImage(file="info_sign_1.gif")
             btn_info.config(image=self.photo)
@@ -1068,10 +1339,10 @@ class ImsilScrollFrame(BlancFrame):
                        column=ELEMENTS_PER_PARAM*self.params_in_row,
                        sticky="NESW")
     
-            # Add the Info Button for the parameter
+            # Add the info Button for the parameter
             btn_info = self.add_button(parent=par_frame,
-                                       w=INFO_WIDTH,
-                                       h=INFO_HEIGHT, 
+                                       w=info_WIDTH,
+                                       h=info_HEIGHT, 
                                        tool_tip_text=short_desc)
             self.photo=tk.PhotoImage(file="info_sign_1.gif")
             btn_info.config(image=self.photo)
