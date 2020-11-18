@@ -491,7 +491,7 @@ class ImsilScrollFrame(BlancFrame):
         if not IS_DOWN:
             # Set the Entry values to match the single Entry
             init =self.set_entry_values(par_frame)
-            # Initialize the array with the Entry values
+            # Save the current values of the index variable array
             self.save_entry_values(par_frame, m, n, init, IS_POINT)
             # Iterate through every widget and place them
             for i,widget in enumerate(par_frame.children.values()):
@@ -605,13 +605,12 @@ class ImsilScrollFrame(BlancFrame):
         # Get the Button reference and array state
         left_arrow_btn, IS_DOWN, IS_RIGHT = self.get_state(par_frame, 'l')
         # Get the dimensions for the array to be created
-        dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)
-
-        # Save the current values of the index variable array
-        self.save_entry_values(par_frame, m, n, False, IS_POINT)
+        dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)        
 
         # If the array is expanded downwards readd the widgets
         if IS_DOWN:
+            # Save the current values of the index variable array
+            self.save_entry_values(par_frame, m, n, False, IS_POINT)
             # Hide every widget except the main Label and info Button
             # and show the Entry
             self.hide_widgets(par_frame, m, n, True, row_index)
@@ -701,7 +700,7 @@ class ImsilScrollFrame(BlancFrame):
         if not IS_RIGHT:
             # Set the Entry values to match the single Entry
             init = self.set_entry_values(par_frame)
-            # Save the Entry values
+            # Save the current values of the index variable array
             self.save_entry_values(par_frame, m, n, init, IS_POINT)
             # Iterate through every widget
             for i,widget in enumerate(par_frame.children.values()):
@@ -821,12 +820,12 @@ class ImsilScrollFrame(BlancFrame):
         # Get the Button reference and array state
         up_arrow_btn, IS_DOWN, IS_RIGHT = self.get_state(par_frame, 'u')
         # Get the dimensions for the array to be created
-        dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)
-
-        self.save_entry_values(par_frame, m, n, False, IS_POINT)
+        dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)        
 
         # If the array is expanded to the right, readd the widgets
         if IS_RIGHT:
+            # Save the current values of the index variable array
+            self.save_entry_values(par_frame, m, n, False, IS_POINT)
             # Hide every widget except the main Label and info Button and
             # show the Entry
             self.hide_widgets(par_frame, m, n, True, row_index)  
@@ -864,6 +863,9 @@ class ImsilScrollFrame(BlancFrame):
                     
         # Otherwise check, if all Entry values are the same
         else:
+            if IS_POINT:
+                # Save the current values of the index variable array
+                self.save_entry_values(par_frame, m, n, False, IS_POINT)
             # Iterate through every (already placed) widget
             for i,widget in enumerate(par_frame.children.values()):
                 # Skip the main Label, info Button and the single Entry
@@ -933,7 +935,7 @@ class ImsilScrollFrame(BlancFrame):
             btn_down.destroy()
         
         # Increase the counter variable value
-        self.num_points += 1
+        self.num_points += 1        
         
         # Add the row with a Label and Entry
         self.add_label(parent=par_frame, 
@@ -1018,7 +1020,7 @@ class ImsilScrollFrame(BlancFrame):
         curr_button.destroy()
 
         # Decrease the counter variable value
-        self.num_points -= 1       
+        self.num_points -= 1
         # Get the dimensions for the array to be created
         dim, m, n, IS_POINT = self.get_dimensions(par_frame, index_var_list)
  
