@@ -1,6 +1,6 @@
 """
 Classes:
-    :WelcomeWindow: The main window, where the user can configurate the
+    :WelcomeWindow: The main window, where the user can configure the
                     Input Parameter Editor settings.
     :ImsilInputParameterEditor: Based on the four parameters (type of
                     simulation, existing input file, number of regions 
@@ -81,7 +81,7 @@ class WelcomeWindow(tk.Tk):
     Editor will have different parameters at the beginning of each 
     notebook page. These parameters, so called "basic" parameters, that
     are for this type of simulation common, have to be defined in the 
-    database.
+    database (not yet implemented).
     """
     WINDOW_WIDTH = 470  # Define the window width
 
@@ -104,8 +104,8 @@ class WelcomeWindow(tk.Tk):
                         " for IMSIL. You can also edit an existing input"
                         " file by loading it in this window below.")
         # Add the welcome message
-        self.welcome_message_label = tk.Label(self.frame, 
-                                              wraplength=self.WINDOW_WIDTH, 
+        self.welcome_message_label = tk.Label(self.frame,
+                                              wraplength=self.WINDOW_WIDTH,
                                               anchor=tk.NW,
                                               text=welcome_text,
                                               justify=tk.LEFT)
@@ -154,24 +154,26 @@ class WelcomeWindow(tk.Tk):
             command=self.open_imsil_input_parameter_editor)
         self.btn_continue.grid(row=5, column=0, columnspan=3,
                                padx=10, pady=10, sticky="NESW")
-        
+
         # Add a Label, and an Entry for both N_R and N_ATOM within a
         # new Frame, so the positions can be adjusted
         self.var_frame = BlancFrame(self.frame, columns=4, frame_id=WELCOME)
-        self.var_frame.grid(row=4, column=0, columnspan=4, 
+        self.var_frame.grid(row=4, column=0, columnspan=4,
                             padx=(5, 10), pady=4, sticky="NESW")
         self.nr_label = tk.Label(self.var_frame, text="Number of Regions:")
         self.nr_label.grid(row=0, column=0, padx=5, pady=0, sticky="NES")
         self.nr_var = tk.IntVar()
         self.natom_var = tk.IntVar()  # Define before the callback
-        self.nr_entry = tk.Entry(self.var_frame, 
+        self.nr_entry = tk.Entry(self.var_frame,
+                                 width=3,
                                  textvariable=self.nr_var,
                                  validate="focusout", 
                                  validatecommand=self.callback_for_button)
         self.nr_entry.grid(row=0, column=1, padx=0, pady=0, sticky="NESW")
         self.natom_label = tk.Label(self.var_frame, text="Number of Atoms:")
         self.natom_label.grid(row=0, column=2, padx=5, pady=0, sticky="NES")
-        self.natom_entry = tk.Entry(self.var_frame, 
+        self.natom_entry = tk.Entry(self.var_frame,
+                                    width=3,
                                     textvariable=self.natom_var,
                                     validate="focusout", 
                                     validatecommand=self.callback_for_button)
@@ -284,7 +286,7 @@ class ImsilInputParameterEditor:
         # resizable and center it
         root = tk.Tk()
         root.title('IMSIL Input Parameter Editor')
-        root.resizable(False,False)
+        root.resizable(False, False)
         center_window(root)
         
         # Add a loading message (becomes visible after the user presses
