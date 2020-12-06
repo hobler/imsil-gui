@@ -402,14 +402,26 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
+                # Get the Label of which the text needs to be swapped
+                elif (widget.winfo_class() == "Label" and 
+                      dim == 2 and
+                      widget.grid_info() and
+                      widget.grid_info()['row'] == 1 and 
+                      widget.grid_info()['column'] == 3):
+                    # Get all Label texts
+                    label_text = widget.cget('text')
+                    # Swap the element accordingly
+                    if label_text == "REGION 1":
+                        widget['text'] = "ALL REGIONS"
+                    if label_text == "ATOM 1":
+                        widget['text'] = "ALL ATOMS"                        
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current column in the grid
                     curr_col = widget.grid_info()['column']
                     # Column in the array
                     col = curr_col - (NUM_ELEMS+2)
                     # Array with all elements from the current column
-                    items = [x[col] for x in self.values]
-                    
+                    items = [x[col] for x in self.values]                    
                     # If all items are the same, set the first Entry
                     if all(items[0] == item for item in items):
                         widget.delete(0, "end")  # Delete
@@ -425,6 +437,19 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
+                # Get the Label of which the text needs to be swapped
+                elif (widget.winfo_class() == "Label" and 
+                      dim == 2 and
+                      widget.grid_info() and
+                      widget.grid_info()['row'] == 0 and 
+                      widget.grid_info()['column'] == 4):
+                    # Get all Label texts
+                    label_text = widget.cget('text')
+                    # Swap the elements back  accordingly
+                    if label_text == "ALL REGIONS":
+                        widget['text'] = "REGION 1"
+                    if label_text == "ALL ATOMS":
+                        widget['text'] = "ATOM 1"
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current row and column in the grid
                     curr_row = widget.grid_info()['row']
@@ -527,6 +552,20 @@ class IndexVariableArrayFrame(BlancFrame):
                         if not all(items[0] == item for item in items):
                             widget.delete(0, "end")  # Delete
                             widget.insert(0, "Multiple values")  # Readd
+                            
+                    # Get the Label of which the text needs to be swapped
+                    elif (widget.winfo_class() == "Label" and 
+                          dim == 2 and
+                          widget.grid_info() and
+                          widget.grid_info()['row'] == 0 and 
+                          widget.grid_info()['column'] == 4):
+                        # Get all Label texts
+                        label_text = widget.cget('text')
+                        # Swap the element accordingly
+                        if label_text == "REGION 1":
+                            widget['text'] = "ALL REGIONS"
+                        if label_text == "ATOM 1":
+                            widget['text'] = "ALL ATOMS"
         # Otherwise check, if all Entry values are the same and update
         # the saved Entry values
         else:
@@ -548,6 +587,19 @@ class IndexVariableArrayFrame(BlancFrame):
                     if curr_value != "Multiple values":
                         for j in range(len(self.values)):
                             self.values[j][col] = curr_value
+                # Get the Label of which the text needs to be swapped
+                elif (widget.winfo_class() == "Label" and 
+                      dim == 2 and
+                      widget.grid_info() and
+                      widget.grid_info()['row'] == 1 and 
+                      widget.grid_info()['column'] == 3):
+                    # Get all Label texts
+                    label_text = widget.cget('text')
+                    # Swap the elements back  accordingly
+                    if label_text == "ALL REGIONS":
+                        widget['text'] = "REGION 1"
+                    if label_text == "ALL ATOMS":
+                        widget['text'] = "ATOM 1"
             # Hide every widget except the main Label and info Button
             # and show the Entry
             self.hide_widgets(self, m, n, True, row_index)
@@ -604,6 +656,19 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
+                # Get the Label of which the text needs to be swapped
+                elif (widget.winfo_class() == "Label" and 
+                      dim == 2 and
+                      widget.grid_info() and
+                      widget.grid_info()['row'] == 0 and 
+                      widget.grid_info()['column'] == 4):
+                    # Get all Label texts
+                    label_text = widget.cget('text')
+                    # Swap the element accordingly
+                    if label_text == "REGION 1":
+                        widget['text'] = "ALL REGIONS"
+                    if label_text == "ATOM 1":
+                        widget['text'] = "ALL ATOMS"
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current row in the grid
                     curr_row = widget.grid_info()['row']
@@ -627,6 +692,19 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
+                # Get the Label of which the text needs to be swapped
+                elif (widget.winfo_class() == "Label" and 
+                      dim == 2 and
+                      widget.grid_info() and
+                      widget.grid_info()['row'] == 1 and 
+                      widget.grid_info()['column'] == 3):
+                    # Get all Label texts
+                    label_text = widget.cget('text')
+                    # Swap the elements back  accordingly
+                    if label_text == "ALL REGIONS":
+                        widget['text'] = "REGION 1"
+                    if label_text == "ALL ATOMS":
+                        widget['text'] = "ATOM 1"
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current row and column in the grid
                     curr_row = widget.grid_info()['row']
@@ -713,7 +791,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     widget.grid_forget()
                 # Show the first row with the Header for the Atoms
                 elif i < ((NUM_ELEMS+1) + (n+1)):
-                    widget.grid(row=0, column=i, sticky="NESW")
+                    widget.grid(row=0, column=i, sticky="NESW")                
                 # Show the second row with the Label for the Region and
                 # the Entries for the Atoms
                 elif i < ((NUM_ELEMS+1) + 2*(n+1)):
@@ -734,6 +812,20 @@ class IndexVariableArrayFrame(BlancFrame):
                         if not all(items[0] == item for item in items):
                             widget.delete(0, "end")  # Delete
                             widget.insert(0, "Multiple values")  # Readd
+                    # Get the Label of which the text needs to be swapped
+                    elif (widget.winfo_class() == "Label" and 
+                          dim == 2 and
+                          widget.grid_info() and
+                          widget.grid_info()['row'] == 1 and 
+                          widget.grid_info()['column'] == 3):
+                        # Get all Label texts
+                        label_text = widget.cget('text')
+                        # Swap the element accordingly
+                        if label_text == "REGION 1":
+                            widget['text'] = "ALL REGIONS"
+                        if label_text == "ATOM 1":
+                            widget['text'] = "ALL ATOMS"  
+
                     
         # Otherwise check, if all Entry values are the same
         else:
@@ -760,6 +852,20 @@ class IndexVariableArrayFrame(BlancFrame):
                     if curr_value != "Multiple values":
                         for j in range(len(self.values[row])):
                             self.values[row][j] = curr_value
+                # Get the Label of which the text needs to be swapped
+                elif (widget.winfo_class() == "Label" and 
+                      dim == 2 and
+                      widget.grid_info() and
+                      widget.grid_info()['row'] == 0 and 
+                      widget.grid_info()['column'] == 4):
+                    # Get all Label texts
+                    label_text = widget.cget('text')
+                    # Swap the elements back  accordingly
+                    if label_text == "ALL REGIONS":
+                        widget['text'] = "REGION 1"
+                    if label_text == "ALL ATOMS":
+                        widget['text'] = "ATOM 1"
+                            
             # Hide every widget except the main Label and info Button
             # and show the Entry
             self.hide_widgets(self, m, n, True, row_index)
