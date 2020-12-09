@@ -1,25 +1,25 @@
 import tkinter as tk
-from tkinter import messagebox
+#from tkinter import messagebox
 
-from UI.Frames.blanc.blanc_frame import BlancFrame
-from UI.Frames.blanc.blanc_frame import INDEX_COLLAPSE_1D as INDEX_COLLAPSE_1D
-from UI.Frames.blanc.blanc_frame import INDEX_COLLAPSE_2D as INDEX_COLLAPSE_2D
-from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_R_1D as INDEX_EXPAND_R_1D
-from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_R_2D as INDEX_EXPAND_R_2D
-from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_D_1D as INDEX_EXPAND_D_1D
-from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_D_2D as INDEX_EXPAND_D_2D
-from UI.Frames.blanc.blanc_frame import INDEX_EXPAND_RD as INDEX_EXPAND_RD
+from UI.Frames.blanc_frame import BlancFrame
+from UI.Frames.blanc_frame import INDEX_COLLAPSE_1D
+from UI.Frames.blanc_frame import INDEX_COLLAPSE_2D
+from UI.Frames.blanc_frame import INDEX_EXPAND_R_1D
+from UI.Frames.blanc_frame import INDEX_EXPAND_R_2D
+from UI.Frames.blanc_frame import INDEX_EXPAND_D_1D
+from UI.Frames.blanc_frame import INDEX_EXPAND_D_2D
+from UI.Frames.blanc_frame import INDEX_EXPAND_RD
 
 # Configure the width and height of the widgets
-INFO_WIDTH = 10 # info Button width
-INFO_HEIGHT = 10 # info Button height
-ARROW_WIDTH = 20 # Width of the arrow (and '+'/'-') Button(s)
-ARROW_HEIGHT = 20 # Height of the arrow (and '+'/'-') Button(s)
+INFO_WIDTH = 10  # info Button width
+INFO_HEIGHT = 10  # info Button height
+ARROW_WIDTH = 20  # Width of the arrow (and '+'/'-') Button(s)
+ARROW_HEIGHT = 20  # Height of the arrow (and '+'/'-') Button(s)
 
 # Width of the parameter name field for index variable arrays. The use
 # of a width is necessary, since every parameter has a separate frame
 # and thus they can't be aligned by only using weights
-INDEX_NAME_WIDTH = 8
+INDEX_NAME_WIDTH = 9
 INDEX_LABEL_WIDTH_1D = 8
 INDEX_LABEL_WIDTH_2D = 12
 
@@ -36,7 +36,7 @@ class IndexVariableArrayFrame(BlancFrame):
     of the corresponding index variable array. Its layout is built 
     dynamically, based on the index variable it holds. Furthermore, the
     class implements all methods for collapsing/expanding the index 
-    variable arrays and adding/deleting Points for the index variable
+    variable arrays and adding/deleting points for the index variable
     array POINTS.
     """
     def __init__(self, parent, par_name, index_var_list, default_value,
@@ -47,7 +47,7 @@ class IndexVariableArrayFrame(BlancFrame):
         parameters are defined, the layout is determined dynamically
         and the Buttons for expanding the array are set up.
 
-        :param parent: the ImsilScrollFrame which holds this Frame. It 
+        :param parent: the ScrollFrame which holds this Frame. It
                        is used to access the methods to add Labels,
                        Entries, etc. (this is not the parent tk widget!
                        The parent Frame is parent.content_frame)
@@ -70,17 +70,17 @@ class IndexVariableArrayFrame(BlancFrame):
         # The number of POINTS (only used for the POINTS index variable
         # array in the geom tab)
         self.num_points = 1
-        # An Array to save the values of the index variable array. This
-        # is used to keep track of the values regardless of the current
-        # state of the array
-        self.values=[]
+        # A list of values of the index variable array. This is used to keep
+        # track of the values regardless of the current state of the array
+        self.values = []
         
         # Get the number of elements for the current parameter
         dim = len(index_var_list)
         # Set the number of rows and columns of the array
         if dim == 1:
             curr_frame_id = INDEX_COLLAPSE_1D
-            if "ATOM1" in index_var_list or "ATOM2" in index_var_list:
+            if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
+                "ATOM" in index_var_list):
                 # Create a 1 x NATOM array
                 self.num_rows = 2  # Header+Value
                 self.num_columns = 5 + self.n_atom  # 3Fix+Header+Button
@@ -108,7 +108,7 @@ class IndexVariableArrayFrame(BlancFrame):
             elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
                 # Create an NATOM x NATOM array
                 self.num_rows = 1 + self.n_atom  # Header+natom rows
-                self.num_columns = 6 + self.n_atom # 3Fix+Header+2Button
+                self.num_columns = 6 + self.n_atom  # 3Fix+Header+2Button
         
         # Call the init of BlancFrame with the correct rows and columns
         super().__init__(parent.content_frame, self.num_rows, self.num_columns, 
@@ -120,16 +120,17 @@ class IndexVariableArrayFrame(BlancFrame):
         label.grid(row=row_index, column=0, sticky="NESW")
 
         # Add the info Button for the parameter
+        self.option_add('*Dialog.msg.font', 'Helvetica 12')
         btn_info = self.parent.add_button(parent=self,
                                           w=INFO_WIDTH,
                                           h=INFO_HEIGHT, 
                                           tool_tip_text=short_desc)
-        self.photo=tk.PhotoImage(file="info_sign_1.gif")
+        self.photo = tk.PhotoImage(file="info_sign_1.gif")
         btn_info.config(image=self.photo)
-        btn_info.image = self.photo;
+        btn_info.image = self.photo
         btn_info.config(takefocus=False)
         btn_info.config(
-                command=lambda: messagebox.showinfo(par_name, long_desc))
+                command=lambda: tk.messagebox.showinfo(par_name, long_desc))
         btn_info.grid(row=row_index, column=1, sticky="W")
                 
         # Add the Entry for the parameter  
@@ -143,9 +144,11 @@ class IndexVariableArrayFrame(BlancFrame):
         header_text = header_text.replace("REGION", "Region")
         header_text = header_text.replace("ATOM1", "Ion")
         header_text = header_text.replace("ATOM2", "Target")
+        header_text = header_text.replace("ATOM", "Atom")
         # Set the number of rows and columns of the array
         if dim == 1:
-            if "ATOM1" in index_var_list or "ATOM2" in index_var_list:
+            if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
+                    "ATOM" in index_var_list):
                 # Create a 1 x NATOM array
                 # Fill the Header row with Labels for the ATOMS
                 label = self.parent.add_label(parent=self,
@@ -220,7 +223,7 @@ class IndexVariableArrayFrame(BlancFrame):
                                               entry_text="", add_to_list=False)
                 label = self.parent.add_label(parent=self, label_text="")
                 # The first row needs 3 elements, because the
-                # algorythm takes 3 elements per row and it does
+                # algorithm takes 3 elements per row and it does
                 # not consider the '+' Button. The second row needs
                 # 3 elements because it does not have a '-' Button.
                                     
@@ -235,7 +238,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 btn_d.grid(row=row_index ,column=self.num_columns - 1)
         elif dim == 2:
             if ("REGION" in index_var_list and 
-                ("ATOM1" in index_var_list or "ATOM2" in index_var_list)):
+                    ("ATOM1" in index_var_list or "ATOM2" in index_var_list)):
                 # Create an NR x NATOM array
                 # Fill the Header row with Labels for the ATOMS
                 label = self.parent.add_label(parent=self,
@@ -383,7 +386,7 @@ class IndexVariableArrayFrame(BlancFrame):
             # Save the Entry values to the array
             self.save_entry_values(self, m, n, init, IS_POINT)
             # Iterate through every widget and place them
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label and info button
                 if i < NUM_ELEMS:
                     continue
@@ -398,7 +401,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     widget.grid(row=1, column=i - (n+1), sticky="NESW")
                     
             # Iterate through every widget and update the values
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -524,7 +527,7 @@ class IndexVariableArrayFrame(BlancFrame):
             # and show the Entry
             self.hide_widgets(self, m, n, True, row_index)
             # Iterate through every widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, the info Button and the Entry
                 if i < NUM_ELEMS:
                     continue
@@ -570,7 +573,7 @@ class IndexVariableArrayFrame(BlancFrame):
         # the saved Entry values
         else:
             # Iterate through every (already placed) widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -652,7 +655,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
                     
             # Iterate through every widget and update values
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -688,7 +691,7 @@ class IndexVariableArrayFrame(BlancFrame):
         # If the array is expanded to the right
         else:                              
             # Iterate through every (already placed) widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -725,7 +728,7 @@ class IndexVariableArrayFrame(BlancFrame):
                         for j in range(len(self.values)):
                             self.values[j][col] = curr_value
             # Iterate through every widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label and info Button
                 if i < NUM_ELEMS:
                     continue
@@ -782,7 +785,7 @@ class IndexVariableArrayFrame(BlancFrame):
             # and show the Entry
             self.hide_widgets(self, m, n, True, row_index)  
             # Iterate through every widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label and info button
                 if i < NUM_ELEMS:
                     continue
@@ -826,14 +829,13 @@ class IndexVariableArrayFrame(BlancFrame):
                         if label_text == "ATOM 1":
                             widget['text'] = "ALL ATOMS"  
 
-                    
         # Otherwise check, if all Entry values are the same
         else:
             if IS_POINT:
                 # Save the current values of the index variable array
                 self.save_entry_values(self, m, n, False, IS_POINT)
             # Iterate through every (already placed) widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -1207,7 +1209,8 @@ class IndexVariableArrayFrame(BlancFrame):
         dim = len(index_var_list)
         # Set the number of rows and columns of the array
         if dim == 1:
-            if "ATOM1" in index_var_list or "ATOM2" in index_var_list:
+            if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
+                    "ATOM" in index_var_list):
                 # Create a 1 x NATOM array
                 m = 1
                 n = self.n_atom
@@ -1226,7 +1229,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 n = 2
         elif dim == 2:
             if ("REGION" in index_var_list and 
-                ("ATOM1" in index_var_list or "ATOM2" in index_var_list)):
+                    ("ATOM1" in index_var_list or "ATOM2" in index_var_list)):
                 # Create an NR x NATOM array
                 m = self.n_r
                 n = self.n_atom
@@ -1235,7 +1238,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 m = self.n_atom
                 n = self.n_atom
                 
-        return (dim, m, n, IS_POINT)
+        return dim, m, n, IS_POINT
     
     def get_state(self, text):
         """

@@ -15,10 +15,10 @@ from collections import OrderedDict
 from tkinter import ttk, filedialog
 
 from DataModel.InputFile import InputFile
-from DataModel.Table.SqliteMaster import SqliteMaster
-from UI.Frames.blanc.blanc_frame import BlancFrame
-from UI.Frames.db_frame import DbFrame
-from UI.Frames.blanc.blanc_frame import WELCOME as WELCOME
+from DataModel.read_sqlite import get_database_table_names
+from UI.Frames.blanc_frame import BlancFrame
+from UI.Frames.tab_frame import TabFrame
+from UI.Frames.blanc_frame import WELCOME as WELCOME
 
 DATABASE_FILE = "parameters.db"
 
@@ -267,9 +267,8 @@ class ImsilInputParameterEditor:
     def __init__(self, type_of_simulation, input_file_path, nr, natom):
         """
         In the initialization of the IMSIL Input Parameter Editor a 
-        notebook is added to the window. The SqliteMaster class is used
-        to determine the table names in the database. For each table a
-        new tab is added as a DbFrame to the notebook. 
+        notebook is added to the window. For each table of the database
+        a new tab is added as a TabFrame to the notebook.
 
         If a path to an input file is passed, it is read and the 
         parameter values will be placed into the Editor.
@@ -299,15 +298,14 @@ class ImsilInputParameterEditor:
         self.nb = ttk.Notebook(root, width=900, height=600)
         
         # Add the necessary tabs
-        sqlite_master_table = SqliteMaster(DATABASE_FILE)
-        for table_name in sqlite_master_table.get_table_names():
-            self.nb.add(DbFrame(parent=self.nb,
-                                db_file=DATABASE_FILE,
-                                table_name=table_name,
-                                type_of_simulation=type_of_simulation,
-                                nr=nr,
-                                natom=natom,
-                                name=table_name),
+        for table_name in get_database_table_names(DATABASE_FILE):
+            self.nb.add(TabFrame(parent=self.nb,
+                            db_file=DATABASE_FILE,
+                            table_name=table_name,
+                            type_of_simulation=type_of_simulation,
+                            nr=nr,
+                            natom=natom,
+                            name=table_name),
                         text=table_name)
         
         # Remove the loading message
@@ -361,10 +359,10 @@ class ImsilInputParameterEditor:
         EXAMPLE:
             set_parameter_value("setup", "ndim", "2")
         """
-        frame = self.nb.nametowidget(tab_name)
-        if frame is not None:
-            if hasattr(frame.scroll_frame, 'ui_data_list'):
-                par_variable = frame.scroll_frame.ui_data_list.get_variable(
+        tab_frame = self.nb.nametowidget(tab_name)
+        if tab_frame is not None:
+            if hasattr(tab_frame.scroll_frame, 'ui_data_list'):
+                par_variable = tab_frame.scroll_frame.ui_data_list.get_variable(
                     parameter_name)
                 if par_variable is not None:
                     par_variable.set(parameter_value)
@@ -373,7 +371,7 @@ class ImsilInputParameterEditor:
                           + parameter_name + " in tab " + tab_name)
             else:
                 print("Frame " 
-                      + frame 
+                      + tab_frame
                       + " does not contain an attribute with the name"
                       + " ui_data_list")
         else:

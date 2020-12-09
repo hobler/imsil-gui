@@ -21,9 +21,9 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from DataModel.DataList import DataList
-from UI.Canvas.blanc.blanc_canvas import BlancCanvas
+from UI.Canvas.blanc_canvas import BlancCanvas
 from UI.Widgets.ShowAdvParButton import ShowAdvParButton, ButtonState
-from UI.Frames.blanc.blanc_frame import BlancFrame
+from UI.Frames.blanc_frame import BlancFrame
 
 OS = platform.system()
 
@@ -42,7 +42,7 @@ CHECKBUTTON_WIDTH = 36
 CHECKBUTTON_WIDTH_WITHOUT_INDEX_VARIABLES = 61
 
 
-class ImsilScrollFrame(BlancFrame):
+class ScrollFrame(BlancFrame):
     """
     In the initialization only the scrollable area is created. Use function
     add_parameter to add new parameters to the frame.

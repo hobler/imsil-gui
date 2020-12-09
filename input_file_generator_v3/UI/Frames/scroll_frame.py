@@ -4,13 +4,12 @@ import tkinter as tk
 from tkinter import messagebox
 
 from DataModel.DataList import DataList
-from UI.Canvas.blanc.blanc_canvas import BlancCanvas
-from UI.Frames.blanc.blanc_frame import BlancFrame
-from UI.Frames.indexvariablearray.index_variable_array_frame import (
-        IndexVariableArrayFrame)
-from UI.Frames.blanc.blanc_frame import MAIN as MAIN
-from UI.Frames.blanc.blanc_frame import BOOLEAN as BOOLEAN
-from UI.Frames.blanc.blanc_frame import ENTRY as ENTRY
+from UI.Canvas.blanc_canvas import BlancCanvas
+from UI.Frames.blanc_frame import BlancFrame
+from UI.Frames.index_variable_array_frame import IndexVariableArrayFrame
+from UI.Frames.blanc_frame import MAIN as MAIN
+from UI.Frames.blanc_frame import BOOLEAN as BOOLEAN
+from UI.Frames.blanc_frame import ENTRY as ENTRY
 
 OS = platform.system()
 
@@ -26,17 +25,17 @@ ENTRY_PARAMS_PER_ROW = 2
 ELEMENTS_PER_PARAM = 3
 
 
-class ImsilScrollFrame(BlancFrame):
+class ScrollFrame(BlancFrame):
     """
-    This is the class for the ImsilScrollframe 
+    Scrollable frame for one IMSIL record.
     
-    The ImsilScrollFrame holds the Boolean and the Entry BlancFrames,
+    The ScrollFrame holds the Boolean and the Entry BlancFrames,
     as well as all IndexVariableArrayFrames of the (parent) tab.
 
     """
     def __init__(self, parent, nr=3, natom=2, *args, **kwargs):
         """
-        In the initialization of the ImsilScrollFrame all object 
+        In the initialization of the ScrollFrame all object
         parameters are defined, the Boolean and Entry BlancFrames are
         created and added to the list of all Frames, and the scrollable
         area is created.

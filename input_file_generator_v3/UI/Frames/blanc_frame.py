@@ -39,8 +39,7 @@ class BlancFrame(tk.Frame):
         :param rows: the number of rows of the grid
         :param columns: the number of columns of the grid
         :param frame_id: the ID of the Frame
-        :param set_grid_propagate: parameter for the grid_propagate 
-                                   function
+        :param set_grid_propagate: parameter for the grid_propagate function
         :param args: is forwarded to the super().__init__() function
         :param kwargs: is forwarded to the super().__init__() function
         """

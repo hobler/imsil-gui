@@ -3,7 +3,7 @@ import f90nml
 
 class InputFile:
     """
-    This class use the f90nml module to read an Fortran namelist file.
+    This class use the f90nml module to read a Fortran namelist file.
 
     :get_parameters: return all parameters for the given key name.
     """

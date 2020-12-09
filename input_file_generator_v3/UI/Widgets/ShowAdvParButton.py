@@ -1,7 +1,7 @@
 from enum import Enum
 from tkinter import ttk
 
-from UI.Frames.blanc.blanc_frame import BlancFrame
+from UI.Frames.blanc_frame import BlancFrame
 
 
 class ButtonState(Enum):
