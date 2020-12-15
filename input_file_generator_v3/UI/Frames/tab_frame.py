@@ -1,11 +1,6 @@
-import platform
-
-#from DataModel.Table.DatabaseTable import DatabaseTable
 from DataModel.read_sqlite import DatabaseTable
 from UI.Frames.scroll_frame import ScrollFrame
 from UI.Frames.blanc_frame import BlancFrame
-
-OS = platform.system()
 
 
 class TabFrame(BlancFrame):
@@ -21,7 +16,7 @@ class TabFrame(BlancFrame):
                  nr, natom, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
-        # Get data from database and regroup them
+        # Get the database table and regroup the parameters
         self.db_table = DatabaseTable(db_file, table_name)
         self.db_table.regroup()
         
@@ -29,8 +24,7 @@ class TabFrame(BlancFrame):
         self.scroll_frame = ScrollFrame(self, nr, natom)
 
         # Add parameters to the Scrollframe
-        table_rows = self.db_table.get_rows()
-        for table_row in table_rows:
+        for table_row in self.db_table:
             self.add_parameter(table_row)
 
     def add_parameter(self, table_row):
@@ -39,17 +33,17 @@ class TabFrame(BlancFrame):
 
         :param table_row: the row holding all data of the parameter to be added
         """
-        par_name = self.db_table.get_name(table_row)
         self.scroll_frame.add_parameter(
-            par_name=par_name,
-            index_var_list=self.db_table.get_index_vars_for_par(par_name),
-            default_value=self.db_table.get_default_value(table_row),
-            short_desc=self.db_table.get_short_desc(table_row),
+            par_name=table_row.get_name(),
+            index_var_list=table_row.get_index_vars(),
+            default_value=table_row.get_default_value(),
+            short_desc=table_row.get_short_desc(),
             long_desc=self.create_info_button_text(table_row),
-            is_bool=self.db_table.is_logical(table_row),
-            is_index_var=self.db_table.is_index_var(table_row))
+            is_bool=table_row.is_logical(),
+            is_index_var=table_row.is_index_var())
 
-    def create_info_button_text(self, table_row):
+    @staticmethod
+    def create_info_button_text(table_row):
         """
         Create the info message text.
         
@@ -59,11 +53,11 @@ class TabFrame(BlancFrame):
         :param table_row: the row holding all data of the parameter for
                           which the info text should be added
         """
-        return (self.db_table.get_long_desc(table_row).rstrip()
+        return (table_row.get_long_desc().rstrip()
                 + "\n\n"
-                + "Type: " + self.db_table.get_type(table_row).rstrip() 
+                + "Type: " + table_row.get_type().rstrip()
                 + "\n\n" 
                 + "Default value: " 
-                + self.db_table.get_default_value(table_row).rstrip() 
+                + table_row.get_default_value().rstrip()
                 + "\n\n" 
-                + "Range: " + self.db_table.get_range(table_row).rstrip())
+                + "Range: " + table_row.get_range().rstrip())

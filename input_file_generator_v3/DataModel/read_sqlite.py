@@ -99,134 +99,117 @@ class DatabaseTable:
     """
     One table in a database.
 
-    Methods:
-        :get_name: return the name of the parameter
-        :get_short_desc: return the short description of the parameter
-        :get_long_desc: return the long description of the parameter
-        :get_type: return the type of the parameter
-        :get_default_value: return the default value of the parameter
-        :get_range: return the range of the parameter
-        :get_basic: return all parameters that are marked as basic
-        :get_rows: return a list holding all rows of the database
-#        :get_all_index_vars: return all index array variables from the
-#                             database table
-        :get_index_vars_for_par: return all index variables for the
-            specified parameter
-        :is_logical: return True if the parameter is a boolean
-        :is_index_var: return True if the parameter is an index
-                       variable array
-        :regroup: regroup all parameters in the three categories
+    The table is represented by a list of DatabaseTableRow objects.
+    Iterating over the DatabaseTable returns DatabaseTableRows.
+
+    The rows are ordered alphabetically. Optionally, the rows may be grouped
+    using the regroup method.
     """
 
     def __init__(self, database_file, table_name):
-        self.table = _load_database_table(database_file, table_name)
+        table_row_list = _load_database_table(database_file, table_name)
+        table_row_list.sort()
+        self.table_row_list = []
+        for table_row in table_row_list:
+            self.table_row_list.append(DatabaseTableRow(table_row))
 
-    @staticmethod
-    def _get_cell_text(table_row, column_index):
-        """Return text in as specific table row and column."""
-        if len(table_row) >= column_index:
-            return table_row[column_index].rstrip().lstrip()
-        return ""
+    def __iter__(self):
+        self.index = 0
+        return self
 
-    def get_name(self, table_row):
-        return self._get_cell_text(table_row, DATABASE_NAME_COL)
-
-    def get_short_desc(self, table_row):
-        return self._get_cell_text(table_row, DATABASE_SHORT_DESC_COL)
-
-    def get_long_desc(self, table_row):
-        return self._get_cell_text(table_row, DATABASE_LONG_DESC_COL)
-
-    def get_type(self, table_row):
-        return self._get_cell_text(table_row, DATABASE_TYPE_COL)
-
-    def get_default_value(self, table_row):
-        return self._get_cell_text(table_row, DATABASE_DEFAULT_VALUE_COL)
-
-    def get_range(self, table_row):
-        return self._get_cell_text(table_row, DATABASE_RANGE_COL)
-
-    def get_basic(self, table_row):
-        return self._get_cell_text(table_row, DATABASE_BASIC_COL)
-
-    def get_rows(self):
-        # table is already a list of rows
-        return self.table
-
-    #    def get_all_index_vars(self):
-    #        index_vars_list = []
-    #        # Iterate through every row/parameter of the current table
-    #        for db_row in self.table:
-    #            type_value = self.get_type(db_row)
-    #            # If the parameter is an index variable add it to the list.
-    #            # The type_value has a format of: "index variable array
-    #            # (name_of_parameters) of datatype_of_parameter"
-    #            if self.is_index_var(db_row):
-    #                # Retrieve the name of the parameter(s)
-    #                index_vars = type_value[type_value.index("(")+1:
-    #                                        type_value.index(")")]
-    #                # Iterate through every parameter
-    #                for index_var in index_vars.split(","):
-    #                    index_var = index_var.strip() # Remove whitespaces
-    #                    # Add the element to the list
-    #                    if index_var not in index_vars_list:
-    #                        index_vars_list.append(index_var)
-    #        return index_vars_list
-
-    def get_index_vars_for_par(self, par_name):
-        index_vars_list = []
-        # Iterate through every row/parameter of the current table
-        for db_row in self.table:
-            # Only check for the specified parameter
-            if par_name is self.get_name(db_row):
-                type_value = self.get_type(db_row)
-                if self.is_index_var(db_row):
-                    # Retrieve the name(s) of the index variable(s).
-                    # The type_value variable has a format of:
-                    # "index variable array (index variables) of
-                    # datatype_of_parameter"
-                    index_vars = type_value[type_value.index("(") + 1:
-                                            type_value.index(")")]
-                    # Iterate through every parameter
-                    for index_var in index_vars.split(","):
-                        index_var = index_var.strip()  # Remove blanks
-                        # Add the element to the list
-                        if index_var not in index_vars_list:
-                            index_vars_list.append(index_var)
-                break  # Only check specified parameter
-        return index_vars_list
-
-    def is_logical(self, table_row):
-        if "logical" in self.get_type(table_row):
-            return True
+    def __next__(self):
+        if self.index >= len(self.table_row_list):
+            raise StopIteration
         else:
-            return False
-
-    def is_index_var(self, table_row):
-        if "index variable" in self.get_type(table_row):
-            return True
-        else:
-            return False
+            table_row = self.table_row_list[self.index]
+            self.index += 1
+            return table_row
 
     def regroup(self):
-        # Sort the list alphabetically
-        self.table.sort()
-
         # Create empty lists for all of the categories
-        bool_table = []
-        entry_table = []
-        index_table = []
+        bool_list = []
+        entry_list = []
+        index_list = []
 
-        # Iterate through every row and append the entries to the
+        # Iterate through the table and append the entries to the
         # corresponding list
-        for row in self.table:
-            if self.is_logical(row):
-                bool_table.append(row)
-            elif self.is_index_var(row):
-                index_table.append(row)
+        for table_row in self.table_row_list:
+            if table_row.is_logical():
+                bool_list.append(table_row)
+            elif table_row.is_index_var():
+                index_list.append(table_row)
             else:
-                entry_table.append(row)
+                entry_list.append(table_row)
 
         # Overwrite the table so the boolean values come first, followed
         # by the entries and finally the index variable arrays
-        self.table = bool_table + entry_table + index_table
+        self.table_row_list = bool_list + entry_list + index_list
+
+
+class DatabaseTableRow:
+    """
+    One row in a database table corresponding to a "parameter".
+    """
+    def __init__(self, table_row):
+        self.table_row = table_row
+
+    def _get_cell_text(self, column_index):
+        """Return text in a specific table column."""
+        if column_index < len(self.table_row):
+            return self.table_row[column_index].rstrip().lstrip()
+        else:
+            return ""
+
+    def get_name(self):
+        """Return the name of the parameter."""
+        return self._get_cell_text(DATABASE_NAME_COL)
+
+    def get_short_desc(self):
+        """Return the short description of the parameter."""
+        return self._get_cell_text(DATABASE_SHORT_DESC_COL)
+
+    def get_long_desc(self):
+        """Return the long description of the parameter."""
+        return self._get_cell_text(DATABASE_LONG_DESC_COL)
+
+    def get_type(self):
+        """Return the type of the parameter."""
+        return self._get_cell_text(DATABASE_TYPE_COL)
+
+    def get_default_value(self):
+        """Return the default value of the parameter"""
+        return self._get_cell_text(DATABASE_DEFAULT_VALUE_COL)
+
+    def get_range(self):
+        """Return the range of the parameter"""
+        return self._get_cell_text(DATABASE_RANGE_COL)
+
+    def get_basic(self):
+        """Return the basic flag of the parameter."""
+        return self._get_cell_text(DATABASE_BASIC_COL)
+
+    def get_index_vars(self):
+        """Return the list of index variables for the parameter."""
+        index_vars_list = []
+        type_value = self.get_type()
+        if self.is_index_var():
+            # Retrieve the name(s) of the index variable(s).
+            # The type_value variable has a format of:
+            # "index variable array (index variables) of datatype_of_parameter"
+            index_vars = type_value[type_value.index("(") + 1:
+                                    type_value.index(")")]
+            # Iterate through every index variable
+            for index_var in index_vars.split(","):
+                index_var = index_var.strip()  # Remove blanks
+                # Add the element to the list
+                if index_var not in index_vars_list:
+                    index_vars_list.append(index_var)
+        return index_vars_list
+
+    def is_logical(self):
+        """Check if the parameter is a boolean"""
+        return ("logical" in self.get_type())
+
+    def is_index_var(self):
+        """Check if the parameter is an index variable array."""
+        return ("index variable" in self.get_type())
