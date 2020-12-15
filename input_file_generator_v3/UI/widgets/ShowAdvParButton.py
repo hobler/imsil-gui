@@ -12,7 +12,7 @@ class ButtonState(Enum):
 class ShowAdvParButton(BlancFrame):
     """
     Frame that contains a special Button for extending and collapsing widgets
-    in a frame.
+    in a Frame.
 
     It also includes a state that can be read by the state attribute or with
     the Support of the functions is_state_show_basic and is_state_show_all. To

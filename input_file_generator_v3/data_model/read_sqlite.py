@@ -8,11 +8,13 @@ Functions:
 Classes:
     `DatabaseTable`
         Represents one table in the database.
+    `DatabaseTableRow`
+        Represents one row in a table in the database.
 """
 import sqlite3
 
 # Constants for the master tables
-DATABASE_SQLITE_MASTER_TABLE_NAME = "sqlite_master"
+DATABASE_SQLITE_MASTER_TABLE_NAME = 'sqlite_master'
 
 DATABASE_TYPE_COL = 0
 DATABASE_NAME_COL = 1
@@ -45,7 +47,7 @@ def _run_query(database, query):
         cursor = conn.cursor()
         table_rows = cursor.execute(query).fetchall()
     except sqlite3.Error as e:
-        print("Error in run_query: {}".format(e.args[0]))
+        print('Error in run_query: {}'.format(e.args[0]))
     finally:
         if conn:
             conn.close()

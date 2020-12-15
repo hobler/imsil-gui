@@ -8,10 +8,10 @@ current database table there is a tk.Label and tk.Entry with the index
 variable name and value. At last there are two tk.Buttons (+) and (-) to
 add and delete new parameters.
 
-Furthermore the main tk.Frame contains a scrollable area containing a frame for
-basic (common) parameters called self.content_frame_basic and a frame for
+Furthermore the main tk.Frame contains a scrollable area containing a Frame for
+basic (common) parameters called self.content_frame_basic and a Frame for
 all other parameters called self.content_frame_adv.
-With the show/hide Button the visibility of the frame with advanced parameters
+With the show/hide Button the visibility of the Frame with advanced parameters
 can be turned on/off.
 """
 

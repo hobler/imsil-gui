@@ -16,11 +16,11 @@ The Welcome Window serves the purpose to preconfigure the IMSIL Input Parameter 
 To proceed to the IMSIL Input Parameter Editor, the user must press the “Open IMSIL Input Parameter Editor” Button. This Button is only enabled if both the `Number of Regions` and `Number of Atoms` values are greater than 0. In order to activate the Button, the fields have to lose focus (click in first field and fill in first value; click in second field, fill in second value and click out of field). In case the Button is enabled and the user enters invalid values before pressing the Button, a warning will be displayed, and the Button will be disabled again. 
 
 ## IMSIL Input Parameter Editor window
-The IMSIL Input Parameter Editor window contains a notebook with tabs. The names of the tabs are the same as the names of the tables from the database. These are the same as the names of the IMSIL input file records. Currently, the database is represented by the `parameters.db` file. The sqlite_master table, which is generated automatically by sqlite, is used to get all table names that are in the database. This work is done by the class `SqliteMaster.py`.
+The IMSIL Input Parameter Editor window contains a notebook with tabs. The names of the tabs are the same as the names of the tables from the database. These are the same as the names of the IMSIL input file records. Currently, the database is represented by the `parameters.db` file. The sqlite_master table, which is generated automatically by sqlite, is used to get all table names that are in the database. This work is done by the function `get_database_table_names` of the `read_sqlite` module.
  
-For each table name a new page in the notebook is created. On every new page there is a DbFrame. This Frame is represented by the class `DbFrame`. This Frame uses the class `DatabaseTable`, which reads the table from the database and saves it to a list of tuples. Each tuple is a table row. 
+For each table name a new page (tab) in the notebook is created. On every new page there is a TabFrame (class `TabFrame`). This frame uses the class `DatabaseTable`, which reads the table from the database and saves it to a list of `DatabaseTableRow`s. 
 
-The logic behind each tab where you can scroll through all parameters is in the class `ImsilScrollFrame`. `ImsilScrollFrame` creates `BlancFrames` for the Boolean and Entry type parameters and an `IndexVariableArrayFrame` for every index variable array. The class `DataList` is used for all parameters from each table in the GUI to save the parameter name, the corresponding widget and the variable that holds the value of the widget. As there are parameters which are bound to index variables, this class has to be extended with the ability to set/get not only the widget of a parameter but also the widgets and variables of the index variables of the parameter.
+The logic behind each tab where you can scroll through all parameters is in the class `ScrollFrame`. `ScrollFrame` creates `BlancFrames` for the Boolean and Entry type parameters and an `IndexVariableArrayFrame` for every index variable array. The class `DataList` is used for all parameters from each table in the GUI to save the parameter name, the corresponding widget and the variable that holds the value of the widget. As there are parameters which are bound to index variables, this class has to be extended with the ability to set/get not only the widget of a parameter but also the widgets and variables of the index variables of the parameter.
 
 # Files
 In the following section (almost) all files of the project are briefly described 
@@ -32,29 +32,20 @@ In the following section (almost) all files of the project are briefly described
 -	`parameters.db`: the database file
 -	`main.py`: the main file of the program, containing the classes `WelcomeWindow` and `ImsilInputParameterEditor`
 
-#### `input_file_generator_v3\DataModel`:
--   `Table\DatabaseTable.py`, `Table\SqliteMaster.py`, `DataList.py`, `InputFile.py`: Classes used to manage the data or access the database
+#### `input_file_generator_v3\data_model`:
+-   `read_sqlite.py`, `data_list.py`, `input_file.py`: Classes used to manage the data or access the database
 
-#### `input_file_generator_v3\Support`:
--   `database_functions.py`: A file with support methods for database functionality
+#### `input_file_generator_v3\UI\canvas`:
+-   `blanc_canvas.py`: this class implements the canvas used for the scrolling area in `ScrollFrame`
 
-#### `input_file_generator_v3\UI\Canvas\blanc`:
--   blanc_canvas.py: this class implements the canvas used for the scrolling area in `ImsilScrollFrame`
-
-#### `input_file_generator_v3\UI\Frames`:
--   `db_frame.py`: this class implements the Frame used as a container for the ImsilScrollFrames in every tab of the notebook. This class also calls the methods to retrieve the data from the database, regroup it and add it to the ImsilScrollFrames
-
-#### `input_file_generator_v3\UI\Frames\blanc`:
+#### `input_file_generator_v3\UI\frames`:
+-   `tab_frame.py`: this module implements the Frame used as a container for the ScrollFrames in every tab of the notebook. This module also calls the methods to retrieve the data from the database, regroup it and add it to the ScrollFrames
 -	`blanc_frame.py`: this class implements the Frame used as a base for all other Frames in the program. It contains functionality to control the layout of each Frame by setting the weights of the rows and columns using Frame IDs.
+-	`scroll_frame.py`: this class implements the scrolling area in every tab as well as the methods to add parameters to the corresponding content Frames inside the scrolling area. This class also contains the methods to add every type of element (Labels, Entries, etc.) to the Frames.
+-	`ivarray_frame.py`: this class implements every method regarding index variable arrays. It contains methods to get their state, expand/collapse them, add/delete rows, track their values and set them accordingly as well as the general logic for their layout.
 
-#### `input_file_generator_v3\UI\Frames\scroll`:
--	`imsil_scroll_frame.py`: this class implements the scrolling area in every tab as well as the methods to add parameters to the corresponding content Frames inside the scrolling area. This class also contains the methods to add every type of element (Labels, Entries, etc.) to the Frames.
-
-#### `input_file_generator_v3\UI\Frames\indexvariablearray`:
--	`index_variable_array_frame.py`: this class implements every method regarding index variable arrays. It contains methods to get their state, expand/collapse them, add/delete rows, track their values and set them accordingly as well as the general logic for their layout.
-
-#### `imsil-gui\input_file_generator_v3\UI\Widgets`:
--	`index_variable_array_frame.py`: this class was used to separate and toggle basic and advanced parameters in the UI. This functionality is not in use in the current version of the program.
+#### `input_file_generator_v3\UI\widgets`:
+-	`ShowAdvParButton.py`: this class was used to separate and toggle basic and advanced parameters in the UI. This functionality is not in use in the current version of the program.
 
 # Functionality
 The functionality of the program is briefly explained as follows:
@@ -63,7 +54,7 @@ The program can be started by running the file main.py. By doing so, the Welcome
 
 Next, a small window will appear, informing the user that the data is loading. Once the data has been fully loaded and the notebook is set up, the small window closes and the IMSIL Input Parameter Editor appears. The Editor has several tabs, each following the same logic and structure. Every tab can consist of three sections: The Flags, the Entries and the index variable arrays. Some tabs contain all three sections, some contain only one or two of them. Regardless, their order is always the same. First the Flags are displayed, followed by the Entries, followed by the index variable arrays. Within each section the elements are ordered alphabetically. 
  
-The number of Flags and Entries per row can be set in the program using the two variables `BOOL_PARAMS_PER_ROW` and `ENTRY_PARAMS_PER_ROW` in the `imsil_scroll_frame.py` file. For index variable arrays only one array is possible per row, thus there is no variable defining the number of index variable arrays per row.
+The number of Flags and Entries per row can be set in the program using the two variables `BOOL_PARAMS_PER_ROW` and `ENTRY_PARAMS_PER_ROW` in the `scroll_frame.py` file. For index variable arrays only one array is possible per row, thus there is no variable defining the number of index variable arrays per row.
 
 The index variable arrays can be expanded and collapsed with the help of the arrow Buttons on the right-hand side of the row. Depending on the dimension of each index variable array, one or two arrow Buttons are available. The logic of the index variable arrays is as follows:
 -	If the array is fully collapsed (only one Entry is visible), the single Entry can have three different states: it can be empty, it can hold a value or it can display the text “Multiple values”. The first two states are the same (empty is a value) and they signify, that every element of the index variable array has the same value as the single Entry. The third state signifies, that the index variable array has at least two elements with different values. If the value of the single Entry is modified, all elements of the index variable array will be set to this new value.

@@ -3,13 +3,13 @@ import Pmw
 import tkinter as tk
 from tkinter import messagebox
 
-from DataModel.DataList import DataList
-from UI.Canvas.blanc_canvas import BlancCanvas
-from UI.Frames.blanc_frame import BlancFrame
-from UI.Frames.index_variable_array_frame import IndexVariableArrayFrame
-from UI.Frames.blanc_frame import MAIN as MAIN
-from UI.Frames.blanc_frame import BOOLEAN as BOOLEAN
-from UI.Frames.blanc_frame import ENTRY as ENTRY
+from data_model.data_list import DataList
+from UI.canvas.blanc_canvas import BlancCanvas
+from UI.frames.blanc_frame import BlancFrame
+from UI.frames.ivarray_frame import IndexVariableArrayFrame
+from UI.frames.blanc_frame import MAIN as MAIN
+from UI.frames.blanc_frame import BOOLEAN as BOOLEAN
+from UI.frames.blanc_frame import ENTRY as ENTRY
 
 OS = platform.system()
 
@@ -27,37 +27,36 @@ ELEMENTS_PER_PARAM = 3
 
 class ScrollFrame(BlancFrame):
     """
-    Scrollable frame for one IMSIL record.
+    Scrollable Frame for one IMSIL record.
     
     The ScrollFrame holds the Boolean and the Entry BlancFrames,
     as well as all IndexVariableArrayFrames of the (parent) tab.
 
     """
-    def __init__(self, parent, nr=3, natom=2, *args, **kwargs):
+    def __init__(self, parent, nr, natom, *args, **kwargs):
         """
-        In the initialization of the ScrollFrame all object
-        parameters are defined, the Boolean and Entry BlancFrames are
-        created and added to the list of all Frames, and the scrollable
-        area is created.
+        In the initialization of the ScrollFrame all object parameters are
+        defined, the Boolean and Entry BlancFrames are created and added to
+        the list of all Frames, and the scrollable area is created.
 
         :param parent: the parent tk widget
-        :param nr: the number of regions for index variable arrays
-        :param natom: the number of atoms for index variable arrays
+        :param nr: (textvariable) number of regions for index variable arrays
+        :param natom: (textvariable) number of atoms for index variable arrays
         :param args: is forwarded to the super().__init__() function
         :param kwargs: is forwarded to the super().__init__() function
         """
         super().__init__(parent, *args, **kwargs)    
             
         # Assign the number of Regions and Atoms
-        self.n_r = nr.get()
-        self.n_atom = natom.get()
+        self.nr = nr.get()
+        self.natom = natom.get()
 
         # Define the number of columns for the Boolean and Entry params
         self.columns_b = BOOL_PARAMS_PER_ROW * ELEMENTS_PER_PARAM
         self.columns_e = ENTRY_PARAMS_PER_ROW * ELEMENTS_PER_PARAM
-        # The number of columns for index variable arrays as well as 
-        # the Frames for each index variable array parameter are 
-        # created dynamically
+        # The number of columns for index variable arrays as well as the
+        # Frames for each index variable array parameter are created
+        # dynamically
 
         # Initialize the counter variable to track the number of 
         # parameters in the current row
@@ -74,8 +73,7 @@ class ScrollFrame(BlancFrame):
         # Build the scrolling area
         self.main_canvas = BlancCanvas(self, columns=1, width=890)
         self.content_frame = BlancFrame(self.main_canvas, frame_id=MAIN)
-        # @create_window: parameter 'tags' is later required to change
-        # the window size
+        # parameter 'tags' is later required to change the window size:
         self.main_canvas.create_window(0, 0,
                                        window=self.content_frame,
                                        tags="self.content_frame", 
@@ -86,7 +84,7 @@ class ScrollFrame(BlancFrame):
         self.main_canvas.config(yscrollcommand=self.vertical_scrollbar.set)
         self.bind_mouse_event(self.content_frame)
 
-        # Create the Boolean and Entry Frames
+        # Create the Boolean and Entry frames
         self.content_frame_bool = BlancFrame(self.content_frame,
                                              columns=self.columns_b,
                                              frame_id=BOOLEAN)
@@ -128,11 +126,11 @@ class ScrollFrame(BlancFrame):
         if is_index_var:
             # If it is an index variable array parameter, create a new
             # IndexVariableArrayFrame 
-            par_frame = IndexVariableArrayFrame(self, par_name, 
-                                                index_var_list, default_value, 
-                                                short_desc, long_desc, 
-                                                row_index, 
-                                                self.n_r, self.n_atom)
+            par_frame = IndexVariableArrayFrame(self, par_name,
+                                                index_var_list, default_value,
+                                                short_desc, long_desc,
+                                                row_index,
+                                                self.nr, self.natom)
             
             # Place the new Frame and set up the mouse bind event
             par_frame.grid(sticky="NESW")
@@ -281,7 +279,7 @@ class ScrollFrame(BlancFrame):
                 short_desc=short_desc,
                 long_desc=long_desc,
                 is_bool=is_bool,
-                row_index= self.num_entries // ENTRY_PARAMS_PER_ROW,
+                row_index=self.num_entries // ENTRY_PARAMS_PER_ROW,
                 is_index_var=is_index_var)
             # Increase the counters
             self.num_entries += 1
@@ -319,12 +317,12 @@ class ScrollFrame(BlancFrame):
         # TODO: consider input files
         if par_name == 'NR':
             if not isinstance(default_value, int):
-                entry_text = str(self.n_r)
-                default_value = self.n_r
+                entry_text = str(self.nr)
+                default_value = self.nr
         elif par_name == 'NATOM':
             if not isinstance(default_value, int):
-                entry_text = str(self.n_atom)
-                default_value = self.n_atom
+                entry_text = str(self.natom)
+                default_value = self.natom
         
         entry_string_var = tk.StringVar(value=entry_text)
         entry = tk.Entry(parent, 

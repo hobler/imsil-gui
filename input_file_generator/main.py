@@ -77,7 +77,7 @@ class ImsilInputParameterEditor:
         In the initialization of the IMSIL Input Parameter Editor
         a notebook is added to the window. The SqliteMaster class is used to
         determinate the table names in the database. For each table name a
-        new tab is added to the notebook. Each tab contains a frame of
+        new tab is added to the notebook. Each tab contains a Frame of
         the class DbFrame.
 
         If a path to an input file is passed, it is read and the

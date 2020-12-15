@@ -1,6 +1,6 @@
-from DataModel.read_sqlite import DatabaseTable
-from UI.Frames.scroll_frame import ScrollFrame
-from UI.Frames.blanc_frame import BlancFrame
+from data_model.read_sqlite import DatabaseTable
+from UI.frames.scroll_frame import ScrollFrame
+from UI.frames.blanc_frame import BlancFrame
 
 
 class TabFrame(BlancFrame):
@@ -9,7 +9,7 @@ class TabFrame(BlancFrame):
 
     Note that a tab in the GUI presents the parameters of one IMSIL "record".
     TabFrame contains a ScrollFrame which contains the widgets for the
-    parameters. The Scrollframe allows to scroll up and down the parameter
+    parameters. The ScrollFrame allows to scroll up and down the parameter
     list in case the window does not provide enough space for all of them.
     """
     def __init__(self, parent, db_file, table_name, type_of_simulation, 
@@ -20,16 +20,16 @@ class TabFrame(BlancFrame):
         self.db_table = DatabaseTable(db_file, table_name)
         self.db_table.regroup()
         
-        # Create a Scrollframe specifically developed for this project
+        # Create a ScrollFrame specifically developed for this project
         self.scroll_frame = ScrollFrame(self, nr, natom)
 
-        # Add parameters to the Scrollframe
+        # Add parameters to the ScrollFrame
         for table_row in self.db_table:
             self.add_parameter(table_row)
 
     def add_parameter(self, table_row):
         """
-        Add a parameter to the Scrollframe.
+        Add a parameter to the ScrollFrame.
 
         :param table_row: the row holding all data of the parameter to be added
         """
@@ -45,19 +45,18 @@ class TabFrame(BlancFrame):
     @staticmethod
     def create_info_button_text(table_row):
         """
-        Create the info message text.
+        Create the info message text for a parameter.
         
         Create a string, which contains all information that should be
         shown to the user when the user presses the info Button.
         
-        :param table_row: the row holding all data of the parameter for
-                          which the info text should be added
+        :param table_row: The row holding all data of the parameter.
         """
         return (table_row.get_long_desc().rstrip()
                 + "\n\n"
                 + "Type: " + table_row.get_type().rstrip()
-                + "\n\n" 
-                + "Default value: " 
+                + "\n\n"
+                + "Default value: "
                 + table_row.get_default_value().rstrip()
-                + "\n\n" 
+                + "\n\n"
                 + "Range: " + table_row.get_range().rstrip())

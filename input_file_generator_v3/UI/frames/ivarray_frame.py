@@ -1,14 +1,14 @@
 import tkinter as tk
 #from tkinter import messagebox
 
-from UI.Frames.blanc_frame import BlancFrame
-from UI.Frames.blanc_frame import INDEX_COLLAPSE_1D
-from UI.Frames.blanc_frame import INDEX_COLLAPSE_2D
-from UI.Frames.blanc_frame import INDEX_EXPAND_R_1D
-from UI.Frames.blanc_frame import INDEX_EXPAND_R_2D
-from UI.Frames.blanc_frame import INDEX_EXPAND_D_1D
-from UI.Frames.blanc_frame import INDEX_EXPAND_D_2D
-from UI.Frames.blanc_frame import INDEX_EXPAND_RD
+from UI.frames.blanc_frame import BlancFrame
+from UI.frames.blanc_frame import INDEX_COLLAPSE_1D
+from UI.frames.blanc_frame import INDEX_COLLAPSE_2D
+from UI.frames.blanc_frame import INDEX_EXPAND_R_1D
+from UI.frames.blanc_frame import INDEX_EXPAND_R_2D
+from UI.frames.blanc_frame import INDEX_EXPAND_D_1D
+from UI.frames.blanc_frame import INDEX_EXPAND_D_2D
+from UI.frames.blanc_frame import INDEX_EXPAND_RD
 
 # Configure the width and height of the widgets
 INFO_WIDTH = 10  # info Button width
@@ -1028,7 +1028,7 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         Set the weights of the index variable arrays, using the presets
                 
-        Set the weights of the Frames, depending on their dimensions 
+        Set the weights of the frames, depending on their dimensions
         and their state: collapsed/expanded(right)/expanded(down)/
         expanded(right&down). 
         

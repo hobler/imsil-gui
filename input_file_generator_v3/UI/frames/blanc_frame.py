@@ -6,7 +6,7 @@ DEFAULT = -1  # Default (used for the tabs)
 MAIN = 0  # Main content Frame of the Imsil Scrollframe
 BOOLEAN = 1  # The Frame holding the flags
 ENTRY = 2  # The Frame holding the Entries
-# The index variable array Frames have 1 and 2 dimensional versions, 
+# The index variable array frames have 1 and 2 dimensional versions,
 # depending on the number of elements <-> the number of arrow Buttons
 INDEX_COLLAPSE_1D = 3  # Index variable array Frame (collapsed state)
 INDEX_COLLAPSE_2D = 4  # Index variable array Frame (collapsed state)
@@ -74,7 +74,7 @@ class BlancFrame(tk.Frame):
                 self.grid_columnconfigure(1, weight=1)
                 self.grid_columnconfigure(2, weight=0)
                 self.grid_columnconfigure(3, weight=1)
-            # Set the weights for the main content Frames in every tab
+            # Set the weights for the main content frames in every tab
             elif self.frame_id == MAIN:
                 self.grid_columnconfigure(0, weight=1)
             # Set the weights for the Booelan BlancFrame
