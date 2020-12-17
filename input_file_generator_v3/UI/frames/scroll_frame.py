@@ -67,6 +67,7 @@ class ScrollFrame(BlancFrame):
         self.num_index = 0        
 
         # Create the lists holding the Frames
+        #TODO: par_frame_list could possibly be eliminated
         self.par_frame_list = []
         self.ui_data_list = DataList()
 
@@ -94,6 +95,8 @@ class ScrollFrame(BlancFrame):
                                               columns=self.columns_e,
                                               frame_id=ENTRY)
         self.content_frame_entry.grid(sticky="NESW")
+        # Each index variable array will get its own frame, so these frames
+        # can be created only when these parameters are added.
 
         # Add the two Frames to the list of Frames
         self.par_frame_list.append(self.content_frame_bool)
@@ -104,6 +107,7 @@ class ScrollFrame(BlancFrame):
         self.content_frame.bind("<Configure>", self.update_scrollregion)
         self.main_canvas.bind('<Configure>', self.update_frame_width)    
 
+    #TODO: add_content_in_par_frame could possibly be merged into add_parameter
     def add_content_in_par_frame(self, par_name, index_var_list, default_value,
                                  short_desc, long_desc, is_bool, is_index_var,
                                  row_index):                
