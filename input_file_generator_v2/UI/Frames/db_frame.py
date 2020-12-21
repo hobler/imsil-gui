@@ -8,9 +8,8 @@ OS = platform.system()
 
 
 class DbFrame(BlancFrame):
-#class DbFrame(tk.Frame):
-    """
-    DbFrame is a Frame which contains an ImsilScrollFrame to display
+    """        
+    DbFrame is a Frame, which contains an ImsilScrollFrame to display
     the parameters.
     """
     def __init__(self, parent, db_file, table_name, type_of_simulation, 
@@ -20,20 +19,20 @@ class DbFrame(BlancFrame):
         # Get data from database
         self.db_table = DatabaseTable(db_file, table_name)
         self.table_rows = self.db_table.get_rows()
-
-        # Create a scrollframe specifically developed for this project
+        
+        # Create a Scrollframe specifically developed for this project
         self.scroll_frame = ImsilScrollFrame(self, nr, natom)
 
         # Regroup the parameters
         self.table_rows = self.db_table.regroup(self.table_rows)
         
-        # Add parameters to the scrollframe
+        # Add parameters to the Scrollframe
         for table_row in self.table_rows:
             self.add_parameter(table_row)
 
     def add_parameter(self, table_row):
         """
-        Add a parameter to the scroll frame.
+        Add a parameter to the Scrollframe.
         
         :param table_row: the row holding all data of the parameter to
                           be added
@@ -53,7 +52,7 @@ class DbFrame(BlancFrame):
         Create the info message text.
         
         Create a string, which contains all information that should be
-        shown to the user by pressing the info button.
+        shown to the user when the user presses the info Button.
         
         :param table_row: the row holding all data of the parameter for
                           which the info text should be added

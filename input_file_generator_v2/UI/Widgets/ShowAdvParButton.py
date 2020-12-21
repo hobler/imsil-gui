@@ -28,8 +28,7 @@ class ShowAdvParButton(BlancFrame):
                         borderwidth='4')
         style.map('AdvButton.TButton',
                   foreground=[('active', '!disabled', 'black')],
-                  background=[('active', 'black')]
-                  )
+                  background=[('active', 'black')])
         self.button = ttk.Button(self, text=button_text,
                                  style='AdvButton.TButton')
         self.button.grid(row=0, column=0, sticky="NESW")

@@ -11,12 +11,13 @@ class BlancCanvas(tk.Canvas):
         """
         In the initialization of the blanc canvas the number of rows 
         and columns can be defined, finally the canvas is placed into
-        the parent Frame.
+        the parent frame.
 
         :param parent: tk widget, where this canvas has to be placed
-        :param rows: number of rows of the grid
-        :param columns: number of columns of the grid
-        :param set_grid_propagate: parameter for the grid_propagate function
+        :param rows: the number of rows of the grid
+        :param columns: the number of columns of the grid
+        :param set_grid_propagate: parameter for the grid_propagate 
+                                   function
         :param args: is forwarded to the super().__init__() function
         :param kwargs: is forwarded to the super().__init__() function
         """
