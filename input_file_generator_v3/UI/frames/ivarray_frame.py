@@ -1,5 +1,5 @@
 import tkinter as tk
-#from tkinter import messagebox
+# from tkinter import messagebox
 
 from UI.Frames.blanc_frame import BlancFrame
 from UI.Frames.blanc_frame import INDEX_COLLAPSE_1D
@@ -39,6 +39,7 @@ class IndexVariableArrayFrame(BlancFrame):
     variable arrays and adding/deleting points for the index variable
     array POINTS.
     """
+
     def __init__(self, parent, par_name, index_var_list, default_value,
                  short_desc, long_desc, row_index, nr=3, natom=2,
                  *args, **kwargs):
@@ -86,7 +87,7 @@ class IndexVariableArrayFrame(BlancFrame):
         if dim == 1:
             curr_frame_id = INDEX_COLLAPSE_1D
             if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
-                "ATOM" in index_var_list):
+                    "ATOM" in index_var_list):
                 # Create a 1 x NATOM array
                 self.num_rows = 2  # Header+Value
                 self.num_columns = 5 + self.n_atom  # 3Fix+Header+Button
@@ -107,10 +108,10 @@ class IndexVariableArrayFrame(BlancFrame):
         elif dim == 2:
             curr_frame_id = INDEX_COLLAPSE_2D
             if ("REGION" in index_var_list and
-                ("ATOM1" in index_var_list or "ATOM2" in index_var_list)):
+                    ("ATOM1" in index_var_list or "ATOM2" in index_var_list)):
                 # Create an NR x NATOM array
                 self.num_rows = 1 + self.n_r  # Header+nr rows
-                self.num_columns = 6 + self.n_atom # 3Fix+Header+2Button
+                self.num_columns = 6 + self.n_atom  # 3Fix+Header+2Button
             elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
                 # Create an NATOM x NATOM array
                 self.num_rows = 1 + self.n_atom  # Header+natom rows
@@ -136,7 +137,7 @@ class IndexVariableArrayFrame(BlancFrame):
         btn_info.image = self.photo
         btn_info.config(takefocus=False)
         btn_info.config(
-                command=lambda: tk.messagebox.showinfo(par_name, long_desc))
+            command=lambda: tk.messagebox.showinfo(par_name, long_desc))
         btn_info.grid(row=row_index, column=1, sticky="W")
 
         # Add the Entry for the parameter
@@ -162,7 +163,7 @@ class IndexVariableArrayFrame(BlancFrame):
                                               width=INDEX_LABEL_WIDTH_1D)
                 for i in range(self.n_atom):
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM "+str(i+1))
+                                                  label_text="ATOM " + str(i + 1))
                 # Add a new row with a Label and Entries
                 label = self.parent.add_label(parent=self, label_text="")
                 for i in range(self.n_atom):
@@ -183,7 +184,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 label = self.parent.add_label(parent=self, label_text="")
                 # Add new rows with a Label and Entry
                 # Add an extra row REGION 0
-                for i in range(self.n_r+1):
+                for i in range(self.n_r + 1):
                     label_text = "REGION " + str(i)
                     label = self.parent.add_label(parent=self,
                                                   label_text=label_text)
@@ -194,7 +195,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
                 self.set_button(btn_d, "arrow_d.gif", 'd')
-                btn_d.grid(row=row_index ,column=self.num_columns - 1)
+                btn_d.grid(row=row_index, column=self.num_columns - 1)
             elif "REGION" in index_var_list:
                 # Create a 1 x NR array
                 # Fill the Header row with Labels for the REGIONS
@@ -203,7 +204,7 @@ class IndexVariableArrayFrame(BlancFrame):
                                               width=INDEX_LABEL_WIDTH_1D)
                 for i in range(self.n_r):
                     label = self.parent.add_label(parent=self,
-                                                  label_text="REGION "+str(i+1))
+                                                  label_text="REGION " + str(i + 1))
                 # Add a new row with a Label and Entries
                 label = self.parent.add_label(parent=self, label_text="")
                 for i in range(self.n_r):
@@ -237,11 +238,11 @@ class IndexVariableArrayFrame(BlancFrame):
                 btn_add = self.parent.add_button(parent=self, btn_text="+",
                                                  w=ARROW_WIDTH, h=ARROW_HEIGHT)
                 self.set_button(btn_add, "add.gif", '+')
-                btn_add.grid(row=row_index ,column=self.num_columns - 2)
+                btn_add.grid(row=row_index, column=self.num_columns - 2)
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
                 self.set_button(btn_d, "arrow_d.gif", 'd')
-                btn_d.grid(row=row_index ,column=self.num_columns - 1)
+                btn_d.grid(row=row_index, column=self.num_columns - 1)
         elif dim == 2:
             if ("REGION" in index_var_list and
                     ("ATOM1" in index_var_list or "ATOM2" in index_var_list)):
@@ -252,11 +253,11 @@ class IndexVariableArrayFrame(BlancFrame):
                                               width=INDEX_LABEL_WIDTH_2D)
                 for i in range(self.n_atom):
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM "+str(i+1))
+                                                  label_text="ATOM " + str(i + 1))
                 # Add new rows with a Label and Entries
                 for i in range(self.n_r):
                     label = self.parent.add_label(parent=self,
-                                                  label_text="REGION "+str(i+1))
+                                                  label_text="REGION " + str(i + 1))
                     for i in range(self.n_atom):
                         entry = self.parent.add_entry(parent=self,
                                                       par_name=par_name,
@@ -265,7 +266,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
                 self.set_button(btn_d, "arrow_d.gif", 'd')
-                btn_d.grid(row=row_index ,column=self.num_columns - 2)
+                btn_d.grid(row=row_index, column=self.num_columns - 2)
 
                 btn_r = self.parent.add_button(parent=self, btn_text="r",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
@@ -279,11 +280,11 @@ class IndexVariableArrayFrame(BlancFrame):
                                               width=INDEX_LABEL_WIDTH_2D)
                 for i in range(self.n_atom):
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM "+str(i+1))
+                                                  label_text="ATOM " + str(i + 1))
                 # Add new rows with a Label and Entries
                 for i in range(self.n_atom):
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM "+str(i+1))
+                                                  label_text="ATOM " + str(i + 1))
                     for i in range(self.n_atom):
                         entry = self.parent.add_entry(parent=self,
                                                       par_name=par_name,
@@ -292,7 +293,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
                 self.set_button(btn_d, "arrow_d.gif", 'd')
-                btn_d.grid(row=row_index ,column=self.num_columns - 2)
+                btn_d.grid(row=row_index, column=self.num_columns - 2)
 
                 btn_r = self.parent.add_button(parent=self, btn_text="r",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
@@ -317,7 +318,7 @@ class IndexVariableArrayFrame(BlancFrame):
         btn_new = widget
         self.photo_new = tk.PhotoImage(file=file)
         btn_new.config(image=self.photo_new)
-        btn_new.image = self.photo_new;
+        btn_new.image = self.photo_new
         btn_new.config(takefocus=False)
         btn_new.config(text=text)
 
@@ -368,8 +369,8 @@ class IndexVariableArrayFrame(BlancFrame):
                 # If it is a - Button (marked with '-')
                 if '-' == child.cget('text'):
                     child.config(command=lambda row_index=child_grid_row:
-                        self.delete_row(index_var_list=index_var_list,
-                                        row_index=row_index))
+                    self.delete_row(index_var_list=index_var_list,
+                                    row_index=row_index))
 
     def open_index_var_r(self, index_var_list, row_index):
         """
@@ -388,7 +389,7 @@ class IndexVariableArrayFrame(BlancFrame):
         # If the array is collapsed currently
         if not IS_DOWN:
             # Set the Entry values to match the single Entry
-            init =self.set_entry_values(self)
+            init = self.set_entry_values(self)
             # Save the Entry values to the array
             self.save_entry_values(self, m, n, init, IS_POINT)
             # Iterate through every widget and place them
@@ -400,11 +401,11 @@ class IndexVariableArrayFrame(BlancFrame):
                 elif i == NUM_ELEMS:
                     widget.grid_forget()
                 # Show the first row with the header
-                elif i < ((NUM_ELEMS+1) + (n+1)):
+                elif i < ((NUM_ELEMS + 1) + (n + 1)):
                     widget.grid(row=0, column=i, sticky="NESW")
                 # Show the second row with the values
-                elif i < ((NUM_ELEMS+1) + 2*(n+1)):
-                    widget.grid(row=1, column=i - (n+1), sticky="NESW")
+                elif i < ((NUM_ELEMS + 1) + 2 * (n + 1)):
+                    widget.grid(row=1, column=i - (n + 1), sticky="NESW")
 
             # Iterate through every widget and update the values
             for i, widget in enumerate(self.children.values()):
@@ -428,7 +429,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     # Current column in the grid
                     curr_col = widget.grid_info()['column']
                     # Column in the array
-                    col = curr_col - (NUM_ELEMS+2)
+                    col = curr_col - (NUM_ELEMS + 2)
                     # Array with all elements from the current column
                     items = [x[col] for x in self.values]
                     # If all items are the same, set the first Entry
@@ -442,7 +443,7 @@ class IndexVariableArrayFrame(BlancFrame):
         # If the array is expanded downwards
         else:
             # Iterate through every (already placed) widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -465,7 +466,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     curr_col = widget.grid_info()['column']
                     # Row and column in the array
                     row = curr_row - 1
-                    col = curr_col - (NUM_ELEMS+2)
+                    col = curr_col - (NUM_ELEMS + 2)
                     # Current widget value
                     curr_value = widget.get()
                     # If the value of the first Entry was "Multiple
@@ -481,22 +482,22 @@ class IndexVariableArrayFrame(BlancFrame):
             # Hide every widget except the main Label and info Button
             self.hide_widgets(self, m, n)
             # Iterate through every widget, and readd them
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, the info Button and the Entry
                 if i <= NUM_ELEMS:
                     continue
                 # Show all other widgets
-                elif i < (NUM_ELEMS+1) + (m+1)*(n+1):
+                elif i < (NUM_ELEMS + 1) + (m + 1) * (n + 1):
                     # Calculate the current row and column in the grid
-                    curr_row = (i - (NUM_ELEMS+1)) // (n+1)
-                    curr_col = i - curr_row*(n+1)
+                    curr_row = (i - (NUM_ELEMS + 1)) // (n + 1)
+                    curr_col = i - curr_row * (n + 1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
 
                     if widget.winfo_class() == "Entry" and widget.grid_info():
                         # Row and column in the array
                         row = curr_row - 1
-                        col = curr_col - (NUM_ELEMS+2)
+                        col = curr_col - (NUM_ELEMS + 2)
                         # Current widget value
                         curr_value = widget.get()
                         # If the current widget value is not up to date
@@ -540,12 +541,12 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Hide the single Entry
                 elif i == NUM_ELEMS:
                     widget.grid_forget()
-                elif (i < (NUM_ELEMS+1) + (m+1)*(n+1) and
-                      ((i - (NUM_ELEMS+1)) % (n+1) == 0 or
-                       (i - (NUM_ELEMS+1)) % (n+1) == 1)):
+                elif (i < (NUM_ELEMS + 1) + (m + 1) * (n + 1) and
+                      ((i - (NUM_ELEMS + 1)) % (n + 1) == 0 or
+                       (i - (NUM_ELEMS + 1)) % (n + 1) == 1)):
                     # Calculate the current row and column
-                    curr_row = (i - (NUM_ELEMS+1)) // (n+1)
-                    curr_col = i - curr_row*(n+1)
+                    curr_row = (i - (NUM_ELEMS + 1)) // (n + 1)
+                    curr_col = i - curr_row * (n + 1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
 
@@ -554,7 +555,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     if widget.winfo_class() == "Entry":
                         # Get the values of the according row (row num
                         # minus 1 because the first row is a Header)
-                        items = self.values[curr_row-1]
+                        items = self.values[curr_row - 1]
                         # If not all elements of the row have the same
                         # value, set the value of the first Entries to
                         # "Multiple values"
@@ -587,7 +588,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     # Current column in the grid
                     curr_col = widget.grid_info()['column']
                     # Column in the array
-                    col = curr_col - (NUM_ELEMS+2)
+                    col = curr_col - (NUM_ELEMS + 2)
                     # Current widget value
                     curr_value = widget.get()
                     # If the value of the first Entry is not "Multiple
@@ -643,20 +644,20 @@ class IndexVariableArrayFrame(BlancFrame):
             # Save the Entry values
             self.save_entry_values(self, m, n, init, IS_POINT)
             # Iterate through every widget
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label and info Button
                 if i < NUM_ELEMS:
                     continue
                 # Hide the single Entry
                 elif i == NUM_ELEMS:
                     widget.grid_forget()
-                elif (i < (NUM_ELEMS+1) + (m+1)*(n+1) and
-                      ((i - (NUM_ELEMS+1)) % (n+1) == 0 or
-                       (i - (NUM_ELEMS+1)) % (n+1) == 1 or
-                       (((i - (NUM_ELEMS+1)) % (n+1) == 2) and IS_POINT))):
+                elif (i < (NUM_ELEMS + 1) + (m + 1) * (n + 1) and
+                      ((i - (NUM_ELEMS + 1)) % (n + 1) == 0 or
+                       (i - (NUM_ELEMS + 1)) % (n + 1) == 1 or
+                       (((i - (NUM_ELEMS + 1)) % (n + 1) == 2) and IS_POINT))):
                     # Calculate the current row and column
-                    curr_row = (i - (NUM_ELEMS+1)) // (n+1)
-                    curr_col = i - curr_row*(n+1)
+                    curr_row = (i - (NUM_ELEMS + 1)) // (n + 1)
+                    curr_col = i - curr_row * (n + 1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
 
@@ -720,7 +721,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     curr_col = widget.grid_info()['column']
                     # Row and column in the array
                     row = curr_row - 1
-                    col = curr_col - (NUM_ELEMS+2)
+                    col = curr_col - (NUM_ELEMS + 2)
                     # Current widget value
                     curr_value = widget.get()
                     # If the value of the first Entry was "Multiple
@@ -743,18 +744,18 @@ class IndexVariableArrayFrame(BlancFrame):
                     widget.grid_forget()
                 # Show all other widgets below the 2nd row (the widgets
                 # in the first and second row are visible already)
-                elif (i >= ((NUM_ELEMS+1) + 2*(n+1)) and
-                      i < (NUM_ELEMS+1) + (m+1)*(n+1)):
+                elif (i >= ((NUM_ELEMS + 1) + 2 * (n + 1)) and
+                      i < (NUM_ELEMS + 1) + (m + 1) * (n + 1)):
                     # Calculate the current row and column
-                    curr_row = (i - (NUM_ELEMS+1)) // (n+1)
-                    curr_col = i - curr_row*(n+1)
+                    curr_row = (i - (NUM_ELEMS + 1)) // (n + 1)
+                    curr_col = i - curr_row * (n + 1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
 
                     if widget.winfo_class() == "Entry" and widget.grid_info():
                         # Row and column in the array
                         row = curr_row - 1
-                        col = curr_col - (NUM_ELEMS+2)
+                        col = curr_col - (NUM_ELEMS + 2)
                         # Current widget value
                         curr_value = widget.get()
                         # If the current widget value is not up to date
@@ -799,12 +800,12 @@ class IndexVariableArrayFrame(BlancFrame):
                 elif i == NUM_ELEMS:
                     widget.grid_forget()
                 # Show the first row with the Header for the Atoms
-                elif i < ((NUM_ELEMS+1) + (n+1)):
+                elif i < ((NUM_ELEMS + 1) + (n + 1)):
                     widget.grid(row=0, column=i, sticky="NESW")
                 # Show the second row with the Label for the Region and
                 # the Entries for the Atoms
-                elif i < ((NUM_ELEMS+1) + 2*(n+1)):
-                    widget.grid(row=1, column=i-(n+1), sticky="NESW")
+                elif i < ((NUM_ELEMS + 1) + 2 * (n + 1)):
+                    widget.grid(row=1, column=i - (n + 1), sticky="NESW")
 
                     # Because of the if condition above, only
                     # the Entries of the first row are checked
@@ -813,7 +814,7 @@ class IndexVariableArrayFrame(BlancFrame):
                         # num minus (n+1) + (NUM_ELEMS+2) because the
                         # first row is a Header and the first Entry
                         # column is at NUM_ELEMS + 2 )
-                        col = i-(n+1)-(NUM_ELEMS+2)
+                        col = i - (n + 1) - (NUM_ELEMS + 2)
                         items = [x[col] for x in self.values]
                         # If not all elements of the column have the
                         # same value, set the value of the first Entries
@@ -851,7 +852,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     curr_col = widget.grid_info()['column']
                     # Row and column in the array
                     row = curr_row - 1
-                    col = curr_col - (NUM_ELEMS+2)
+                    col = curr_col - (NUM_ELEMS + 2)
                     # Current widget value
                     curr_value = widget.get()
                     # If the value of the first Entry is not "Multiple
@@ -898,7 +899,7 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         # Iterate through every widget
         for widget in self.children.values():
-            if widget.winfo_class() == "Button" :
+            if widget.winfo_class() == "Button":
                 # If the down Button is visible, the array is collapsed
                 if 'd' == widget.cget('text'):
                     btn_down = widget
@@ -925,7 +926,7 @@ class IndexVariableArrayFrame(BlancFrame):
         self.parent.add_label(parent=self,
                               label_text="POINT " + str(self.num_points))
         self.parent.add_entry(parent=self, par_name='POS',
-                              entry_text="", add_to_list = False)
+                              entry_text="", add_to_list=False)
         # Add the remove Button
         button_remove = self.parent.add_button(parent=self, btn_text="-",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
@@ -938,7 +939,7 @@ class IndexVariableArrayFrame(BlancFrame):
         button_add = self.parent.add_button(parent=self, btn_text="+",
                                             w=ARROW_WIDTH, h=ARROW_HEIGHT)
         self.set_button(button_add, "add.gif", '+')
-        button_add.grid(row=row_index ,column=7 - 2)
+        button_add.grid(row=row_index, column=7 - 2)
 
         button_arrow = self.parent.add_button(parent=self, btn_text="",
                                               w=ARROW_WIDTH, h=ARROW_HEIGHT)
@@ -947,22 +948,22 @@ class IndexVariableArrayFrame(BlancFrame):
         else:
             self.set_button(button_arrow, "arrow_d.gif", 'd')
 
-        button_arrow.grid(row=row_index ,column=7 - 1)
+        button_arrow.grid(row=row_index, column=7 - 1)
 
         # If the array is expanded downwards
         if IS_DOWN:
             # Hide every widget except the main Label and info Button
             self.hide_widgets(self, m, n)
             # Iterate through every widget, and readd them
-            for i,widget in enumerate(self.children.values()):
+            for i, widget in enumerate(self.children.values()):
                 # Skip the main Label, the info Button and the Entry
                 if i <= NUM_ELEMS:
                     continue
                 # Show all other widgets
-                elif i < (NUM_ELEMS+1) + (m+1)*(n+1):
+                elif i < (NUM_ELEMS + 1) + (m + 1) * (n + 1):
                     # Calculate the current row and column
-                    curr_row = (i - (NUM_ELEMS+1)) // (n+1)
-                    curr_col = i - curr_row*(n+1)
+                    curr_row = (i - (NUM_ELEMS + 1)) // (n + 1)
+                    curr_col = i - curr_row * (n + 1)
                     # Place the widget
                     widget.grid(row=curr_row, column=curr_col, sticky="NESW")
 
@@ -1007,25 +1008,25 @@ class IndexVariableArrayFrame(BlancFrame):
         # Hide every widget except the main Label and info Button
         self.hide_widgets(self, m, n)
         # Iterate through every widget, and readd them
-        for i,widget in enumerate(self.children.values()):
+        for i, widget in enumerate(self.children.values()):
             # Skip the main Label, the info Button and the Entry
             if i <= NUM_ELEMS:
                 continue
             # Show all other widgets
-            elif i < (NUM_ELEMS+1) + (m+1)*(n+1):
+            elif i < (NUM_ELEMS + 1) + (m + 1) * (n + 1):
                 # Calculate the current row and column
-                curr_row = (i - (NUM_ELEMS+1)) // (n+1)
-                curr_col = i - curr_row*(n+1)
+                curr_row = (i - (NUM_ELEMS + 1)) // (n + 1)
+                curr_col = i - curr_row * (n + 1)
                 # Place the widget
                 widget.grid(row=curr_row, column=curr_col, sticky="NESW")
 
         # Iterate through every widget
-        for i,widget in enumerate(self.children.values()):
-            if i < NUM_ELEMS+5 or not widget.grid_info():
+        for i, widget in enumerate(self.children.values()):
+            if i < NUM_ELEMS + 5 or not widget.grid_info():
                 continue
             elif (widget.winfo_class() == "Label" and
                   "POINT" in widget.cget('text')):
-               widget.config(text=('POINT ' + str(widget.grid_info()['row'])))
+                widget.config(text=('POINT ' + str(widget.grid_info()['row'])))
 
         # Update the Button commands
         self.update_buttons_command(index_var_list)
@@ -1069,7 +1070,7 @@ class IndexVariableArrayFrame(BlancFrame):
             else:
                 par_frame.update_grid_columnconfigure(INDEX_COLLAPSE_2D)
 
-    def save_entry_values(self, par_frame, m ,n, init=False, IS_POINT=False):
+    def save_entry_values(self, par_frame, m, n, init=False, IS_POINT=False):
         """
         This method is used to save the values of the index variable
         array elements so they can be kept track of
@@ -1082,11 +1083,11 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         # ALways update for the POINT index variable array
         if IS_POINT:
-            par_frame.values = [[ None for y in range(n-1) ] for x in range(m)]
+            par_frame.values = [[None for y in range(n - 1)] for x in range(m)]
 
             j = 0
             # Iterate through every widget
-            for i,widget in enumerate(par_frame.children.values()):
+            for i, widget in enumerate(par_frame.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -1096,18 +1097,18 @@ class IndexVariableArrayFrame(BlancFrame):
                     # Do not overwrite the old values with the text
                     # "Multiple values"
                     if curr_val != "Multiple values":
-                        par_frame.values[j//(n-1)][j%(n-1)]  = curr_val
+                        par_frame.values[j // (n - 1)][j % (n - 1)] = curr_val
                     j += 1
             return
 
         # If the Array does not exist yet
         if not par_frame.values:
-            par_frame.values = [[ None for y in range(n) ] for x in range(m)]
+            par_frame.values = [[None for y in range(n)] for x in range(m)]
         # If the array should be changed
         if not init or any(None in x for x in par_frame.values):
             j = 0
             # Iterate through every widget
-            for i,widget in enumerate(par_frame.children.values()):
+            for i, widget in enumerate(par_frame.children.values()):
                 # Skip the main Label, info Button and the single Entry
                 if i <= NUM_ELEMS:
                     continue
@@ -1117,7 +1118,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     # Do not overwrite the old values with the text
                     # "Multiple values"
                     if curr_val != "Multiple values":
-                        par_frame.values[j//n][j%n]  = curr_val
+                        par_frame.values[j // n][j % n] = curr_val
                     j += 1
 
     def set_entry_values(self, par_frame):
@@ -1128,7 +1129,7 @@ class IndexVariableArrayFrame(BlancFrame):
         :param par_frame: the parent Frame
         """
         # Iterate through every widget
-        for i,widget in enumerate(par_frame.children.values()):
+        for i, widget in enumerate(par_frame.children.values()):
             # Skip the main Label and info Button
             if i < NUM_ELEMS:
                 continue
@@ -1157,7 +1158,7 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         items = []
         # Iterate through every widget
-        for i,widget in enumerate(par_frame.children.values()):
+        for i, widget in enumerate(par_frame.children.values()):
             # Skip the main Label and info Button
             if i < NUM_ELEMS:
                 continue
@@ -1165,8 +1166,8 @@ class IndexVariableArrayFrame(BlancFrame):
             elif i == NUM_ELEMS:
                 curr_widget = widget
             # Get the value of all other Entry widgets
-            elif (i < (NUM_ELEMS+1) + (m+1)*(n+1) and
-                      widget.winfo_class() == "Entry"):
+            elif (i < (NUM_ELEMS + 1) + (m + 1) * (n + 1) and
+                  widget.winfo_class() == "Entry"):
                 items.append(widget.get())
 
         # Set the value of the singel Entry
@@ -1188,7 +1189,7 @@ class IndexVariableArrayFrame(BlancFrame):
         :param row_index: the row of the single Entry
         """
         # Iterate through every widget
-        for i,widget in enumerate(par_frame.children.values()):
+        for i, widget in enumerate(par_frame.children.values()):
             # Skip the main Label and info button
             if i < NUM_ELEMS:
                 continue
@@ -1196,7 +1197,7 @@ class IndexVariableArrayFrame(BlancFrame):
             elif i == NUM_ELEMS and showEntry:
                 widget.grid(row=row_index, column=NUM_ELEMS, sticky="NESW")
             # Hide all other elements (except the two arrow Buttons)
-            elif i < (NUM_ELEMS+1) + (m+1)*(n+1):
+            elif i < (NUM_ELEMS + 1) + (m + 1) * (n + 1):
                 widget.grid_forget()
 
     def get_dimensions(self, index_var_list):
@@ -1293,20 +1294,21 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         array_state = self.get_state_simple()
         array_settings = self.get_array_settings()
-        size = self.get_size(array_settings[0],
-                             array_settings[1],
-                             self.n_r,
-                             self.n_atom)
+        size_string = self.get_size_string(array_settings[0],
+                                           array_settings[1])
 
         # open the array to write all values
         # into the textboxes to read them
-        self.open_array_with_parameters(array_state, size)
+        self.open_array_with_parameters(array_state, size_string)
 
         values = []
         for child in self.children:
             if "entry" in child:
                 entry = self.nametowidget(child)
                 values.append(str(entry.get()))
+
+        self.close_array()
+        self.set_state(array_state[0], array_state[1])
 
         return values, array_state, array_settings
 
@@ -1322,7 +1324,7 @@ class IndexVariableArrayFrame(BlancFrame):
         is_right = False
 
         for widget in self.children.values():
-            if widget.winfo_class() == "Button" :
+            if widget.winfo_class() == "Button":
                 # Down Button is visible -> array is collapsed
                 if 'd' == widget.cget('text'):
                     is_down = False
@@ -1351,11 +1353,14 @@ class IndexVariableArrayFrame(BlancFrame):
                 self.short_desc,
                 self.long_desc)
 
+    # TODO: cleanup, function not used anymore, was for the previous version
     def set_values(self, values, nr_pre, natom_pre):
         """
         This method is used to re-add the values
         that were read by the get_values function
         and to set it to the same state as before
+
+        deprecated
 
         :param values: values that the get_values function returned.
         :param nr_pre: previous number of regions
@@ -1420,8 +1425,8 @@ class IndexVariableArrayFrame(BlancFrame):
                     width_pre = 1
             elif dim == 2:
                 if ("REGION" in index_var_list and
-                    ("ATOM1" in index_var_list or
-                     "ATOM2" in index_var_list)):
+                        ("ATOM1" in index_var_list or
+                         "ATOM2" in index_var_list)):
                     # NR x NATOM array
                     width_now = self.n_r
                     width_pre = nr_pre
@@ -1465,7 +1470,7 @@ class IndexVariableArrayFrame(BlancFrame):
                             # and the positions match up
                             # (value_nr+1, because the value of
                             #  the extra field is also stored)
-                            if value_nr + 1 < len(values[0])\
+                            if value_nr + 1 < len(values[0]) \
                                     and val_pos == entry_pos:
                                 # write the value in the field
                                 # and increase value_nr
@@ -1493,6 +1498,107 @@ class IndexVariableArrayFrame(BlancFrame):
             # close all arrays again and open the previously opened ones
             self.close_array()
             self.set_state(values[1][0], values[1][1])
+
+    def set_values_from_ivdata(self, ivdata, nr, natom):
+        """
+        This method is used to re-add the values
+        that were read by the get_values function
+        and to set it to the same state as before
+
+        :param ivdata: data as a 2d array
+        :param nr: new number of regions
+        :param natom: new number of atoms
+        """
+
+        # Special case of the POINT Array,
+        # the size should be the same as before
+        # values[2][1] is the contains a list of the index variable names
+        if "POINT" in ivdata.array_settings[1]:
+            # open the array if it was open before
+            self.set_state(ivdata.array_state[0], ivdata.array_state[1])
+            # add as many rows as there have been before
+            for i, value in enumerate(ivdata.values):
+                # starting at the 3rd textbox because
+                # the first two are always there
+                if i > 1:
+                    # adding the rows
+                    self.add_row(ivdata.array_settings[1], 0)
+            # re-add the values
+            # entry_nr counts the textboxes
+            entry_nr = 0
+            for child in self.children:
+                if "entry" in child:
+                    entry = self.nametowidget(child)
+                    # if there aren't enough values to fill all textboxes
+                    # (shouldn't happen in the Point array)
+                    if entry_nr < len(ivdata.values):
+                        self.set_entry(entry, ivdata.values[entry_nr])
+                    else:
+                        self.set_entry(entry, "")
+                    entry_nr += 1
+        # standard case
+        else:
+            # open the array to add values correctly
+            self.open_array()
+
+            # saving the new and previous widths to calculate
+            # the correct positions with the new size
+            width = 0
+            # get the index var list from the values list
+            index_var_list = ivdata.array_settings[1]
+            # index_var_list is a list, containing the variables
+            # the dimension and size of the array depend on the given variables
+            dim = len(index_var_list)
+            if dim == 1:
+                if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
+                        "ATOM" in index_var_list):
+                    # 1 x NATOM array
+                    width = natom
+                elif ("REGION" in index_var_list and
+                      # POINTS in parameter name
+                      "POINTS" in str(ivdata.array_settings[0])):
+                    # NR x 1 array (+1 because of region0)
+                    width = 1
+                elif "REGION" in index_var_list:
+                    # 1 x NR array
+                    width = nr
+            elif dim == 2:
+                if ("REGION" in index_var_list and
+                        ("ATOM1" in index_var_list or
+                         "ATOM2" in index_var_list)):
+                    # NR x NATOM array
+                    width = natom
+                elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
+                    # NATOM x NATOM array
+                    width = natom
+
+            # looping oder every entry field and setting the values again
+            # loop variables:
+            # entry_nr is the index of the current entry
+            # grid_entry_nr is the index of the given entry in the grid
+            # (it's always entry_nr-1 because there's an
+            #  extra entry for the collapsed state on index 0)
+            entry_nr = 0
+            grid_entry_nr = -1
+            counter = 0
+            for child in self.children:
+                if "entry" in child:
+                    # get the entry object
+                    entry = self.nametowidget(child)
+                    # ignore the first entry
+                    if grid_entry_nr >= 0:
+                        self.set_entry(entry, ivdata.values[grid_entry_nr
+                                            // width][grid_entry_nr % width])
+                        counter += 1
+                    else:
+                        self.set_entry(entry, "")
+                    # update the loop variables
+                    entry_nr += 1
+                    grid_entry_nr = entry_nr - 1
+
+            # close all arrays again and open the previously opened ones
+            self.close_array()
+            self.set_state(ivdata.array_state[0], ivdata.array_state[1])
 
     def set_entry(self, entry, value):
         """
@@ -1556,6 +1662,43 @@ class IndexVariableArrayFrame(BlancFrame):
 
         return size
 
+    def get_size_string(self, par_name, index_var_list):
+        """
+        Returns the width and height of the grid as a list.
+
+        :param par_name: Parameter Name.
+        :param index_var_list: Index Variable List.
+
+        :return: With and height of the grid as a list.
+        """
+        size = ["0", "0"]
+
+        dim = len(index_var_list)
+        if dim == 1:
+            if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
+                    "ATOM" in index_var_list):
+                # 1 x NATOM array
+                size = ["1", "a"]
+            elif ("REGION" in index_var_list and
+                  # POINTS in parameter name
+                  "POINTS" in par_name):
+                # NR x 1 array
+                size = ["r", "1"]
+            elif "REGION" in index_var_list:
+                # 1 x NR array
+                size = ["1", "r"]
+        elif dim == 2:
+            if ("REGION" in index_var_list and
+                    ("ATOM1" in index_var_list or
+                     "ATOM2" in index_var_list)):
+                # NR x NATOM array
+                size = ["r", "a"]
+            elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
+                # NATOM x NATOM array
+                size = ["a", "a"]
+
+        return size
+
     def open_array(self):
         """
         Open the array fully.
@@ -1563,21 +1706,21 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         array_state = self.get_state_simple()
         array_settings = self.get_array_settings()
-        size = self.get_size(array_settings[0],
-                             array_settings[1],
-                             self.n_r,
-                             self.n_atom)
-        self.open_array_with_parameters(array_state, size)
+        size_string = self.get_size_string(array_settings[0], array_settings[1])
+        self.open_array_with_parameters(array_state, size_string)
 
-    def open_array_with_parameters(self, opened_state, size):
+    def open_array_with_parameters(self, opened_state, size_string):
         """
         Open the array fully.
 
         :param opened_state: Open/Closed state of the array.
-        :param size: Size of the entry grid.
+        :param size_string: returns on which parameters the size is dependable
         """
-        self.set_state(size[0] > 1 and opened_state[0] is False,
-                       size[1] > 1 and opened_state[1] is False)
+
+        self.set_state((size_string[0] == "r" or size_string[0] == "a")
+                       and opened_state[0] is False,
+                       (size_string[1] == "r" or size_string[1] == "a")
+                       and opened_state[1] is False)
 
     def close_array(self):
         """

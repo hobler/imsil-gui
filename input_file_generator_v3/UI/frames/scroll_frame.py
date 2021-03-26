@@ -339,36 +339,15 @@ class ScrollFrame(BlancFrame):
                 entry_text = str(self.natom)
                 default_value = self.natom
 
-        if par_name == 'NR':
-            entry_string_var = tk.StringVar(value=entry_text)
-            validate_command = self.register(self.validate_natom_nr)
-            entry = tk.Entry(parent,
-                             textvariable=entry_string_var,
-                             disabledbackground=disabledbackground,
-                             disabledforeground=disabledforeground,
-                             validate="all",
-                             validatecommand=(validate_command, '%P', 'NR'))
-            entry.bind(sequence='<Return>', func=self.try_resize)
-        elif par_name == 'NATOM':
-            entry_string_var = tk.StringVar(value=entry_text)
-            validate_command = self.register(self.validate_natom_nr)
-            entry = tk.Entry(parent,
-                             textvariable=entry_string_var,
-                             disabledbackground=disabledbackground,
-                             disabledforeground=disabledforeground,
-                             validate="all",
-                             validatecommand=(validate_command, '%P', 'NATOM'))
-            entry.bind(sequence='<Return>', func=self.try_resize)
-        else:
-            entry_string_var = tk.StringVar(value=entry_text)
-            entry = tk.Entry(parent,
-                             textvariable=entry_string_var,
-                             disabledbackground=disabledbackground,
-                             disabledforeground=disabledforeground)
+        entry_string_var = tk.StringVar(value=entry_text)
+        entry = tk.Entry(parent,
+                         textvariable=entry_string_var,
+                         disabledbackground=disabledbackground,
+                         disabledforeground=disabledforeground)
 
         # Disable the two fields NR and NATOM in the GUI
-        # if par_name == 'NR' or par_name == 'NATOM':
-        #     entry.config(state='disabled')
+        if par_name == 'NR' or par_name == 'NATOM':
+            entry.config(state='disabled')
 
         # Adding the Entries for the index variable array "POINT" to
         # the list caused some issues. Since these are never obligatory
@@ -482,7 +461,8 @@ class ScrollFrame(BlancFrame):
 
     def get_ivarrays(self):
         """
-        Returns the IndexVariableArrays that are placed inside this Scroll_Frame.
+        Returns the IndexVariableArrays that are
+        placed inside this Scroll_Frame.
 
         """
         return self.ivarray_list
@@ -493,33 +473,3 @@ class ScrollFrame(BlancFrame):
 
         """
         self.ivarray_list.clear()
-
-    def validate_natom_nr(self, text, variable):
-        """
-        Used to validate the input in the NR and NATOM fields,
-        updates the IndexVariableArrays accordingly
-
-        :param text: Value that the text will have if the change is allowed.
-        :param variable: NATOM or NR
-        """
-        print(text)
-        if text.isdigit():
-            if int(text) > 0:
-                if variable == 'NATOM':
-                    self.natom_new = int(text)
-                elif variable == 'NR':
-                    self.nr_new = int(text)
-                return True
-        elif text == '':
-            return True
-        return False
-
-    def try_resize(self, event):
-        """
-        Calls the Resize method from the ImsilParameterEditor Class
-
-        :param event: Necessary parameter for a callback function
-        """
-        if self.nr_new != self.nr or self.natom_new != self.natom:
-            if self.nr_new > 0 and self.natom_new > 0:
-                self.func_resize(self.nr_new, self.natom_new)

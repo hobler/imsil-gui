@@ -19,6 +19,8 @@ from data_model.read_sqlite import get_database_table_names
 from UI.Frames.blanc_frame import BlancFrame
 from UI.Frames.tab_frame import TabFrame
 from UI.Frames.blanc_frame import WELCOME
+from edit_window import EditWindow
+from data_model.iv_data import IVData, IVDict
 
 DATABASE_FILE = "parameters.db"
 
@@ -324,12 +326,19 @@ class ImsilInputParameterEditor:
 
         self.nr = nr
         self.natom = natom
-        # Menu for testing
-        # self.menu = tk.Menu(self.root)
-        # self.root.config(menu=self.menu)
-        # testmenu = tk.Menu(self.menu)
-        # self.menu.add_cascade(label="Test", menu=testmenu)
-        # testmenu.add_command(label="Test Resize IVArray", command=self.resize_all_ivarrays)
+
+        # creating a menu bar
+        # can also be used to read in files or save files later
+        self.menu = tk.Menu(self.root)
+        self.root.config(menu=self.menu)
+        filemenu = tk.Menu(self.menu)
+        editmenu = tk.Menu(self.menu)
+        viewmenu = tk.Menu(self.menu)
+        self.menu.add_cascade(label="File", menu=filemenu)
+        self.menu.add_cascade(label="Edit", menu=editmenu)
+        editmenu.add_command(label="Materials/Ions",
+                             command=self.open_edit_material_window)
+        self.menu.add_cascade(label="View", menu=viewmenu)
 
         # If the user has passed the name of an IMSIL input file
         if input_file_path != "":
@@ -396,6 +405,7 @@ class ImsilInputParameterEditor:
         else:
             print("There is no tab with the name " + tab_name)
 
+    # TODO: cleanup, not used currently, got replaced by update_all_iv_arrays()
     def resize_all_ivarrays(self, nr=4, natom=6):
         """
         Resizes all IndexVariableArrays in every Tab.
@@ -527,6 +537,78 @@ class ImsilInputParameterEditor:
         # Reopen the before opened Tab
         self.nb.select(current_tab)
 
+    def update_all_iv_arrays(self, iv_dict, natom, nr):
+        """
+        Resizes all IndexVariableArrays in every Tab.
+
+        :param iv_dict: dictionary containing all ivarrays
+            accessible through the tab_name
+        :param nr: new number of Regions
+        :param natom: new number of Atoms
+        """
+        # TODO: maybe add the Progressbar from the above method
+
+        # can't set the variables below 1
+        if nr < 1 or natom < 1:
+            return
+
+        # save the current tab to reopen later
+        current_tab = self.nb.select()
+        # disable all tabs so no entries can be made while updating
+        self.disable_tabs()
+
+        # save previous size
+        if type(self.nr) == int:
+            nr_pre = self.nr
+        else:
+            nr_pre = self.nr.get()
+        if type(self.natom) == int:
+            natom_pre = self.natom
+        else:
+            natom_pre = self.natom.get()
+
+        # loop over all tabs
+        for tab_num, tab_name in enumerate(self.nb.tabs()):
+
+            # ---- Clear all IVArrays ----
+            # Get TabFrame to access the scroll_frame
+            tab_frame = self.nb.nametowidget(tab_name)
+            # Clear the IVArray dependencies in the ui_data_list
+            # TODO better way?
+            for i in reversed(
+                    range(
+                        len(tab_frame.scroll_frame.ui_data_list.data_list))):
+                if "indexvariable" in \
+                        str(tab_frame.scroll_frame.ui_data_list.data_list[i]):
+                    tab_frame.scroll_frame.ui_data_list.data_list.remove(
+                        tab_frame.scroll_frame.ui_data_list.data_list[i])
+            # Clear the pre-saved list of IVArrays (scroll_frame.ivarray_list)
+            self.clear_ivarray_list_in_tab(tab_name)
+            # Delete the IVArrays
+            self.delete_all_ivarrays_in_tab(tab_name)
+
+            # ---- add new arrays with new size ----
+            for arr_num, ivdata in enumerate(iv_dict[tab_name]):
+                # adding ivarray
+                self.add_ivarray_to_tab_new(tab_name, nr, natom, ivdata.array_settings)
+
+            # ---- re-add values, cut off excess ones and add zeros ----
+            tab_ivarrays = self.get_ivarrays_from_tab(tab_name)
+            assert len(tab_ivarrays) == len(iv_dict[tab_name])
+            for i, ivarray in enumerate(tab_ivarrays):
+                # re-adding values
+                # ivarray.set_values(iv_dict[tab_name][i].to_value_array(), nr_pre, natom_pre)
+                ivarray.set_values_from_ivdata(iv_dict[tab_name][i], nr, natom)
+
+        # save new size
+        self.nr = nr
+        self.natom = natom
+
+        # Enable all tabs again after finishing
+        self.enable_tabs()
+        # Reopen the before opened Tab
+        self.nb.select(current_tab)
+
     def get_ivarrays_from_tab(self, tab_name):
         """
         Returns the IndexVariableArrays of the Tab with the specified name.
@@ -585,8 +667,31 @@ class ImsilInputParameterEditor:
                 values[2][2],  # default_value
                 values[2][3],  # short_desc
                 values[2][4],  # long_desc
-                False,         # is_bool
-                True)          # row_index
+                False,  # is_bool
+                True)  # row_index
+
+    def add_ivarray_to_tab_new(self, tab_name, nr, natom, array_settings):
+        """
+        Adds a new ivarray to the given Tab with the new size
+        and sets the structure based on the values[2] array state.
+        e.g. par_name, index_var_list, ... see below code
+
+        :param tab_name: Name of the Tab, where the array gets added.
+        :param nr: Number of regions.
+        :param natom: Number of atoms.
+        :param array_settings: Values from the previous array defined by get_values().
+        """
+        tab_frame = self.nb.nametowidget(tab_name)
+        if tab_frame is not None:
+            self.change_dim_of_scroll_frame(tab_frame.scroll_frame, nr, natom)
+            tab_frame.scroll_frame.add_parameter(
+                array_settings[0],  # par_name
+                array_settings[1],  # index_var_list
+                array_settings[2],  # default_value
+                array_settings[3],  # short_desc
+                array_settings[4],  # long_desc
+                False,  # is_bool
+                True)  # row_index
 
     def change_dim_of_scroll_frame(self, scroll_frame, nr, natom):
         """
@@ -625,6 +730,138 @@ class ImsilInputParameterEditor:
         """
         for i in range(len(self.nb.tabs())):
             self.nb.tab(i, state="normal")
+
+    def open_edit_material_window(self):
+        """
+        Opens the window for editing the Ion and Material names.
+
+        """
+
+        # get all data
+        iv_dict = self.get_data_from_ivarrays()
+        ions = None
+        materials = []
+
+        #   get current Ion + Materials
+        for tab_num, tab_name in enumerate(self.nb.tabs()):
+            # ion is saved on the 3rd tab (ions) in the entry box entry8
+            if tab_num == 2:
+                # get all the parent frames to get to the entries
+                tab_frame = self.nb.nametowidget(tab_name)
+                scroll_frame = tab_frame.scroll_frame
+                content_frame_entry = scroll_frame.content_frame_entry
+
+                for child in content_frame_entry.winfo_children():
+                    if "entry8" in str(child):
+                        ions = child.get()
+            # materials are saved in an IndexVariableArray on tab 4 (material)
+            elif tab_num == 3:
+                # can be read from the iv_dict because it's already read before
+                # 2nd iv_array -> 1, 1st entry -> 0
+                materials = iv_dict[tab_name][1].values[0]
+                break
+
+        # hide this window
+        self.root.withdraw()
+        # open edit window with callback function to return new ivdata
+        edit_window = EditWindow(ions, materials, iv_dict,
+                                 self.on_close_edit_material_window)
+
+    def on_close_edit_material_window(self, change=False, iv_dict=None,
+                                      new_ion=None, natom=0, nr=0):
+        """
+        Callback function. Gets called when the EditWindow closes.
+
+        :param change: If the arrays should get updated.
+        :param iv_dict: The data structure containing the entries
+        :param new_ion: New ion name
+        :param natom: new number of atoms
+        :param nr: new number of regions
+
+        """
+        # re-enable this window
+        self.root.deiconify()
+        # if something has changed
+        if change:
+            # call the update method to re-size and re-fill the arrays
+            self.update_all_iv_arrays(iv_dict, natom, nr)
+
+            # write the ion name in the corresponding entries
+            # (see open_edit_material_window())
+            # material names are already in the iv_dict
+            for tab_num, tab_name in enumerate(self.nb.tabs()):
+                if tab_num == 2:
+                    tab_frame = self.nb.nametowidget(tab_name)
+                    scroll_frame = tab_frame.scroll_frame
+                    content_frame_entry = scroll_frame.content_frame_entry
+
+                    for child in content_frame_entry.winfo_children():
+                        if "entry8" in str(child):
+                            child.delete(0, "end")
+                            child.insert(0, str(new_ion))
+
+    def get_data_from_ivarrays(self):
+        """
+        Gets the data from all IVArrays and stores them in a IVDict dictionary.
+        Key is the tab name.
+
+        """
+        iv_dict = IVDict()
+        for tab_name in self.nb.tabs():
+            tab_ivarrays = self.get_ivarrays_from_tab(tab_name)
+            ivarray_tab_values = []
+            for ivarray in tab_ivarrays:
+                values = self.get_data_from_ivarray(ivarray)
+                ivarray_tab_values.append(values)
+            iv_dict[tab_name] = ivarray_tab_values
+        return iv_dict
+
+    def get_data_from_ivarray(self, ivarray):
+        """
+        Returns all the values and array state as a IVData object
+
+        :param ivarray: IndexVariableArray
+
+        """
+        values = ivarray.get_values()
+        # settings to re-create the array
+        array_settings = values[2]
+        size = ivarray.get_size(array_settings[0],
+                                array_settings[1],
+                                self.nr, self.natom)
+        m = size[0]
+        n = size[1]
+        if type(m) != int:
+            m = m.get()
+        if type(n) != int:
+            n = n.get()
+
+        # points has an extra region
+        if "POINTS" in array_settings[0]:
+            m += 1
+
+        if type(self.natom) != int:
+            natom = self.natom.get()
+        else:
+            natom = self.natom
+        if type(self.nr) != int:
+            nr = self.nr.get()
+        else:
+            nr = self.nr
+
+        data = IVData(ivarray.get_size_string(
+            array_settings[0], array_settings[1]),
+            natom, nr, values[1], values[2])
+        # points doesn't get changed, so it's just saved as it is
+        if "POINT" in array_settings[1]:
+            data.values = values[0]
+        else:
+            # save the values in a 2D grid to re-add them easier later
+            for i in range(m * n):
+                if i % n == 0:
+                    data.values.append([])
+                data.values[i // n].append(values[0][i + 1])
+        return data
 
 
 if __name__ == '__main__':
