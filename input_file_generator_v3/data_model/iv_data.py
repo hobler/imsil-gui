@@ -214,22 +214,6 @@ class IVData:
 
         return change_n or change_m
 
-    # TODO: unused, was for testing
-    def to_value_array(self):
-        return self.get_1d_values(), self.array_state, self.array_settings
-
-    # TODO: unused, was for testing
-    def get_1d_values(self):
-        if "POINT" in self.array_settings[1]:
-            return self.values
-        value_arr = [""]
-        m = self.get_m()
-        n = self.get_n()
-        for m in range(m):
-            for n in range(n):
-                value_arr.append(self.values[m][n])
-        return value_arr
-
     # returns the size in m or n matrix direction
     def get_m(self):
         return self.natom if self.size_string[0] == "a" else (self.nr if self.size_string[0] == "r" else 1)

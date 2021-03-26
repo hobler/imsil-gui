@@ -33,7 +33,7 @@ class ScrollFrame(BlancFrame):
     as well as all IndexVariableArrayFrames of the (parent) tab.
 
     """
-    def __init__(self, parent, nr, natom, func_resize, *args, **kwargs):
+    def __init__(self, parent, nr, natom, *args, **kwargs):
         """
         In the initialization of the ScrollFrame all object parameters are
         defined, the Boolean and Entry BlancFrames are created and added to
@@ -52,8 +52,6 @@ class ScrollFrame(BlancFrame):
         self.natom = natom.get()
         self.nr_new = self.nr
         self.natom_new = self.natom
-
-        self.func_resize = func_resize
 
         # Define the number of columns for the Boolean and Entry params
         self.columns_b = BOOL_PARAMS_PER_ROW * ELEMENTS_PER_PARAM

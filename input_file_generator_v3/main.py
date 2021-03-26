@@ -315,7 +315,6 @@ class ImsilInputParameterEditor:
                                  type_of_simulation=type_of_simulation,
                                  nr=nr,
                                  natom=natom,
-                                 func_resize=self.resize_all_ivarrays,
                                  name=table_name)
             self.nb.add(tab_frame, text=table_name)
 
@@ -405,13 +404,14 @@ class ImsilInputParameterEditor:
         else:
             print("There is no tab with the name " + tab_name)
 
-    # TODO: cleanup, not used currently, got replaced by update_all_iv_arrays()
-    def resize_all_ivarrays(self, nr=4, natom=6):
+    def update_all_iv_arrays(self, iv_dict, natom, nr):
         """
         Resizes all IndexVariableArrays in every Tab.
 
-        :param nr: Number of Regions
-        :param natom: Number of Atoms
+        :param iv_dict: dictionary containing all ivarrays
+            accessible through the tab_name
+        :param nr: new number of Regions
+        :param natom: new number of Atoms
         """
 
         # can't set the variables below 1
@@ -447,128 +447,13 @@ class ImsilInputParameterEditor:
 
         # loop over all tabs
         for tab_num, tab_name in enumerate(self.nb.tabs()):
+
             # Set the progress Label to the current tab name
             progress_tab_label['text'] = "Updating Tab: " \
                                          + tab_name.split('.')[-1]
             progress_array_label['text'] = "Clearing all IVArrays"
             progressbar_array["value"] = 0
             self.root.update()
-
-            # ---- get all ivarrays from this tab ----
-            tab_ivarrays = self.get_ivarrays_from_tab(tab_name)
-            # save the point array, because it shouldn't be resized
-            point_array = None
-            # save values from each array
-            ivarray_tab_info = []
-            for ivarray in tab_ivarrays:
-                values = ivarray.get_values()
-                ivarray_tab_info.append(values)
-
-            # ---- Clear all IVArrays ----
-            # Get TabFrame to access the scroll_frame
-            tab_frame = self.nb.nametowidget(tab_name)
-            # Clear the IVArray dependencies in the ui_data_list
-            # TODO better way?
-            for i in reversed(
-                    range(
-                        len(tab_frame.scroll_frame.ui_data_list.data_list))):
-                if "indexvariable" in \
-                        str(tab_frame.scroll_frame.ui_data_list.data_list[i]):
-                    tab_frame.scroll_frame.ui_data_list.data_list.remove(
-                        tab_frame.scroll_frame.ui_data_list.data_list[i])
-            # Clear the pre-saved list of IVArrays (scroll_frame.ivarray_list)
-            self.clear_ivarray_list_in_tab(tab_name)
-            # Delete the IVArrays
-            self.delete_all_ivarrays_in_tab(tab_name)
-
-            # ---- add new arrays with new size ----
-            for arr_num, ivarray_info in enumerate(ivarray_tab_info):
-                # update progress label
-                progress_array_label['text'] = "Re-adding IVArray " \
-                                               + str(arr_num) \
-                                               + "/" \
-                                               + str(len(ivarray_tab_info))
-                self.root.update()
-
-                # adding ivarray
-                self.add_ivarray_to_tab(tab_name, nr, natom, ivarray_info)
-
-                # update progressbar
-                progressbar_array["value"] = \
-                    100 * (arr_num + 1) / len(ivarray_tab_info)
-                self.root.update()
-
-            # ---- re-add values, cut off excess ones and add zeros ----
-            tab_ivarrays = self.get_ivarrays_from_tab(tab_name)
-            assert len(tab_ivarrays) == len(ivarray_tab_info)
-            for i, ivarray in enumerate(tab_ivarrays):
-                # update progress label
-                progress_array_label['text'] = "Re-adding Values to IVArray " \
-                                               + str(i) \
-                                               + "/" \
-                                               + str(len(tab_ivarrays))
-                self.root.update()
-
-                # re-adding values
-                ivarray.set_values(ivarray_tab_info[i], nr_pre, natom_pre)
-
-                # update progressbar
-                progressbar_array["value"] = \
-                    100 * (i + 1) / len(tab_ivarrays)
-                self.root.update()
-
-            # update progressbar value
-            progressbar_tab["value"] = \
-                100 * (tab_num + 1) / len(self.nb.tabs())
-            self.root.update()
-
-        # save new size
-        self.nr = nr
-        self.natom = natom
-
-        # remove progressbar and label
-        progressbar_tab.destroy()
-        progress_tab_label.destroy()
-        progressbar_array.destroy()
-        progress_array_label.destroy()
-
-        # Enable all tabs again after finishing
-        self.enable_tabs()
-        # Reopen the before opened Tab
-        self.nb.select(current_tab)
-
-    def update_all_iv_arrays(self, iv_dict, natom, nr):
-        """
-        Resizes all IndexVariableArrays in every Tab.
-
-        :param iv_dict: dictionary containing all ivarrays
-            accessible through the tab_name
-        :param nr: new number of Regions
-        :param natom: new number of Atoms
-        """
-        # TODO: maybe add the Progressbar from the above method
-
-        # can't set the variables below 1
-        if nr < 1 or natom < 1:
-            return
-
-        # save the current tab to reopen later
-        current_tab = self.nb.select()
-        # disable all tabs so no entries can be made while updating
-        self.disable_tabs()
-
-        # save previous size
-        if type(self.nr) == int:
-            nr_pre = self.nr
-        else:
-            nr_pre = self.nr.get()
-        if type(self.natom) == int:
-            natom_pre = self.natom
-        else:
-            natom_pre = self.natom.get()
-
-        # loop over all tabs
-        for tab_num, tab_name in enumerate(self.nb.tabs()):
 
             # ---- Clear all IVArrays ----
             # Get TabFrame to access the scroll_frame
@@ -589,20 +474,54 @@ class ImsilInputParameterEditor:
 
             # ---- add new arrays with new size ----
             for arr_num, ivdata in enumerate(iv_dict[tab_name]):
+                # update progress label
+                progress_array_label['text'] = "Re-adding IVArray " \
+                                               + str(arr_num) \
+                                               + "/" \
+                                               + str(len(iv_dict[tab_name]))
+                self.root.update()
+
                 # adding ivarray
-                self.add_ivarray_to_tab_new(tab_name, nr, natom, ivdata.array_settings)
+                self.add_ivarray_to_tab(tab_name, nr, natom, ivdata.array_settings)
+
+                # update progressbar
+                progressbar_array["value"] = \
+                    100 * (arr_num + 1) / len(iv_dict[tab_name])
+                self.root.update()
 
             # ---- re-add values, cut off excess ones and add zeros ----
             tab_ivarrays = self.get_ivarrays_from_tab(tab_name)
             assert len(tab_ivarrays) == len(iv_dict[tab_name])
             for i, ivarray in enumerate(tab_ivarrays):
+                # update progress label
+                progress_array_label['text'] = "Re-adding Values to IVArray " \
+                                               + str(i) \
+                                               + "/" \
+                                               + str(len(tab_ivarrays))
+                self.root.update()
+
                 # re-adding values
-                # ivarray.set_values(iv_dict[tab_name][i].to_value_array(), nr_pre, natom_pre)
                 ivarray.set_values_from_ivdata(iv_dict[tab_name][i], nr, natom)
+
+                # update progressbar
+                progressbar_array["value"] = \
+                    100 * (i + 1) / len(tab_ivarrays)
+                self.root.update()
+
+            # update progressbar value
+            progressbar_tab["value"] = \
+                100 * (tab_num + 1) / len(self.nb.tabs())
+            self.root.update()
 
         # save new size
         self.nr = nr
         self.natom = natom
+
+        # remove progressbar and label
+        progressbar_tab.destroy()
+        progress_tab_label.destroy()
+        progressbar_array.destroy()
+        progress_array_label.destroy()
 
         # Enable all tabs again after finishing
         self.enable_tabs()
@@ -647,30 +566,7 @@ class ImsilInputParameterEditor:
             if "indexvariable" in str(child):
                 child.destroy()
 
-    def add_ivarray_to_tab(self, tab_name, nr, natom, values):
-        """
-        Adds a new ivarray to the given Tab with the new size
-        and sets the structure based on the values[2] array state.
-        e.g. par_name, index_var_list, ... see below code
-
-        :param tab_name: Name of the Tab, where the array gets added.
-        :param nr: Number of regions.
-        :param natom: Number of atoms.
-        :param values: Values from the previous array defined by get_values().
-        """
-        tab_frame = self.nb.nametowidget(tab_name)
-        if tab_frame is not None:
-            self.change_dim_of_scroll_frame(tab_frame.scroll_frame, nr, natom)
-            tab_frame.scroll_frame.add_parameter(
-                values[2][0],  # par_name
-                values[2][1],  # index_var_list
-                values[2][2],  # default_value
-                values[2][3],  # short_desc
-                values[2][4],  # long_desc
-                False,  # is_bool
-                True)  # row_index
-
-    def add_ivarray_to_tab_new(self, tab_name, nr, natom, array_settings):
+    def add_ivarray_to_tab(self, tab_name, nr, natom, array_settings):
         """
         Adds a new ivarray to the given Tab with the new size
         and sets the structure based on the values[2] array state.
@@ -703,17 +599,6 @@ class ImsilInputParameterEditor:
         """
         scroll_frame.nr = nr
         scroll_frame.natom = natom
-
-    def get_all_ivarrays(self):
-        """
-        Returns every IndexVariableArray.
-
-        :return: All IndexVariableArrays in the whole Notebook.
-        """
-        ivarrays = []
-        for tab_name in self.nb.tabs():
-            ivarrays.extend(self.get_ivarrays_from_tab(tab_name))
-        return ivarrays
 
     def disable_tabs(self):
         """

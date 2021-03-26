@@ -8,12 +8,13 @@ class TabFrame(BlancFrame):
     TabFrame contains all widgets for a notebook tab.
 
     Note that a tab in the GUI presents the parameters of one IMSIL "record".
+    Note that a tab in the GUI presents the parameters of one IMSIL "record".
     TabFrame contains a ScrollFrame which contains the widgets for the
     parameters. The ScrollFrame allows to scroll up and down the parameter
     list in case the window does not provide enough space for all of them.
     """
     def __init__(self, parent, db_file, table_name, type_of_simulation,
-                 nr, natom, func_resize, *args, **kwargs):
+                 nr, natom, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
         # Get the database table and regroup the parameters
@@ -21,7 +22,7 @@ class TabFrame(BlancFrame):
         self.db_table.regroup()
 
         # Create a ScrollFrame specifically developed for this project
-        self.scroll_frame = ScrollFrame(self, nr, natom, func_resize)
+        self.scroll_frame = ScrollFrame(self, nr, natom)
 
         # Add parameters to the ScrollFrame
         for table_row in self.db_table:
