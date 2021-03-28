@@ -343,8 +343,8 @@ class ScrollFrame(BlancFrame):
                          disabledbackground=disabledbackground,
                          disabledforeground=disabledforeground)
 
-        # Disable the two fields NR and NATOM in the GUI
-        if par_name == 'NR' or par_name == 'NATOM':
+        # Disable the two fields NR, NATOM and NAME in the GUI
+        if par_name == 'NR' or par_name == 'NATOM' or par_name == 'NAME':
             entry.config(state='disabled')
 
         # Adding the Entries for the index variable array "POINT" to

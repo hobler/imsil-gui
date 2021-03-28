@@ -653,7 +653,8 @@ class ImsilInputParameterEditor:
                                  self.on_close_edit_material_window)
 
     def on_close_edit_material_window(self, change=False, iv_dict=None,
-                                      new_ion=None, natom=0, nr=0):
+                                      new_ion=None, natom=0, nr=0,
+                                      atoms=None, regions=None):
         """
         Callback function. Gets called when the EditWindow closes.
 
@@ -662,6 +663,8 @@ class ImsilInputParameterEditor:
         :param new_ion: New ion name
         :param natom: new number of atoms
         :param nr: new number of regions
+        :param atoms: names of the atoms
+        :param regions: names of the regions
 
         """
         # re-enable this window
@@ -674,16 +677,46 @@ class ImsilInputParameterEditor:
             # write the ion name in the corresponding entries
             # (see open_edit_material_window())
             # material names are already in the iv_dict
+            # switch ATOM and REGION with corresponding name
             for tab_num, tab_name in enumerate(self.nb.tabs()):
+                tab_frame = self.nb.nametowidget(tab_name)
+                scroll_frame = tab_frame.scroll_frame
+
+                # writing the atom name in it's entry
                 if tab_num == 2:
-                    tab_frame = self.nb.nametowidget(tab_name)
-                    scroll_frame = tab_frame.scroll_frame
                     content_frame_entry = scroll_frame.content_frame_entry
 
                     for child in content_frame_entry.winfo_children():
                         if "entry8" in str(child):
+                            child["state"] = 'normal'
                             child.delete(0, "end")
                             child.insert(0, str(new_ion))
+                            child["state"] = 'disabled'
+
+                # iterate over every ivarray and change
+                # ATOM and REGION with the corresponding name
+                for iv_num, ivarray in enumerate(scroll_frame.get_ivarrays()):
+                    # skip these 2 ivarrays, because
+                    # they are arrays that hold the names
+                    if (tab_num == 1 and iv_num == 3) \
+                            or (tab_num == 3 and iv_num == 1):
+                        for child in ivarray.winfo_children():
+                            if "entry" in str(child):
+                                child["state"] = 'disabled'
+                        continue
+
+                    # check for labels with ATOM or REGION in it
+                    # and write the correct name in them
+                    for child in ivarray.winfo_children():
+                        if "label" in str(child):
+                            if "ATOM" in child["text"]:
+                                index = int(child["text"].split(' ')[-1])
+                                if index > 0:
+                                    child["text"] = atoms[index - 1]
+                            if "REGION" in child["text"]:
+                                index = int(child["text"].split(' ')[-1])
+                                if index > 0:
+                                    child["text"] = regions[index - 1]
 
     def get_data_from_ivarrays(self):
         """
