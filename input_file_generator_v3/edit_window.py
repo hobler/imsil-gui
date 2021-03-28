@@ -9,7 +9,7 @@ Classes:
     `EditWindow`
         Window for editing the Ion and Material names.
 """
-
+import sys
 import tkinter as tk
 from tkinter import messagebox
 
@@ -211,15 +211,18 @@ class EditWindow(tk.Tk):
                 empty_error = True
                 break
         if empty_error:
-            tk.messagebox.showerror("Invalid Input", "Ion or Materials can't be empty.")
+            tk.messagebox.showerror("Invalid Input",
+                                    "Ion or Materials can't be empty.")
             return
 
         # check for correct spelling of the molecules
         try:
             new_unique_ions = get_unique_atoms([new_ion], self.all_elements)
-            new_unique_materials = get_unique_atoms(new_materials, self.all_elements)
+            new_unique_materials = get_unique_atoms(new_materials,
+                                                    self.all_elements)
         except ValueError:
-            tk.messagebox.showerror("Invalid Input", "Invalid Ion or Material name.")
+            tk.messagebox.showerror("Invalid Input",
+                                    "Invalid Ion or Material name.")
             return
 
         # check if the given string was even a molecule name
@@ -277,9 +280,11 @@ class EditWindow(tk.Tk):
             self.iv_dict.add_atom_at(new_unique_ions.index(atom))
 
         for atom in reversed(unique_materials_to_delete):
-            self.iv_dict.remove_atom(self.unique_materials.index(atom) + len(new_unique_ions))
+            self.iv_dict.remove_atom(self.unique_materials.index(atom) +
+                                     len(new_unique_ions))
         for atom in unique_materials_to_add:
-            self.iv_dict.add_atom_at(new_unique_materials.index(atom) + len(new_unique_ions))
+            self.iv_dict.add_atom_at(new_unique_materials.index(atom) +
+                                     len(new_unique_ions))
 
         # used for natom calculation
         unique_atoms = []
@@ -302,12 +307,18 @@ class EditWindow(tk.Tk):
         # in their corresponding IVArray Entries
         for i, tab in enumerate(self.iv_dict):
             if i == 1:
-                self.iv_dict[tab][3].values[0] = [x.name for x in new_unique_atoms]
+                self.iv_dict[tab][3].values[0] = \
+                    [x.name for x in new_unique_atoms]
             if i == 3:
                 self.iv_dict[tab][1].values[0] = new_materials
 
         # call the callback function of the main window
-        self.on_close(True, self.iv_dict, new_ion, natom, nr)
+        try:
+            self.on_close(True, self.iv_dict, new_ion, natom, nr,
+                          [x.name for x in new_unique_atoms], new_materials)
+        except:
+            tk.messagebox.showerror("Unexpected error:", sys.exc_info()[0])
+
         # destroy this window
         self.destroy()
 
