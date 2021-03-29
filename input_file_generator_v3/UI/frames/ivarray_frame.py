@@ -1441,8 +1441,12 @@ class IndexVariableArrayFrame(BlancFrame):
                     entry = self.nametowidget(child)
                     # ignore the first entry
                     if grid_entry_nr >= 0:
+                        if ivdata.array_settings[0] == "NAME":
+                            entry["state"] = 'normal'
                         self.set_entry(entry, ivdata.values[grid_entry_nr
                                             // width][grid_entry_nr % width])
+                        if ivdata.array_settings[0] == "NAME":
+                            entry["state"] = 'readonly'
                         counter += 1
                     else:
                         self.set_entry(entry, "")

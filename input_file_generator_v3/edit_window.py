@@ -296,12 +296,8 @@ class EditWindow(tk.Tk):
         new_unique_atoms.extend(new_unique_materials)
 
         # calculating the new nr and natom
-        natom = len(unique_atoms) \
-              - len(unique_ions_to_delete) \
-              - len(unique_materials_to_delete) \
-              + len(unique_ions_to_add) \
-              + len(unique_materials_to_add)
-        nr = pre_reg_len - len(regions_to_delete) + len(regions_to_add)
+        natom = len(new_unique_atoms)
+        nr = len(new_materials)
 
         # adding the new atom and region names
         # in their corresponding IVArray Entries
