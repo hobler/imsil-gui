@@ -18,6 +18,7 @@ Classes:
     `Element`
         Chemical element data type
 """
+import os
 
 
 def get_all_elements():
@@ -26,7 +27,8 @@ def get_all_elements():
     as a List of Element Objects
 
     """
-    f = open("data_model\\element.f90", "r")
+    f90_fname = os.path.join(os.path.dirname(__file__), 'element.f90')
+    f = open(f90_fname, "r")
     data = f.readlines()
     elements = []
     for line in data:
@@ -115,7 +117,7 @@ def analyze_molecule(molecule, elements_short):
 
 def get_element_names(elements):
     """
-    Returns the short name for each element in a list.
+    Return the short name for each element in a list.
 
     :param elements: elements (Element object list)
 
@@ -146,7 +148,7 @@ class Element:
         :param dens: density
         :param name1: long name
         :param name2: alternative long name
-        :param t_debye: debye temperature
+        :param t_debye: Debye temperature
         :param esurf: surface binding energy
         """
 
@@ -162,7 +164,6 @@ class Element:
     def print_element(self):
         """
         Prints all the attributes.
-
         """
         print(str(self.name) + ", " + str(self.mass1) + ", "
               + str(self.mass2) + ", " + str(self.dens) + ", "

@@ -16,12 +16,10 @@ class IVDict(dict):
     Dictionary object for IVData with methods to
     add and remove region and atom entries.
     Inherits from dict.
-
     """
     def add_atom(self):
         """
         Adds an Atom to every IVArray
-
         """
         for tab in self:
             # for all index variable arrays in that tab
@@ -31,7 +29,6 @@ class IVDict(dict):
     def add_region(self):
         """
         Adds a Region to every IVArray
-
         """
         for tab in self:
             # for all index variable arrays in that tab
@@ -87,7 +84,6 @@ class IVData:
     """
     Contains all the necessary data to re-create and re-fill an IVArray
     and some methods to add or remove entries
-
     """
 
     def __init__(self, size_string, natom, nr, array_state, array_settings):
@@ -191,15 +187,17 @@ class IVData:
 
     def remove_variable(self, variable, index):
         """
-        Removes a variable spot at the given index
+        Removes a variable from the array at the given index
 
         :param variable: "a" or "r" for atom or region
         :param index: Delete Position
+
+        :return: Flag indicating whether array has changed
         """
-        # determines which dimension has to change
-        # by looking at which axis depends on the given variable (a or r)
-        change_m = self.size_string[0] == variable
-        change_n = self.size_string[1] == variable
+        # determine which dimension has to change by looking at which axis
+        # depends on the given variable ("a" or "r")
+        change_m = (self.size_string[0] == variable)
+        change_n = (self.size_string[1] == variable)
         pre_m = self.get_m()
 
         if not change_m and not change_n:
@@ -214,10 +212,30 @@ class IVData:
 
         return change_n or change_m
 
-    # returns the size in m or n matrix direction
     def get_m(self):
-        return self.natom if self.size_string[0] == "a" else (self.nr if self.size_string[0] == "r" else 1)
+        """
+        Return the size of the m x n index variable array in m direction.
+
+        :return: m
+        """
+        if self.size_string[0] == "a":
+            return self.natom
+        else:
+            if self.size_string[0] == "r":
+                return self.nr
+            else:
+                return 1
 
     def get_n(self):
-        return self.natom if self.size_string[1] == "a" else (self.nr if self.size_string[1] == "r" else 1)
+        """
+        Return the size of the m x n index variable array in n direction.
 
+        :return: n
+        """
+        if self.size_string[1] == "a":
+            return self.natom
+        else:
+            if self.size_string[1] == "r":
+                return self.nr
+            else:
+                return 1

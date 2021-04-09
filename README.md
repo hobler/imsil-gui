@@ -1,5 +1,5 @@
 # The Program: 
-IMSIL-GUI` is a GUI for the binary collision simulator `IMSIL`, written in
+`IMSIL-GUI` is a GUI for the binary collision simulator `IMSIL`, written in
 python with Tkinter.
 
 # Versions: 
@@ -64,6 +64,11 @@ In the following section (almost) all files of the project are briefly
 described  
 
 #### `input_file_generator_v3`:
+-	`parameters.db`: the SQLite database
+-	`main.py`: the top-level program file, containing the classes 
+    `WelcomeWindow` and `ImsilInputParameterEditor`
+
+#### `input_file_generator_v3\pics`:
 -	`add.gif`, `minus.gif`: the pictures used for the +/- Buttons to 
      add/delete rows from the `POINT` index variable array 
 -	`arrow.png`, `arrow_r.gif`, `arrow_l.gif`, `arrow_d.gif`, `arrow_u.gif`: 
@@ -71,9 +76,6 @@ described
     variable array to the right/left/down/up  
 -	`info_sign.gif`, `info_sign_1.gif`: the pictures used for the info Button 
     (`info_sign_1.gif` is currently used)
--	`parameters.db`: the database file
--	`main.py`: the main file of the program, containing the classes 
-    `WelcomeWindow` and `ImsilInputParameterEditor`
 
 #### `input_file_generator_v3\data_model`:
 -   `read_sqlite.py`, `data_list.py`, `input_file.py`: Classes used to manage
@@ -117,8 +119,8 @@ the values are set, the user can press the `Open IMSIL Input Parameter
 Editor` Button.     
 
 Next, a small window will appear, informing the user that the data is loading. 
-Once the data has been fully loaded and the notebook is set up, the small
-window closes and the IMSIL Input Parameter Editor appears. The Editor has
+Once the data has been fully loaded, and the notebook is set up, the small
+window closes, and the IMSIL Input Parameter Editor appears. The Editor has
 several tabs, each following the same logic and structure. Every tab can
 consist of three sections: The Flags, the Entries and the index variable
 arrays. Some tabs contain all three sections, some contain only one or
@@ -137,52 +139,50 @@ arrow Buttons on the right-hand side of the row. Depending on the dimension
 of each index variable array, one or two arrow Buttons are available. The
 logic of the index variable arrays is as follows: 
   
--	If the array is fully collapsed (only one Entry is visible), the single
-    Entry can have three different states: it can be empty, it can hold a value
-    or it can display the text “Multiple values”. The first two states are the
-    same (empty is a value) and they signify, that every element of the index
-    variable array has the same value as the single Entry. The third state
-    signifies, that the index variable array has at least two elements with
-    different values. If the value of the single Entry is modified, all
-    elements of the index variable array will be set to this new value.       
--	If the array is 1-dimensional and it is expanded in this dimension, every
-    Entry can be set separately. If the array gets collapsed afterwards, the
-    single Entry will either show the value, set for all elements (if they are
-    identical) or show “Multiple values” (if the elements are not identical).   
--	If the array is 2-dimensional and it is only expanded in one dimension, 
-    the elements in the first row/column will work the same way as the single
-    Entry in the collapsed state. This means they will show if all elements of
-    the row/column have the same value or not. If their value is modified, all
-    elements of the row/column are modified. Example: If the array is 
-    2-dimensional and expanded only to the right, every Entry in the first row
-    will either show a value or the text “Multiple values”. If an Entry shows
-    a value, it means that every element of that column has the same value, if 
-    it shows “Multiple values” at least two elements of that column have 
-    different values. By setting any of these first elements, all elements of 
-    that row/column will be set to the same value. Therefore, if only the 
-    element in the first row/column should be set instead of all elements in 
-    that column/row, the array needs to be fully expanded before entering the 
-    value.              
--	If the array is 2-dimensional and it is expanded in both dimensions, every 
-    Entry can be set separately. If the array gets collapsed in any dimension 
-    afterwards, the first row/column (or the single Entry for the fully 
-    collapsed state) will either show the value, set for all elements in
-    that column/row (if they are identical) or show “Multiple values” (if the
-    elements are not identical).     
-    For the POINT index variable array (confusingly not the index variable
-    array with the name POINT, but rather the one with the name POS, of
-    which the elements are called POINT), additionally new rows can be
-    added by pressing the ‘+’ Button. In the expanded state, existing rows
-    can be deleted by pressing the ‘-’ Button, however, there is always
-    at least one Entry (the first Entry cannot be deleted). The logic
-    for the values of the new rows is as follows:      
--	If the array is collapsed and the single Entry is set to a value, every
+- If the array is fully collapsed (only one Entry is visible), the single Entry 
+  can have three different states: it can be empty, it can hold a value, or it 
+  can display the text “Multiple values”. The first two states are the same 
+  (empty is a value), and they signify that every element of the index
+  variable array has the same value as the single Entry. The third state
+  signifies that the index variable array has at least two elements with 
+  different values. If the value of the single Entry is modified, all
+  elements of the index variable array will be set to this new value.       
+- If the array is 1-dimensional, and it is expanded in this dimension, every
+  Entry can be set separately. If the array gets collapsed afterwards, the
+  single Entry will either show the value, set for all elements (if they are
+  identical) or show “Multiple values” (if the elements are not identical).   
+- If the array is 2-dimensional, and it is only expanded in one dimension, 
+  the elements in the first row/column will work the same way as the single
+  Entry in the collapsed state. This means they will show if all elements of
+  the row/column have the same value or not. If their value is modified, all
+  elements of the row/column are modified. Example: If the array is 
+  2-dimensional and expanded only to the right, every Entry in the first row
+  will either show a value or the text “Multiple values”. If an Entry shows
+  a value, it means that every element of that column has the same value. If 
+  it shows “Multiple values” at least two elements of that column have 
+  different values. By setting any of these first elements, all elements of 
+  that row/column will be set to the same value. Therefore, if only the 
+  element in the first row/column should be set instead of all elements in 
+  that column/row, the array needs to be fully expanded before entering the 
+  value.              
+- If the array is 2-dimensional, and it is expanded in both dimensions, every 
+  Entry can be set separately. If the array gets collapsed in any dimension 
+  afterwards, the first row/column (or the single Entry for the fully 
+  collapsed state) will either show the value, set for all elements in
+  that column/row (if they are identical) or show “Multiple values” (if the
+  elements are not identical).     
+- For the POS index variable array (whose index variable internally is called
+  POINT), new rows can be added by pressing the ‘+’ Button. In the expanded 
+  state, existing rows can be deleted by pressing the ‘-’ Button. However, 
+  there is always at least one Entry (the first Entry cannot be deleted). The 
+  logic for the values of the new rows is as follows:
+  -	If the array is collapsed and the single Entry is set to a value, every
     new row added, by pressing the ‘+’ Button, will have the value of the 
     single Entry.  
--	If the array is collapsed and the single Entry shows the text “Multiple
+  -	If the array is collapsed and the single Entry shows the text “Multiple 
     values”, every new row added, by pressing the ‘+’ Button, will have the
     value ‘’ (empty).  
--	If the array is expanded, every row added, by pressing the ‘+’ Button, will 
-    have the value ‘’ (empty). 
+  -	If the array is expanded, every row added, by pressing the ‘+’ Button, 
+    will have the value ‘’ (empty). 
 
 

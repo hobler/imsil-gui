@@ -3,12 +3,11 @@ Classes:
     :WelcomeWindow: The main window, where the user can configure the
                     Input Parameter Editor settings.
 """
-
 import tkinter as tk
 from tkinter import ttk, filedialog
 
-from UI.Frames.blanc_frame import BlancFrame, WELCOME
-from imsil_editor_window import ImsilInputParameterEditor
+from UI.frames.blanc_frame import BlancFrame, WELCOME
+from parameter_editor_window import ImsilInputParameterEditor
 
 
 def center_window(tk_window):
@@ -69,7 +68,7 @@ class WelcomeWindow(tk.Tk):
         # Set the welcome message text
         welcome_text = ("Welcome to the input file generator for IMSIL."
                         " With this tool you can generate an input file"
-                        " for IMSIL. Start with either loading edit an "
+                        " for IMSIL. Start with either loading an "
                         "existing input file or by specifying the number of "
                         "regions and records directly. By pressing the "
                         "'Open IMSIL Input Parameter Editor' button you can "
@@ -170,8 +169,8 @@ class WelcomeWindow(tk.Tk):
         TODO: this functionality has not been tested yet
         """
         loaded_file = filedialog.askopenfile(
-            initialdir=self.load_existing_file_variable.get(),
-            title="Select IMSIL input file")
+                initialdir=self.load_existing_file_variable.get(),
+                title="Select IMSIL input file")
         if loaded_file:
             self.load_existing_file_variable.set(loaded_file.name)
             loaded_file.close()

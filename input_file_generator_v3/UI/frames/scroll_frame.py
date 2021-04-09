@@ -1,15 +1,16 @@
+import os
 import platform
 import Pmw
 import tkinter as tk
 from tkinter import messagebox
 
 from data_model.data_list import DataList
-from UI.Canvas.blanc_canvas import BlancCanvas
-from UI.Frames.blanc_frame import BlancFrame
-from UI.Frames.ivarray_frame import IndexVariableArrayFrame
-from UI.Frames.blanc_frame import MAIN as MAIN
-from UI.Frames.blanc_frame import BOOLEAN as BOOLEAN
-from UI.Frames.blanc_frame import ENTRY as ENTRY
+from UI.canvas.blanc_canvas import BlancCanvas
+from UI.frames.blanc_frame import BlancFrame
+from UI.frames.ivarray_frame import IndexVariableArrayFrame
+from UI.frames.blanc_frame import MAIN as MAIN
+from UI.frames.blanc_frame import BOOLEAN as BOOLEAN
+from UI.frames.blanc_frame import ENTRY as ENTRY
 
 OS = platform.system()
 
@@ -66,7 +67,7 @@ class ScrollFrame(BlancFrame):
         # Initialize the counter variables for each type of parameter
         self.num_bools = 0
         self.num_entries = 0
-        self.num_index = 0
+        self.num_ivarrays = 0
 
         # Create the lists holding the Frames
         #TODO: par_frame_list could possibly be eliminated
@@ -173,7 +174,8 @@ class ScrollFrame(BlancFrame):
                                        w=INFO_WIDTH,
                                        h=INFO_HEIGHT,
                                        tool_tip_text=short_desc)
-            self.photo=tk.PhotoImage(file="info_sign_1.gif")
+            self.photo = tk.PhotoImage(
+                    file=os.path.join("pics", "info_sign_1.gif"))
             btn_info.config(image=self.photo)
             btn_info.image = self.photo
             btn_info.config(takefocus=False)
@@ -197,7 +199,8 @@ class ScrollFrame(BlancFrame):
                                        w=INFO_WIDTH,
                                        h=INFO_HEIGHT,
                                        tool_tip_text=short_desc)
-            self.photo=tk.PhotoImage(file="info_sign_1.gif")
+            self.photo = tk.PhotoImage(
+                    file=os.path.join("pics", "info_sign_1.gif"))
             btn_info.config(image=self.photo)
             btn_info.image = self.photo
             btn_info.config(takefocus=False)
@@ -254,7 +257,7 @@ class ScrollFrame(BlancFrame):
                 row_index=0,
                 is_index_var=is_index_var)
             # Increase the counter
-            self.num_index += 1
+            self.num_ivarrays += 1
         elif is_bool:
             # If the parameter is the first boolean, reset the counter
             if self.num_bools == 0:
@@ -390,7 +393,7 @@ class ScrollFrame(BlancFrame):
         or False and set the state of the tk.Entry to activate or
         deactivate the parameter.
 
-        :par_name: Name of a bool paramter
+        :par_name: Name of a bool parameter
         """
         widget_variable = self.ui_data_list.get_variable(par_name)
         obligatory_if = str(par_name + "=" + widget_variable.get())
@@ -399,7 +402,7 @@ class ScrollFrame(BlancFrame):
             if ui_data[1].winfo_class() == "Entry":
                 item_name = ui_data[0]
                 def_value = ui_data[3]
-                if (isinstance(def_value, str) and obligatory_if in def_value):
+                if isinstance(def_value, str) and obligatory_if in def_value:
                     widgets = self.ui_data_list.get_widgets(item_name)
                     for widget in widgets:
                         widget.config(state='normal')
@@ -452,25 +455,22 @@ class ScrollFrame(BlancFrame):
     def mouse_wheel(self, event):
         if OS == 'Linux':
             if event.num == 4:
-                self.main_canvas.yview_scroll(int(event.delta),"units")
+                self.main_canvas.yview_scroll(int(event.delta), "units")
             elif event.num == 5:
-                self.main_canvas.yview_scroll(int(-1 * event.delta),"units")
+                self.main_canvas.yview_scroll(int(-1 * event.delta), "units")
         elif OS == 'Windows':
-            self.main_canvas.yview_scroll(int(-1 * event.delta/120),"units")
+            self.main_canvas.yview_scroll(int(-1 * event.delta/120), "units")
         elif OS == 'Darwin':
-            self.main_canvas.yview_scroll(int(-1 * event.delta),"units")
+            self.main_canvas.yview_scroll(int(-1 * event.delta), "units")
 
     def get_ivarrays(self):
         """
-        Returns the IndexVariableArrays that are
-        placed inside this Scroll_Frame.
-
+        Return IndexVariableArrays that are placed inside this Scroll_Frame.
         """
         return self.ivarray_list
 
     def clear_ivarray_list(self):
         """
         Clears the ivarray_list.
-
         """
         self.ivarray_list.clear()

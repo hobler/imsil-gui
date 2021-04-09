@@ -1,6 +1,6 @@
 from data_model.read_sqlite import DatabaseTable
-from UI.Frames.scroll_frame import ScrollFrame
-from UI.Frames.blanc_frame import BlancFrame
+from UI.frames.scroll_frame import ScrollFrame
+from UI.frames.blanc_frame import BlancFrame
 
 
 class TabFrame(BlancFrame):
@@ -46,14 +46,12 @@ class TabFrame(BlancFrame):
     def get_ivarrays(self):
         """
         Returns the IndexVariableArrays that are placed inside this Tab_Frame.
-
         """
         return self.scroll_frame.get_ivarrays()
 
     def clear_ivarray_list(self):
         """
         Clears the ivarray_list in the scroll_frame.
-
         """
         self.scroll_frame.clear_ivarray_list()
 
