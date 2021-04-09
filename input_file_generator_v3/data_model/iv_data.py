@@ -16,12 +16,10 @@ class IVDict(dict):
     Dictionary object for IVData with methods to
     add and remove region and atom entries.
     Inherits from dict.
-
     """
     def add_atom(self):
         """
         Adds an Atom to every IVArray
-
         """
         for tab in self:
             # for all index variable arrays in that tab
@@ -31,7 +29,6 @@ class IVDict(dict):
     def add_region(self):
         """
         Adds a Region to every IVArray
-
         """
         for tab in self:
             # for all index variable arrays in that tab
@@ -87,7 +84,6 @@ class IVData:
     """
     Contains all the necessary data to re-create and re-fill an IVArray
     and some methods to add or remove entries
-
     """
 
     def __init__(self, size_string, natom, nr, array_state, array_settings):

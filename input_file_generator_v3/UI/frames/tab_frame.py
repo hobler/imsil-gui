@@ -1,6 +1,6 @@
 from data_model.read_sqlite import DatabaseTable
-from UI.Frames.scroll_frame import ScrollFrame
-from UI.Frames.blanc_frame import BlancFrame
+from UI.frames.scroll_frame import ScrollFrame
+from UI.frames.blanc_frame import BlancFrame
 
 
 class TabFrame(BlancFrame):

@@ -12,7 +12,7 @@ import tkinter as tk
 from collections import OrderedDict
 from tkinter import ttk
 
-from UI.Frames.tab_frame import TabFrame
+from UI.frames.tab_frame import TabFrame
 from data_model.input_file import InputFile
 from data_model.iv_data import IVData, IVDict
 from data_model.read_sqlite import get_database_table_names
@@ -403,7 +403,6 @@ class ImsilInputParameterEditor:
     def disable_tabs(self):
         """
         Disables all Tabs of the notebook.
-
         """
         for i in range(len(self.nb.tabs())):
             self.nb.tab(i, state="disabled")
@@ -411,7 +410,6 @@ class ImsilInputParameterEditor:
     def enable_tabs(self):
         """
         Enables all Tabs of the notebook.
-
         """
         for i in range(len(self.nb.tabs())):
             self.nb.tab(i, state="normal")
@@ -419,11 +417,9 @@ class ImsilInputParameterEditor:
     def open_edit_material_window(self):
         """
         Opens the window for editing the Ion and Material names.
-
         """
-
         # get all data
-        iv_dict = self.get_data_from_ivarrays()
+        iv_dict = self.get_ivdict()
         ions = None
         materials = []
 
@@ -465,7 +461,6 @@ class ImsilInputParameterEditor:
         :param nr: new number of regions
         :param atoms: names of the atoms
         :param regions: names of the regions
-
         """
         # re-enable this window
         self.root.deiconify()
@@ -518,11 +513,11 @@ class ImsilInputParameterEditor:
                                 if index > 0:
                                     child["text"] = regions[index - 1]
 
-    def get_data_from_ivarrays(self):
+    def get_ivdict(self):
         """
-        Gets the data from all IVArrays and stores them in a IVDict dictionary.
-        Key is the tab name.
+        Get the data from all IVArrays and store them in an IVDict dictionary.
 
+        Key is the tab name.
         """
         iv_dict = IVDict()
         for tab_name in self.nb.tabs():
@@ -536,10 +531,9 @@ class ImsilInputParameterEditor:
 
     def get_data_from_ivarray(self, ivarray):
         """
-        Returns all the values and array state as a IVData object
+        Returns all the values and array state as an IVData object
 
         :param ivarray: IndexVariableArray
-
         """
         values = ivarray.get_values()
         # settings to re-create the array
@@ -567,9 +561,9 @@ class ImsilInputParameterEditor:
         else:
             nr = self.nr
 
-        data = IVData(ivarray.get_size_string(
-            array_settings[0], array_settings[1]),
-            natom, nr, values[1], values[2])
+        data = IVData(
+                ivarray.get_size_string(array_settings[0], array_settings[1]),
+                natom, nr, values[1], values[2])
         # points doesn't get changed, so it's just saved as it is
         if "POINT" in array_settings[1]:
             data.values = values[0]

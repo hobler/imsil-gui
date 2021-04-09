@@ -9,6 +9,7 @@ Classes:
     `EditWindow`
         Window for editing the Ion and Material names.
 """
+import os
 import sys
 import tkinter as tk
 from tkinter import messagebox
@@ -49,7 +50,7 @@ class EditWindow(tk.Tk):
 
     def __init__(self, ions, materials, iv_dict, on_close):
         """
-        Constructor.
+        Init method.
 
         :param ions: Current Ion name
         :param materials: List of current Material names
@@ -148,7 +149,6 @@ class EditWindow(tk.Tk):
     def on_btn_add_region(self):
         """
         Adds a new empty RegionEditFrame at the end of the Material Section.
-
         """
         self.add_region_frame(len(self.region_frames), "")
 
@@ -176,7 +176,6 @@ class EditWindow(tk.Tk):
         """
         Callback for the Cancel Button. Asks if the cancellation was intended.
         Closes the Window if the user selects "yes".
-
         """
         mb_result = \
             tk.messagebox.askquestion("Cancel Editing",
@@ -193,7 +192,6 @@ class EditWindow(tk.Tk):
         Callback for the OK Button. Asks if the click was intended,
         calculates the new atoms, regions, nr and natom
         and returns them with the callback function to the main window
-
         """
         # get the new values from the entry boxes
         new_ion = self.entry_ion.get()
@@ -233,7 +231,7 @@ class EditWindow(tk.Tk):
             tk.messagebox.showerror("Invalid Input", "Invalid Material name.")
             return
 
-        # get sure that the user wants to apply the changes
+        # make sure that the user wants to apply the changes
         mb_result = \
             tk.messagebox.askquestion("Apply Changes",
                                       "Are you sure you want to "
@@ -322,7 +320,6 @@ class EditWindow(tk.Tk):
 class RegionEditFrame(tk.Frame):
     """
     Frame to edit the Material names. Inherits from tk.Frame.
-
     """
 
     def __init__(self, parent, text, material, on_delete, *args, **kwargs):
@@ -354,7 +351,8 @@ class RegionEditFrame(tk.Frame):
         self.btn_delete = tk.Button(self, text="delete",
                                     width=20, height=20,
                                     command=self.on_btn_delete)
-        self.set_button(self.btn_delete, "minus.gif", "delete")
+        self.set_button(self.btn_delete, os.path.join("pics", "minus.gif"),
+                        "delete")
         self.btn_delete.grid(row=0, column=2)
 
     def set_button(self, widget, file, text):
@@ -377,7 +375,6 @@ class RegionEditFrame(tk.Frame):
     def on_btn_delete(self):
         """
         Callback for the Delete Button
-
         """
         self.on_delete(self)
 
@@ -386,13 +383,11 @@ class RegionEditFrame(tk.Frame):
         Sets the label text.
 
         :param text: The text.
-
         """
         self.lbl_name.configure(text=text)
 
     def get_name(self):
         """
         Returns the text in the entry box.
-
         """
         return self.ent_name.get()

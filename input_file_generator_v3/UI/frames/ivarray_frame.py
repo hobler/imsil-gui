@@ -1,14 +1,15 @@
+import os
 import tkinter as tk
 # from tkinter import messagebox
 
-from UI.Frames.blanc_frame import BlancFrame
-from UI.Frames.blanc_frame import INDEX_COLLAPSE_1D
-from UI.Frames.blanc_frame import INDEX_COLLAPSE_2D
-from UI.Frames.blanc_frame import INDEX_EXPAND_R_1D
-from UI.Frames.blanc_frame import INDEX_EXPAND_R_2D
-from UI.Frames.blanc_frame import INDEX_EXPAND_D_1D
-from UI.Frames.blanc_frame import INDEX_EXPAND_D_2D
-from UI.Frames.blanc_frame import INDEX_EXPAND_RD
+from UI.frames.blanc_frame import BlancFrame
+from UI.frames.blanc_frame import INDEX_COLLAPSE_1D
+from UI.frames.blanc_frame import INDEX_COLLAPSE_2D
+from UI.frames.blanc_frame import INDEX_EXPAND_R_1D
+from UI.frames.blanc_frame import INDEX_EXPAND_R_2D
+from UI.frames.blanc_frame import INDEX_EXPAND_D_1D
+from UI.frames.blanc_frame import INDEX_EXPAND_D_2D
+from UI.frames.blanc_frame import INDEX_EXPAND_RD
 
 # Configure the width and height of the widgets
 INFO_WIDTH = 10  # info Button width
@@ -132,7 +133,7 @@ class IndexVariableArrayFrame(BlancFrame):
                                           w=INFO_WIDTH,
                                           h=INFO_HEIGHT,
                                           tool_tip_text=short_desc)
-        self.photo = tk.PhotoImage(file="info_sign_1.gif")
+        self.photo = tk.PhotoImage(file=os.path.join("pics", "info_sign_1.gif"))
         btn_info.config(image=self.photo)
         btn_info.image = self.photo
         btn_info.config(takefocus=False)
@@ -173,7 +174,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Add the right arrow Button
                 btn_r = self.parent.add_button(parent=self, btn_text="r",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_r, "arrow_r.gif", 'r')
+                self.set_button(btn_r, os.path.join("pics", "arrow_r.gif"), 'r')
                 btn_r.grid(row=row_index, column=self.num_columns - 1)
             elif "REGION" in index_var_list and "geom" in str(self):
                 # Create an NR x 1 array
@@ -194,7 +195,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Add the down arrow Button
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_d, "arrow_d.gif", 'd')
+                self.set_button(btn_d, os.path.join("pics", "arrow_d.gif"), 'd')
                 btn_d.grid(row=row_index, column=self.num_columns - 1)
             elif "REGION" in index_var_list:
                 # Create a 1 x NR array
@@ -204,7 +205,7 @@ class IndexVariableArrayFrame(BlancFrame):
                                               width=INDEX_LABEL_WIDTH_1D)
                 for i in range(self.n_r):
                     label = self.parent.add_label(parent=self,
-                                                  label_text="REGION " + str(i + 1))
+                                                  label_text="REGION "+str(i+1))
                 # Add a new row with a Label and Entries
                 label = self.parent.add_label(parent=self, label_text="")
                 for i in range(self.n_r):
@@ -214,7 +215,7 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Add the right arrow Button
                 btn_r = self.parent.add_button(parent=self, btn_text="r",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_r, "arrow_r.gif", 'r')
+                self.set_button(btn_r, os.path.join("pics", "arrow_r.gif"), 'r')
                 btn_r.grid(row=row_index, column=self.num_columns - 1)
             elif "POINT" in index_var_list:
                 # Create a special array for POINT
@@ -237,11 +238,11 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Add the '+' and down arrow Buttons
                 btn_add = self.parent.add_button(parent=self, btn_text="+",
                                                  w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_add, "add.gif", '+')
+                self.set_button(btn_add, os.path.join("pics", "add.gif"), '+')
                 btn_add.grid(row=row_index, column=self.num_columns - 2)
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_d, "arrow_d.gif", 'd')
+                self.set_button(btn_d, os.path.join("pics", "arrow_d.gif"), 'd')
                 btn_d.grid(row=row_index, column=self.num_columns - 1)
         elif dim == 2:
             if ("REGION" in index_var_list and
@@ -265,12 +266,12 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Add the two arrow Buttons
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_d, "arrow_d.gif", 'd')
+                self.set_button(btn_d, os.path.join("pics", "arrow_d.gif"), 'd')
                 btn_d.grid(row=row_index, column=self.num_columns - 2)
 
                 btn_r = self.parent.add_button(parent=self, btn_text="r",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_r, "arrow_r.gif", 'r')
+                self.set_button(btn_r, os.path.join("pics", "arrow_r.gif"), 'r')
                 btn_r.grid(row=row_index, column=self.num_columns - 1)
             elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
                 # Create an NATOM x NATOM array
@@ -292,12 +293,12 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Add the two arrow Buttons
                 btn_d = self.parent.add_button(parent=self, btn_text="d",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_d, "arrow_d.gif", 'd')
+                self.set_button(btn_d, os.path.join("pics", "arrow_d.gif"), 'd')
                 btn_d.grid(row=row_index, column=self.num_columns - 2)
 
                 btn_r = self.parent.add_button(parent=self, btn_text="r",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-                self.set_button(btn_r, "arrow_r.gif", 'r')
+                self.set_button(btn_r, os.path.join("pics", "arrow_r.gif"), 'r')
                 btn_r.grid(row=row_index, column=self.num_columns - 1)
 
         # Update the Button commands
@@ -506,7 +507,8 @@ class IndexVariableArrayFrame(BlancFrame):
                             widget.insert(0, self.values[row][col])  # Readd
 
         # Change the right arrow button to a left arrow button
-        self.set_button(right_arrow_btn, "arrow_l.gif", "l")
+        self.set_button(right_arrow_btn, os.path.join("pics", "arrow_l.gif"),
+                        "l")
         # Update the Button commands
         self.update_buttons_command(index_var_list)
         # Set the weigths for the new state
@@ -617,7 +619,8 @@ class IndexVariableArrayFrame(BlancFrame):
             self.set_entry_value(self, m, n)
 
         # Change the left arrow button to the right arrow button
-        self.set_button(left_arrow_btn, "arrow_r.gif", "r")
+        self.set_button(left_arrow_btn, os.path.join("pics", "arrow_r.gif"),
+                        "r")
         # Update the Button commands
         self.update_buttons_command(index_var_list)
         # Set the weigths for the new state
@@ -764,7 +767,8 @@ class IndexVariableArrayFrame(BlancFrame):
                             widget.insert(0, self.values[row][col])  # Readd
 
         # Change the down arrow button to an up arrow button
-        self.set_button(down_arrow_btn, "arrow_u.gif", "u")
+        self.set_button(down_arrow_btn, os.path.join("pics", "arrow_u.gif"),
+                        "u")
         # Update the Button commands
         self.update_buttons_command(index_var_list)
         # Set the weigths for the new state
@@ -882,7 +886,7 @@ class IndexVariableArrayFrame(BlancFrame):
             self.set_entry_value(self, m, n)
 
         # Change the up arrow button to the down arrow button
-        self.set_button(up_arrow_btn, "arrow_d.gif", "d")
+        self.set_button(up_arrow_btn, os.path.join("pics", "arrow_d.gif"), "d")
         # Update the Button commands
         self.update_buttons_command(index_var_list)
         # Set the weigths for the new state
@@ -930,7 +934,7 @@ class IndexVariableArrayFrame(BlancFrame):
         # Add the remove Button
         button_remove = self.parent.add_button(parent=self, btn_text="-",
                                                w=ARROW_WIDTH, h=ARROW_HEIGHT)
-        self.set_button(button_remove, "minus.gif", '-')
+        self.set_button(button_remove, os.path.join("pics", "minus.gif"), '-')
 
         # Get the dimensions for the array to be created
         dim, m, n, IS_POINT = self.get_dimensions(index_var_list)
@@ -938,15 +942,17 @@ class IndexVariableArrayFrame(BlancFrame):
         # Add the '+' and the down/up arrow Button
         button_add = self.parent.add_button(parent=self, btn_text="+",
                                             w=ARROW_WIDTH, h=ARROW_HEIGHT)
-        self.set_button(button_add, "add.gif", '+')
+        self.set_button(button_add, os.path.join("pics", "add.gif"), '+')
         button_add.grid(row=row_index, column=7 - 2)
 
         button_arrow = self.parent.add_button(parent=self, btn_text="",
                                               w=ARROW_WIDTH, h=ARROW_HEIGHT)
         if IS_DOWN:
-            self.set_button(button_arrow, "arrow_u.gif", 'u')
+            self.set_button(button_arrow, os.path.join("pics", "arrow_u.gif"),
+                            'u')
         else:
-            self.set_button(button_arrow, "arrow_d.gif", 'd')
+            self.set_button(button_arrow, os.path.join("pics", "arrow_d.gif"),
+                            'd')
 
         button_arrow.grid(row=row_index, column=7 - 1)
 
