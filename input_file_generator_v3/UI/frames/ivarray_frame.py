@@ -81,6 +81,9 @@ class IndexVariableArrayFrame(BlancFrame):
         # A list of values of the index variable array. This is used to keep
         # track of the values regardless of the current state of the array
         self.values = []
+        # Saves the atom and region names for the labels
+        self.atom_names = []
+        self.region_names = []
 
         # Get the number of elements for the current parameter
         dim = len(index_var_list)
@@ -422,9 +425,9 @@ class IndexVariableArrayFrame(BlancFrame):
                     # Get all Label texts
                     label_text = widget.cget('text')
                     # Swap the element accordingly
-                    if label_text == "REGION 1":
+                    if "REGION 1" in label_text:
                         widget['text'] = "ALL REGIONS"
-                    if label_text == "ATOM 1":
+                    if "ATOM 1" in label_text:
                         widget['text'] = "ALL ATOMS"
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current column in the grid
@@ -458,9 +461,13 @@ class IndexVariableArrayFrame(BlancFrame):
                     label_text = widget.cget('text')
                     # Swap the elements back  accordingly
                     if label_text == "ALL REGIONS":
-                        widget['text'] = "REGION 1"
+                        widget['text'] = \
+                            "REGION 1: " + str(self.region_names[0]) \
+                            if len(self.region_names) > 0 else "REGION 1"
                     if label_text == "ALL ATOMS":
-                        widget['text'] = "ATOM 1"
+                        widget['text'] = \
+                            "ATOM 1: " + str(self.atom_names[0]) \
+                            if len(self.atom_names) > 0 else "ATOM 1"
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current row and column in the grid
                     curr_row = widget.grid_info()['row']
@@ -574,9 +581,9 @@ class IndexVariableArrayFrame(BlancFrame):
                         # Get all Label texts
                         label_text = widget.cget('text')
                         # Swap the element accordingly
-                        if label_text == "REGION 1":
+                        if "REGION 1" in label_text:
                             widget['text'] = "ALL REGIONS"
-                        if label_text == "ATOM 1":
+                        if "ATOM 1" in label_text:
                             widget['text'] = "ALL ATOMS"
         # Otherwise check, if all Entry values are the same and update
         # the saved Entry values
@@ -609,9 +616,13 @@ class IndexVariableArrayFrame(BlancFrame):
                     label_text = widget.cget('text')
                     # Swap the elements back  accordingly
                     if label_text == "ALL REGIONS":
-                        widget['text'] = "REGION 1"
+                        widget['text'] = \
+                            "REGION 1: " + str(self.region_names[0]) \
+                            if len(self.region_names) > 0 else "REGION 1"
                     if label_text == "ALL ATOMS":
-                        widget['text'] = "ATOM 1"
+                        widget['text'] = \
+                            "ATOM 1: " + str(self.atom_names[0]) \
+                            if len(self.atom_names) > 0 else "ATOM 1"
             # Hide every widget except the main Label and info Button
             # and show the Entry
             self.hide_widgets(self, m, n, True, row_index)
@@ -678,9 +689,9 @@ class IndexVariableArrayFrame(BlancFrame):
                     # Get all Label texts
                     label_text = widget.cget('text')
                     # Swap the element accordingly
-                    if label_text == "REGION 1":
+                    if "REGION 1" in label_text:
                         widget['text'] = "ALL REGIONS"
-                    if label_text == "ATOM 1":
+                    if "ATOM 1" in label_text:
                         widget['text'] = "ALL ATOMS"
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current row in the grid
@@ -715,9 +726,13 @@ class IndexVariableArrayFrame(BlancFrame):
                     label_text = widget.cget('text')
                     # Swap the elements back  accordingly
                     if label_text == "ALL REGIONS":
-                        widget['text'] = "REGION 1"
+                        widget['text'] = \
+                            "REGION 1: " + str(self.region_names[0]) \
+                            if len(self.region_names) > 0 else "REGION 1"
                     if label_text == "ALL ATOMS":
-                        widget['text'] = "ATOM 1"
+                        widget['text'] = \
+                            "ATOM 1: " + str(self.atom_names[0]) \
+                            if len(self.atom_names) > 0 else "ATOM 1"
                 elif widget.winfo_class() == "Entry" and widget.grid_info():
                     # Current row and column in the grid
                     curr_row = widget.grid_info()['row']
@@ -835,9 +850,9 @@ class IndexVariableArrayFrame(BlancFrame):
                         # Get all Label texts
                         label_text = widget.cget('text')
                         # Swap the element accordingly
-                        if label_text == "REGION 1":
+                        if "REGION 1" in label_text:
                             widget['text'] = "ALL REGIONS"
-                        if label_text == "ATOM 1":
+                        if "ATOM 1" in label_text:
                             widget['text'] = "ALL ATOMS"
 
         # Otherwise check, if all Entry values are the same
@@ -875,9 +890,13 @@ class IndexVariableArrayFrame(BlancFrame):
                     label_text = widget.cget('text')
                     # Swap the elements back  accordingly
                     if label_text == "ALL REGIONS":
-                        widget['text'] = "REGION 1"
+                        widget['text'] = \
+                            "REGION 1: " + str(self.region_names[0]) \
+                            if len(self.region_names) > 0 else "REGION 1"
                     if label_text == "ALL ATOMS":
-                        widget['text'] = "ATOM 1"
+                        widget['text'] = \
+                            "ATOM 1: " + str(self.atom_names[0]) \
+                            if len(self.atom_names) > 0 else "ATOM 1"
 
             # Hide every widget except the main Label and info Button
             # and show the Entry
@@ -1145,8 +1164,14 @@ class IndexVariableArrayFrame(BlancFrame):
             # Set the value of all other Entry widgets
             elif (curr_val != "Multiple values" and
                   widget.winfo_class() == "Entry"):
+                readonly = False
+                if widget['state'] == 'readonly':
+                    readonly = True
+                widget.config(state='normal')
                 widget.delete(0, "end")  # Delete
                 widget.insert(0, curr_val)  # Readd
+                if readonly:
+                    widget.config(state='readonly')
 
         if curr_val != "Multiple values":
             return False
@@ -1163,6 +1188,7 @@ class IndexVariableArrayFrame(BlancFrame):
         :param n: the number of columns of the index variable array
         """
         items = []
+        readonly = False
         # Iterate through every widget
         for i, widget in enumerate(par_frame.children.values()):
             # Skip the main Label and info Button
@@ -1176,12 +1202,17 @@ class IndexVariableArrayFrame(BlancFrame):
                   widget.winfo_class() == "Entry"):
                 items.append(widget.get())
 
-        # Set the value of the singel Entry
+        # Set the value of the single Entry
+        if curr_widget['state'] == 'readonly':
+            readonly = True
+        curr_widget.config(state='normal')
         curr_widget.delete(0, "end")  # Delete
         if all(items[0] == item for item in items):
             curr_widget.insert(0, items[0])  # Readd
         else:
             curr_widget.insert(0, "Multiple values")  # Readd
+        if readonly:
+            curr_widget.config(state='readonly')
 
     def hide_widgets(self, par_frame, m, n, showEntry=False, row_index=None):
         """

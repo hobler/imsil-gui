@@ -203,14 +203,16 @@ class ImsilInputParameterEditor:
         else:
             print("There is no tab with the name " + tab_name)
 
-    def update_all_iv_arrays(self, iv_dict, natom, nr):
+    def update_all_iv_arrays(self, iv_dict, natom, nr, atom_names, region_names):
         """
         Resizes all IndexVariableArrays in every Tab.
 
         :param iv_dict: dictionary containing all ivarrays
             accessible through the tab_name
-        :param nr: new number of Regions
         :param natom: new number of Atoms
+        :param nr: new number of Regions
+        :param atom_names: atom names for the IVArrays
+        :param region_names: region names for the IVArrays
         """
 
         # can't set the variables below 1
@@ -301,6 +303,8 @@ class ImsilInputParameterEditor:
 
                 # re-adding values
                 ivarray.set_values_from_ivdata(iv_dict[tab_name][i], nr, natom)
+                ivarray.atom_names = atom_names.copy()
+                ivarray.region_names = region_names.copy()
 
                 # update progressbar
                 progressbar_array["value"] = \
@@ -466,7 +470,7 @@ class ImsilInputParameterEditor:
         # if something has changed
         if change:
             # call the update method to re-size and re-fill the arrays
-            self.update_all_iv_arrays(iv_dict, natom, nr)
+            self.update_all_iv_arrays(iv_dict, natom, nr, atoms, regions)
 
             # write the ion name in the corresponding entries
             # (see open_edit_material_window())
@@ -506,11 +510,13 @@ class ImsilInputParameterEditor:
                             if "ATOM" in child["text"]:
                                 index = int(child["text"].split(' ')[-1])
                                 if index > 0:
-                                    child["text"] = atoms[index - 1]
+                                    child["text"] = "ATOM " + str(index) \
+                                                + ": " + str(atoms[index - 1])
                             if "REGION" in child["text"]:
                                 index = int(child["text"].split(' ')[-1])
                                 if index > 0:
-                                    child["text"] = regions[index - 1]
+                                    child["text"] = "REGION " + str(index) \
+                                                + ": " + str(regions[index - 1])
 
     def get_ivdict(self):
         """
