@@ -66,7 +66,6 @@ class EditWindow(tk.Tk):
         self.frame_mat_left = tk.Frame(self.frame_mat)
         self.frame_mat_left.grid(row=0, column=0, padx=10,
                                  pady=10, sticky="NS")
-        self.frame_mat_left.rowconfigure(0, weight=1)
 
         self.frame_mat_right = tk.Frame(self.frame_mat)
         self.frame_mat_right.grid(row=0, column=1,
