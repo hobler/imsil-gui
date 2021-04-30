@@ -1,5 +1,5 @@
 """
-Functions and Class for the Edit Window
+Data structures to hold and modify the data in the IVArrays.
 
 Classes:
     `IVDict`

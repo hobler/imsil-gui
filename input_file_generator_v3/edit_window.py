@@ -42,6 +42,7 @@ class EditWindow(tk.Tk):
         self.nr = len(materials)
 
         self.region_frames = []
+        self.add_buttons = []
 
         self.title("Edit Materials/Ions")
         self.minsize(470, 200)
@@ -62,19 +63,26 @@ class EditWindow(tk.Tk):
         self.frame_mat.rowconfigure(0, weight=1)
         self.frame_mat.columnconfigure(0, weight=1)
         self.frame_mat.columnconfigure(1, weight=1)
+        self.frame_mat.columnconfigure(2, weight=1)
 
         self.frame_mat_left = tk.Frame(self.frame_mat)
-        self.frame_mat_left.grid(row=0, column=0, padx=10,
+        self.frame_mat_left.grid(row=0, column=0, padx=(15, 0),
+                                 pady=20, sticky="NS")
+
+        self.frame_mat_add = tk.Frame(self.frame_mat)
+        self.frame_mat_add.grid(row=0, column=1,
                                  pady=10, sticky="NS")
 
         self.frame_mat_right = tk.Frame(self.frame_mat)
-        self.frame_mat_right.grid(row=0, column=1,
+        self.frame_mat_right.grid(row=0, column=2,
                                   padx=10, pady=10, sticky="NS")
 
+        # for 'Add Region' button
         self.frame_mat_control = tk.Frame(self.frame_mat_right)
         self.frame_mat_control.grid(row=0, column=0, sticky="WE")
         self.frame_mat_control.columnconfigure(0, weight=1)
 
+        # for 'Cancel' and 'OK' button
         self.frame_mat_dialog = tk.Frame(self.frame_mat_right)
         self.frame_mat_dialog.grid(row=1, column=0, sticky="WE")
         self.frame_mat_dialog.columnconfigure(0, weight=1)
@@ -102,12 +110,69 @@ class EditWindow(tk.Tk):
         for i, material in enumerate(self.materials):
             self.add_region_frame(i, material)
 
+        self.update_add_buttons()
+
+    def update_add_buttons(self):
+        """
+        Updates the amount of "add" buttons to the number of regions +1
+        """
+        if len(self.add_buttons) == len(self.region_frames) + 1:
+            return
+        # too many buttons -> delete excess ones
+        elif len(self.add_buttons) > len(self.region_frames) + 1:
+            for i in range(len(self.add_buttons) - 1,
+                           len(self.region_frames), -1):
+                self.add_buttons[i].destroy()
+                del self.add_buttons[i]
+        # too few buttons -> add some
+        else:
+            for i in range(len(self.add_buttons), len(self.region_frames) + 1):
+                self.add_add_button()
+
+    def add_add_button(self):
+        """
+        Add a new "add" button
+        """
+        btn_temp = tk.Button(self.frame_mat_add, text="add",
+                                    width=20, height=20)
+        btn_temp.config(command=lambda button=btn_temp: self.on_btn_add(button))
+        self.set_button(btn_temp, os.path.join("pics", "add.gif"), "add")
+        btn_temp.grid(row=len(self.add_buttons), column=0)
+        self.add_buttons.append(btn_temp)
+
+    def on_btn_add(self, sender):
+        """
+        Set up the Button with the specified text and picture.
+
+        :param sender: the Button that called this method
+        """
+        index = self.add_buttons.index(sender)
+        self.shift_region_frames(index)
+        self.add_region_frame(index, "")
+
+    def set_button(self, widget, file, text):
+        """
+        Set up the Button with the specified text and picture.
+
+        This method sets the Button image and text.
+
+        :param widget: the Button to be set
+        :param file: the name of the new image file
+        :param text: the new text of the Button (for identification)
+        """
+        btn_new = widget
+        photo_new = tk.PhotoImage(file=file, master=self)
+        btn_new.config(image=photo_new)
+        btn_new.image = photo_new
+        btn_new.config(takefocus=False)
+        btn_new.config(text=text)
+
     def add_region_frame(self, index, material):
         """
         Adds a new RegionEditFrame to the Material section w
         ith a given name on a given position.
 
-        :param index: Where to add the frame (should always be at the end)
+        :param index: Where to add the frame (has to be free in the grid)
         :param material: Name of the Material
         """
         rgn_frm = RegionEditFrame(self.frame_mat_left,
@@ -115,7 +180,20 @@ class EditWindow(tk.Tk):
                                   material,
                                   self.remove_region_frame)
         rgn_frm.grid(row=index, column=0, sticky="WE")
-        self.region_frames.append(rgn_frm)
+        self.region_frames.insert(index, rgn_frm)
+        self.update_add_buttons()
+
+    def shift_region_frames(self, index):
+        """
+        Shifts all RegionFrames above the index to the next position in the grid
+        to make place for a new RegionFrame.
+
+        :param index: Every RegionFrame above tha index gets shifted.
+        """
+        for i, rgn_frm in enumerate(self.region_frames):
+            if i >= index:
+                rgn_frm.grid(row=i+1, column=0, sticky="WE")
+                rgn_frm.set_label("Region " + str(i+2) + ":")
 
     def on_btn_add_region(self):
         """
@@ -142,6 +220,7 @@ class EditWindow(tk.Tk):
         # actually remove the frame
         self.region_frames.remove(frame)
         frame.destroy()
+        self.update_add_buttons()
 
     def on_btn_cancel(self):
         """
