@@ -31,7 +31,8 @@ class EditWindow(tk.Tk):
         """
         super().__init__()
 
-        self.on_close = on_close
+        self.on_close = on_close  # callback function
+        # callback when window gets closed
         self.protocol("WM_DELETE_WINDOW", self.on_btn_cancel)
         self.ions = ions
         self.materials = materials
@@ -44,19 +45,24 @@ class EditWindow(tk.Tk):
         self.region_frames = []
         self.add_buttons = []
 
+        # window setup
         self.title("Edit Materials/Ions")
         self.minsize(470, 200)
         self.maxsize(500, 1000)
         self.columnconfigure(0, weight=1)
         center_window(self)
 
+        # widget setup
+        # outer frame
         self.frame = tk.Frame(self)
         self.frame.grid(row=0, column=0, sticky="WE")
         self.frame.columnconfigure(0, weight=1)
 
+        # top left frame, containing the ion field
         self.frame_ion = tk.LabelFrame(self.frame, text="Ions", padx=5, pady=5)
         self.frame_ion.grid(row=0, column=0, padx=10, pady=10, sticky="WE")
 
+        # bottom left frame, containing the region frame list
         self.frame_mat = tk.LabelFrame(self.frame, text="Materials",
                                        padx=5, pady=5)
         self.frame_mat.grid(row=1, column=0, padx=10, pady=10, sticky="WE")
@@ -65,27 +71,23 @@ class EditWindow(tk.Tk):
         self.frame_mat.columnconfigure(1, weight=1)
         self.frame_mat.columnconfigure(2, weight=1)
 
+        # frame to contain the region frames
         self.frame_mat_left = tk.Frame(self.frame_mat)
         self.frame_mat_left.grid(row=0, column=0, padx=(15, 0),
                                  pady=20, sticky="NS")
 
+        # frame to contain the add buttons
         self.frame_mat_add = tk.Frame(self.frame_mat)
         self.frame_mat_add.grid(row=0, column=1,
                                  pady=10, sticky="NS")
 
-        self.frame_mat_right = tk.Frame(self.frame_mat)
-        self.frame_mat_right.grid(row=0, column=2,
-                                  padx=10, pady=10, sticky="NS")
-
-        # for 'Add Region' button
-        self.frame_mat_control = tk.Frame(self.frame_mat_right)
-        self.frame_mat_control.grid(row=0, column=0, sticky="WE")
-        self.frame_mat_control.columnconfigure(0, weight=1)
-
-        # for 'Cancel' and 'OK' button
-        self.frame_mat_dialog = tk.Frame(self.frame_mat_right)
-        self.frame_mat_dialog.grid(row=1, column=0, sticky="WE")
-        self.frame_mat_dialog.columnconfigure(0, weight=1)
+        # for 'Cancel' and 'OK' button and the info label
+        self.frame_dialog = tk.LabelFrame(self.frame, text="Info")
+        self.frame_dialog.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="NSWE")
+        self.frame_dialog.columnconfigure(0, weight=1)
+        self.frame_dialog.columnconfigure(1, weight=1)
+        self.frame_dialog.rowconfigure(0, weight=1)
+        self.frame_dialog.rowconfigure(1, weight=1)
 
         self.label_ion = tk.Label(self.frame_ion, text="Ion Name:")
         self.label_ion.grid(row=0, column=0, padx=10, pady=10)
@@ -94,18 +96,18 @@ class EditWindow(tk.Tk):
         self.entry_ion.delete(0, "end")
         self.entry_ion.insert(0, str(self.ions))
 
-        self.btn_add_region = tk.Button(self.frame_mat_control,
-                                        text="Add Region",
-                                        command=self.on_btn_add_region)
-        self.btn_add_region.grid(row=0, column=0,
-                                 padx=10, pady=10, sticky="WE")
-
-        self.btn_cancel = tk.Button(self.frame_mat_dialog, text="Cancel",
+        self.label_info = tk.Label(self.frame_dialog,
+                                   text="Add Ions and Materials by writing "
+                                        "their molecular formula into the "
+                                        "entry fields.",
+                                   justify='left', wraplengt=100)
+        self.label_info.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky='NWE')
+        self.btn_cancel = tk.Button(self.frame_dialog, text="Cancel",
                                     command=self.on_btn_cancel)
-        self.btn_cancel.grid(row=0, column=0, padx=10, pady=10, sticky="WE")
-        self.btn_ok = tk.Button(self.frame_mat_dialog, text="OK",
+        self.btn_cancel.grid(row=1, column=0, padx=10, pady=10, sticky="WES")
+        self.btn_ok = tk.Button(self.frame_dialog, text="OK",
                                 command=self.on_btn_ok)
-        self.btn_ok.grid(row=0, column=1, padx=10, pady=10, sticky="WE")
+        self.btn_ok.grid(row=1, column=1, padx=10, pady=10, sticky="WES")
 
         for i, material in enumerate(self.materials):
             self.add_region_frame(i, material)
@@ -142,7 +144,7 @@ class EditWindow(tk.Tk):
 
     def on_btn_add(self, sender):
         """
-        Set up the Button with the specified text and picture.
+        Add a new Region Frame at the specified index of the button.
 
         :param sender: the Button that called this method
         """
@@ -237,6 +239,11 @@ class EditWindow(tk.Tk):
             self.on_close()
             self.destroy()
 
+    # TODO: known bug: when deleting a region/ion and adding it to another
+    #  position the region/ion doesn't get deleted and their values get mixed up
+    #  possible fix: copy the iv_dict and perform every add/delete action on the
+    #  copy and at the end when pressing "ok" the copy gets
+    #  passed to the update function
     def on_btn_ok(self):
         """
         Callback for the OK Button. Asks if the click was intended,

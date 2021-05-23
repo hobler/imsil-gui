@@ -1334,8 +1334,7 @@ class IndexVariableArrayFrame(BlancFrame):
         size_string = self.get_size_string(array_settings[0],
                                            array_settings[1])
 
-        # open the array to write all values
-        # into the textboxes to read them
+        # open the array to write all values into the textboxes to read them
         self.open_array_with_parameters(array_state, size_string)
 
         values = []
@@ -1432,7 +1431,7 @@ class IndexVariableArrayFrame(BlancFrame):
             # open the array to add values correctly
             self.open_array()
 
-            # saving the new and previous widths to calculate
+            # saving the new width to calculate
             # the correct positions with the new size
             width = 0
             # get the index var list from the values list

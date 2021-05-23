@@ -183,7 +183,7 @@ class ImsilInputParameterEditor:
         """
         Resizes all IndexVariableArrays in every Tab.
 
-        :param iv_dict: dictionary containing all ivarrays
+        :param iv_dict: dictionary (IVDict object) containing all ivarrays
             accessible through the tab_name
         :param natom: new number of Atoms
         :param nr: new number of Regions
@@ -433,8 +433,8 @@ class ImsilInputParameterEditor:
         """
         Callback function. Gets called when the EditWindow closes.
 
-        :param change: If the arrays should get updated.
-        :param iv_dict: The data structure containing the entries
+        :param change: True, if the arrays should get updated.
+        :param iv_dict: The data structure containing the entries (IVDict object)
         :param new_ion: New ion name
         :param natom: new number of atoms
         :param nr: new number of regions
@@ -455,6 +455,21 @@ class ImsilInputParameterEditor:
             for tab_num, tab_name in enumerate(self.nb.tabs()):
                 tab_frame = self.nb.nametowidget(tab_name)
                 scroll_frame = tab_frame.scroll_frame
+
+                # updating NATOM & NR in &SETUP
+                if tab_num == 0:
+                    content_frame_entry = scroll_frame.content_frame_entry
+                    for child in content_frame_entry.winfo_children():
+                        if "entry12" in str(child):
+                            child["state"] = 'normal'
+                            child.delete(0, "end")
+                            child.insert(0, str(natom))
+                            child["state"] = 'disabled'
+                        elif "entry14" in str(child):
+                            child["state"] = 'normal'
+                            child.delete(0, "end")
+                            child.insert(0, str(nr))
+                            child["state"] = 'disabled'
 
                 # writing the atom name in it's entry
                 if tab_num == 2:
@@ -516,14 +531,15 @@ class ImsilInputParameterEditor:
 
         :param ivarray: IndexVariableArray
         """
+        # structure of values described in ivarray_frame.py -> get_values()
         values = ivarray.get_values()
         # settings to re-create the array
         array_settings = values[2]
         size = ivarray.get_size(array_settings[0],
                                 array_settings[1],
                                 self.nr, self.natom)
-        m = size[0]
-        n = size[1]
+        m = size[0]  # number of rows in the iv_array
+        n = size[1]  # number of columns
         if type(m) != int:
             m = m.get()
         if type(n) != int:
