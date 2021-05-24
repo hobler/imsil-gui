@@ -59,14 +59,42 @@ which are bound to index variables, this class has to be extended with
 the ability to set/get not only the widget of a parameter but also the
 widgets and variables of the index variables of the parameter.        
 
+On top of the Window is a menu bar, with which the Edit Materials/Ions Window 
+can be opened under the "Edit" menu. The File and View Menus currently don't 
+have a use.
+
+## Edit Materials/Ions Window
+The Edit Window makes it possible to alter the amount and types of Materials 
+and Ions. The changes made in this window affect the size of the index variable 
+arrays by changing the two variables `NATOM` and `NR` and updating the IMSIL 
+Input Parameter Editor Window.
+
+It consists of 3 Label Frames inside an outer frame. The "Ions" frame holds an 
+entry for the ions molecular formula. The "Materials" frame has
+a list of `RegionEditFrames` which can be added and removed with the plus and 
+minus buttons on the side. Each `RegionEditFrame` consists primarily of an entry
+to edit the molecular formula, and a button to delete the frame. On the left 
+side of the "Materials" frame are buttons to insert a `RegionEditFrame` at the 
+corresponding position. The "Info" Frame on the right holds a small info text 
+and two buttons to discard (Cancel) or apply (OK) the changes. 
+
+After clicking the "OK" button all the text entries are checked for a correct
+molecular formula. If any of them is wrong, a MessageBox shows up, describing 
+the error. If no errors are found, the `IVDict` object is updated with the
+changes and passed to the callback function of the IMSIL Input Parameter Editor 
+Window.
+
 # Files
 In the following section (almost) all files of the project are briefly
 described  
 
 #### `input_file_generator_v3`:
 -	`parameters.db`: the SQLite database
--	`main.py`: the top-level program file, containing the classes 
-    `WelcomeWindow` and `ImsilInputParameterEditor`
+-	`main.py`: contains the main function, which opens the Welcome Window
+-	`welcome_window.py`: The `WelcomeWindow` class
+-	`parameter_editor_window.py`: contains the `ImsilInputParameterEditor` class.
+-	`edit_window.py`: contains the `EditWindow` and `RegionFrame` classes.
+-	`utility.py`: contains the `center_window` function
 
 #### `input_file_generator_v3\pics`:
 -	`add.gif`, `minus.gif`: the pictures used for the +/- Buttons to 
@@ -80,6 +108,9 @@ described
 #### `input_file_generator_v3\data_model`:
 -   `read_sqlite.py`, `data_list.py`, `input_file.py`: Classes used to manage
     the data or access the database
+-   `element.py`, `element.f90`: Classes and files to manage molecular formulas
+-   `iv_data.py`: Classes `IVData` and `IVDict` to store the data from index 
+    variable arrays and provide some helper functions.
 
 #### `input_file_generator_v3\UI\canvas`:
 -   `blanc_canvas.py`: this class implements the canvas used for the scrolling 
@@ -132,7 +163,22 @@ The number of Flags and Entries per row can be set in the program using the
 two variables `BOOL_PARAMS_PER_ROW` and `ENTRY_PARAMS_PER_ROW` in the
 `scroll_frame.py` file. For index variable arrays only one array is
 possible per row, thus there is no variable defining the number of index
-variable arrays per row.    
+variable arrays per row.
+
+To change the Ion or the materials, click on "Edit" -> "Materials/Ions". A new 
+window is opened which is used to alter the molecular formulas of existing 
+materials and ions, or to add and remove regions/materials. The Regions can be 
+removed by clicking the "minus" button next to a region, and added by clicking
+a "plus" button next to the regions. The new Region is inserted at the position 
+of the "plus" button. After editing click "OK" to apply the changes or "Cancel" 
+to discard them. A message box will show either way, to make sure the user 
+intentionally clicked the buttons, or to indicate any errors. After that, the 
+Editing window closes, and the Parameter editor window re-opens with the 
+`on_close_edit_material_window` callback function being called. If "OK" was 
+clicked and changes were made, the window will be locked until the changes are 
+applied, and a progress bar shows up to indicate the progress.
+
+## Index Variable Arrays
 
 The index variable arrays can be expanded and collapsed with the help of the
 arrow Buttons on the right-hand side of the row. Depending on the dimension
@@ -184,5 +230,5 @@ logic of the index variable arrays is as follows:
     value ‘’ (empty).  
   -	If the array is expanded, every row added, by pressing the ‘+’ Button, 
     will have the value ‘’ (empty). 
-
+       
 
