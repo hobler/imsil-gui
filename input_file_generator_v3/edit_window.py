@@ -110,7 +110,7 @@ class EditWindow(tk.Tk):
         self.btn_ok.grid(row=1, column=1, padx=10, pady=10, sticky="WES")
 
         for i, material in enumerate(self.materials):
-            self.add_region_frame(i, material)
+            self.add_region_frame(i, material, True)
 
         self.update_add_buttons()
 
@@ -150,7 +150,7 @@ class EditWindow(tk.Tk):
         """
         index = self.add_buttons.index(sender)
         self.shift_region_frames(index)
-        self.add_region_frame(index, "")
+        self.add_region_frame(index, "", False)
 
     def set_button(self, widget, file, text):
         """
@@ -169,18 +169,21 @@ class EditWindow(tk.Tk):
         btn_new.config(takefocus=False)
         btn_new.config(text=text)
 
-    def add_region_frame(self, index, material):
+    def add_region_frame(self, index, material, is_original):
         """
         Adds a new RegionEditFrame to the Material section w
         ith a given name on a given position.
 
         :param index: Where to add the frame (has to be free in the grid)
         :param material: Name of the Material
+        :param is_original: If this RegionEditFrame was created while loading
+            this window
         """
         rgn_frm = RegionEditFrame(self.frame_mat_left,
                                   "Region " + str(index + 1) + ": ",
                                   material,
-                                  self.remove_region_frame)
+                                  self.remove_region_frame,
+                                  is_original, material)
         rgn_frm.grid(row=index, column=0, sticky="WE")
         self.region_frames.insert(index, rgn_frm)
         self.update_add_buttons()
@@ -201,7 +204,7 @@ class EditWindow(tk.Tk):
         """
         Adds a new empty RegionEditFrame at the end of the Material Section.
         """
-        self.add_region_frame(len(self.region_frames), "")
+        self.add_region_frame(len(self.region_frames), "", False)
 
     def remove_region_frame(self, frame):
         """
@@ -209,6 +212,13 @@ class EditWindow(tk.Tk):
 
         :param frame: The frame to remove
         """
+        # if an original material is deleted, delete it from the
+        # original material list and iv_data
+        if frame.is_original and frame.get_name() == frame.orig_text:
+            # this line removes the entry from both
+            self.iv_dict.remove_region(
+                self.materials.index(frame.orig_text))
+
         index = self.region_frames.index(frame)
         # reconfigure all other frame grid positions after the removed one
         # to keep the numbering right
@@ -239,11 +249,6 @@ class EditWindow(tk.Tk):
             self.on_close()
             self.destroy()
 
-    # TODO: known bug: when deleting a region/ion and adding it to another
-    #  position the region/ion doesn't get deleted and their values get mixed up
-    #  possible fix: copy the iv_dict and perform every add/delete action on the
-    #  copy and at the end when pressing "ok" the copy gets
-    #  passed to the update function
     def on_btn_ok(self):
         """
         Callback for the OK Button. Asks if the click was intended,
@@ -256,6 +261,16 @@ class EditWindow(tk.Tk):
         pre_reg_len = len(self.materials)
         for rgn_frm in self.region_frames:
             new_materials.append(rgn_frm.get_name())
+            # if an original material was changed, delete it from the
+            # original material list and iv_data
+            if rgn_frm.is_original and rgn_frm.get_name() != rgn_frm.orig_text:
+                # this line removes the entry from both
+                self.iv_dict.remove_region(
+                    self.materials.index(rgn_frm.orig_text))
+
+        # recalculate unique atoms
+        self.unique_ions = get_unique_atoms([self.ions], self.all_elements)
+        self.unique_materials = get_unique_atoms(self.materials, self.all_elements)
 
         # check if an entry is empty
         empty_error = False
@@ -379,7 +394,8 @@ class RegionEditFrame(tk.Frame):
     Frame to edit the Material names. Inherits from tk.Frame.
     """
 
-    def __init__(self, parent, text, material, on_delete, *args, **kwargs):
+    def __init__(self, parent, text, material, on_delete,
+                 is_original, orig_text="", *args, **kwargs):
         """
         Constructor. Sets up the widget layout.
 
@@ -388,10 +404,17 @@ class RegionEditFrame(tk.Frame):
         :param material: Name of the Material
         :param on_delete: Callback function that gets called
             when the Region is removed
+        :param is_original: If this RegionEditFrame was created while loading
+            this window
+        :param orig_text: original text, if the REF is original
         """
         super().__init__(parent, *args, **kwargs)
 
         self.on_delete = on_delete
+
+        self.is_original = is_original
+        if is_original:
+            self.orig_text = orig_text
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
