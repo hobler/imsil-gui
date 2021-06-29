@@ -37,6 +37,8 @@ class EditWindow(tk.Tk):
         self.ions = ions
         self.materials = materials
         self.all_elements = get_all_elements()
+        self.unique_ions = get_unique_atoms([self.ions], self.all_elements)
+        self.unique_materials = get_unique_atoms(self.materials, self.all_elements)
         self.iv_dict = iv_dict
         self.nr = len(materials)
 
@@ -210,14 +212,16 @@ class EditWindow(tk.Tk):
 
         :param frame: The frame to remove
         """
+
+        # index of the current frame in the region list
+        index = self.region_frames.index(frame)
+
         # if an original material is deleted, delete it from the
         # original material list and iv_data
         if frame.is_original and frame.get_name() == frame.orig_text:
             # this line removes the entry from both
-            self.iv_dict.remove_region(
-                self.materials.index(frame.orig_text))
+            self.iv_dict.remove_region(index)
 
-        index = self.region_frames.index(frame)
         # reconfigure all other frame grid positions after the removed one
         # to keep the numbering right
         if len(self.region_frames) > index:
@@ -256,18 +260,19 @@ class EditWindow(tk.Tk):
         # get the new values from the entry boxes
         new_ion = self.entry_ion.get()
         new_materials = []
-        for rgn_frm in self.region_frames:
-            new_materials.append(rgn_frm.get_name())
+        # the indexes of newly added or changed regions
+        regions_indexes = []
+        # iterating reversed because some elements get deleted
+        for index, rgn_frm in reversed(list(enumerate(self.region_frames))):
+            new_materials.insert(0, rgn_frm.get_name())
             # if an original material was changed, delete it from the
             # original material list and iv_data
             if rgn_frm.is_original and rgn_frm.get_name() != rgn_frm.orig_text:
                 # this line removes the entry from both
-                self.iv_dict.remove_region(
-                    self.materials.index(rgn_frm.orig_text))
-
-        # recalculate unique atoms for ion and materials
-        unique_ions = get_unique_atoms([self.ions], self.all_elements)
-        unique_materials = get_unique_atoms(self.materials, self.all_elements)
+                self.iv_dict.remove_region(self.region_frames.index(rgn_frm))
+                regions_indexes.append(index)  # append changed region
+            if not rgn_frm.is_original:
+                regions_indexes.append(index)  # append added region
 
         # check if an entry is empty
         empty_error = False
@@ -310,12 +315,9 @@ class EditWindow(tk.Tk):
         if mb_result == "no":
             return
 
-        # calculate the regions that need to be added to the original iv_dict
-        regions_to_add = [item for item in new_materials if
-                          item not in self.materials]
-        # adding the regions
-        for region in regions_to_add:
-            self.iv_dict.add_region_at(new_materials.index(region))
+        # add the new regions
+        for index in regions_indexes:
+            self.iv_dict.add_region_at(index)
 
         # For the Atoms do the same process
         # but for the ions and materials individually
@@ -323,34 +325,30 @@ class EditWindow(tk.Tk):
         # calculate the atoms that need to be removed from
         # and added to the original iv_dict
         unique_ions_to_delete = \
-            [item for item in unique_ions if
+            [item for item in self.unique_ions if
              item not in new_unique_ions]
         unique_materials_to_delete = \
-            [item for item in unique_materials if
+            [item for item in self.unique_materials if
              item not in new_unique_materials]
         unique_ions_to_add = \
             [item for item in new_unique_ions if
-             item not in set(unique_ions)]
+             item not in set(self.unique_ions)]
         unique_materials_to_add = \
             [item for item in new_unique_materials if
-             item not in unique_materials]
+             item not in self.unique_materials]
 
         for atom in reversed(unique_ions_to_delete):
-            self.iv_dict.remove_atom(unique_ions.index(atom))
+            self.iv_dict.remove_atom(self.unique_ions.index(atom))
         for atom in unique_ions_to_add:
             self.iv_dict.add_atom_at(new_unique_ions.index(atom))
 
         for atom in reversed(unique_materials_to_delete):
-            self.iv_dict.remove_atom(unique_materials.index(atom) +
+            self.iv_dict.remove_atom(self.unique_materials.index(atom) +
                                      len(new_unique_ions))
         for atom in unique_materials_to_add:
             self.iv_dict.add_atom_at(new_unique_materials.index(atom) +
                                      len(new_unique_ions))
 
-        # used for natom calculation
-        unique_atoms = []
-        unique_atoms.extend(unique_ions)
-        unique_atoms.extend(unique_materials)
         # used to set the names correctly
         new_unique_atoms = []
         new_unique_atoms.extend(new_unique_ions)
