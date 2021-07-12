@@ -79,6 +79,30 @@ class IVDict(dict):
             for ivdata in self[tab]:
                 ivdata.remove_region(index)
 
+    def swap_atom(self, index_1, index_2):
+        """
+        Swap the contents of the atoms at index 1 and 2
+
+        :param index_1: index of the first atom
+        :param index_2: index of the second atom
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for ivdata in self[tab]:
+                ivdata.swap_atom(index_1, index_2)
+
+    def swap_region(self, index_1, index_2):
+        """
+        Swap the contents of the regions at index 1 and 2
+
+        :param index_1: index of the first regions
+        :param index_2: index of the second regions
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for ivdata in self[tab]:
+                ivdata.swap_region(index_1, index_2)
+
 
 class IVData:
     """
@@ -211,6 +235,38 @@ class IVData:
                     del self.values[i][index]
 
         return change_n or change_m
+
+    def swap_atom(self, index_1, index_2):
+        self.swap_variable("a", index_1, index_2)
+
+    def swap_region(self, index_1, index_2):
+        self.swap_variable("r", index_1, index_2)
+
+    def swap_variable(self, variable, index_1, index_2):
+        """
+        Swaps content of 2 given variables
+
+        :param variable: "a" or "r" for atom or region
+        :param index_1: variable index 1
+        :param index_2: variable index 1
+
+        """
+        change_m = (self.size_string[0] == variable)
+        change_n = (self.size_string[1] == variable)
+        pre_m = self.get_m()
+
+        if not change_m and not change_n:
+            return
+        else:
+            if change_m:
+                temp = self.values[index_1]
+                self.values[index_1] = self.values[index_2]
+                self.values[index_2] = temp
+            if change_n:
+                for i in range(0, pre_m):
+                    temp = self.values[i][index_1]
+                    self.values[i][index_1] = self.values[i][index_2]
+                    self.values[i][index_2] = temp
 
     def get_m(self):
         """
