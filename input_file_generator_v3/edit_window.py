@@ -39,6 +39,9 @@ class EditWindow(tk.Tk):
         self.all_elements = get_all_elements()
         self.unique_ions = get_unique_atoms([self.ions], self.all_elements)
         self.unique_materials = get_unique_atoms(self.materials, self.all_elements)
+        # temporary changeable array for possible swapping
+        self.ions_swap = self.unique_ions.copy()
+        self.materials_swap = self.unique_materials.copy()
         self.iv_dict = iv_dict
         self.nr = len(materials)
 
@@ -338,21 +341,61 @@ class EditWindow(tk.Tk):
              item not in self.unique_materials]
 
         for atom in reversed(unique_ions_to_delete):
-            self.iv_dict.remove_atom(self.unique_ions.index(atom))
+            index = self.unique_ions.index(atom)
+            self.iv_dict.remove_atom(index)
+            del self.ions_swap[index]
         for atom in unique_ions_to_add:
             self.iv_dict.add_atom_at(new_unique_ions.index(atom))
+            self.ions_swap.insert(new_unique_ions.index(atom), atom.name)
 
         for atom in reversed(unique_materials_to_delete):
-            self.iv_dict.remove_atom(self.unique_materials.index(atom) +
-                                     len(new_unique_ions))
+            index = self.unique_materials.index(atom)
+            self.iv_dict.remove_atom(index + len(new_unique_ions))
+            del self.materials_swap[index]
         for atom in unique_materials_to_add:
             self.iv_dict.add_atom_at(new_unique_materials.index(atom) +
                                      len(new_unique_ions))
+            self.materials_swap.insert(new_unique_materials.index(atom),
+                                       atom.name)
 
         # used to set the names correctly
         new_unique_atoms = []
         new_unique_atoms.extend(new_unique_ions)
         new_unique_atoms.extend(new_unique_materials)
+
+        # check if the atoms are in order
+        # and swap the contents to match the new order of atoms
+        if len(new_unique_atoms) == len(self.ions_swap) + \
+                                    len(self.materials_swap):
+
+            # check and swap ions
+            for i in range(len(new_unique_ions)):
+                # if they aren't in order
+                if new_unique_ions[i] != self.ions_swap[i]:
+                    # search the right atom to swap
+                    for j in range(i, len(new_unique_ions)):
+                        # if the right atom index is found
+                        if self.ions_swap[j] == new_unique_ions[i]:
+                            # swap atoms
+                            self.ions_swap[i], self.ions_swap[j] = \
+                                self.ions_swap[j], self.ions_swap[i]
+                            self.iv_dict.swap_atom(i, j)
+                            break
+
+            # check and swap materials
+            for i in range(len(new_unique_materials)):
+                # if they aren't in order
+                if new_unique_materials[i] != self.materials_swap[i]:
+                    # search the right atom to swap
+                    for j in range(i, len(new_unique_materials)):
+                        # if the right atom index is found
+                        if self.materials_swap[j] == new_unique_materials[i]:
+                            # swap atoms
+                            self.materials_swap[i], self.materials_swap[j] = \
+                                self.materials_swap[j], self.materials_swap[i]
+                            self.iv_dict.swap_atom(len(self.ions_swap) + i,
+                                                   len(self.ions_swap) + j)
+                            break
 
         # calculating the new nr and natom
         natom = len(new_unique_atoms)
