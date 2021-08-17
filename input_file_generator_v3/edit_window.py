@@ -63,12 +63,12 @@ class EditWindow(tk.Tk):
 
         # top left frame, containing the ion field
         self.frame_ion = tk.LabelFrame(self.frame, text="Ions", padx=5, pady=5)
-        self.frame_ion.grid(row=0, column=0, padx=10, pady=10, sticky="WE")
+        self.frame_ion.grid(row=0, column=0, padx=10, pady=5, sticky="WE")
 
         # bottom left frame, containing the region frame list
         self.frame_mat = tk.LabelFrame(self.frame, text="Materials",
                                        padx=5, pady=5)
-        self.frame_mat.grid(row=1, column=0, padx=10, pady=10, sticky="WE")
+        self.frame_mat.grid(row=1, column=0, padx=10, pady=5, sticky="WE")
         self.frame_mat.rowconfigure(0, weight=1)
         self.frame_mat.columnconfigure(0, weight=1)
         self.frame_mat.columnconfigure(1, weight=1)
@@ -85,13 +85,26 @@ class EditWindow(tk.Tk):
                                  pady=10, sticky="NS")
 
         # for 'Cancel' and 'OK' button and the info label
-        self.frame_dialog = tk.LabelFrame(self.frame, text="Info")
-        self.frame_dialog.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="NSWE")
+        self.frame_right = tk.Frame(self.frame)
+        self.frame_right.grid(row=0, column=1, rowspan=2, sticky="NSEW")
+        self.frame_right.columnconfigure(0, weight=1)
+        self.frame_right.rowconfigure(0, weight=0)
+        self.frame_right.rowconfigure(1, weight=1)
+
+        # info text frame
+        self.frame_info = tk.LabelFrame(self.frame_right, text="Info")
+        self.frame_info.grid(row=0, column=0, padx=10, pady=5, sticky="NSEW")
+        self.frame_info.columnconfigure(0, weight=1)
+        self.frame_info.rowconfigure(0, weight=1)
+
+        # 'Cancel' and 'OK' button frame
+        self.frame_dialog = tk.Frame(self.frame_right)
+        self.frame_dialog.grid(row=1, column=0, padx=10, pady=5, sticky="NSEW")
         self.frame_dialog.columnconfigure(0, weight=1)
         self.frame_dialog.columnconfigure(1, weight=1)
         self.frame_dialog.rowconfigure(0, weight=1)
-        self.frame_dialog.rowconfigure(1, weight=1)
 
+        # contents of ion frame
         self.label_ion = tk.Label(self.frame_ion, text="Ion Name:")
         self.label_ion.grid(row=0, column=0, padx=10, pady=10)
         self.entry_ion = tk.Entry(self.frame_ion)
@@ -99,7 +112,7 @@ class EditWindow(tk.Tk):
         self.entry_ion.delete(0, "end")
         self.entry_ion.insert(0, str(self.ions))
 
-        self.label_info = tk.Label(self.frame_dialog,
+        self.label_info = tk.Label(self.frame_info,
                                    text="Add Ions and Materials by writing "
                                         "their molecular formula into the "
                                         "entry fields.",
@@ -107,10 +120,10 @@ class EditWindow(tk.Tk):
         self.label_info.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky='NWE')
         self.btn_cancel = tk.Button(self.frame_dialog, text="Cancel",
                                     command=self.on_btn_cancel)
-        self.btn_cancel.grid(row=1, column=0, padx=10, pady=10, sticky="WES")
+        self.btn_cancel.grid(row=1, column=0, padx=10, pady=10, sticky="WE")
         self.btn_ok = tk.Button(self.frame_dialog, text="OK",
                                 command=self.on_btn_ok)
-        self.btn_ok.grid(row=1, column=1, padx=10, pady=10, sticky="WES")
+        self.btn_ok.grid(row=1, column=1, padx=10, pady=10, sticky="WE")
 
         for i, material in enumerate(self.materials):
             self.add_region_frame(i, material, True)
