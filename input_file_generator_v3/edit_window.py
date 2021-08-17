@@ -199,7 +199,7 @@ class EditWindow(tk.Tk):
                                   "Region " + str(index + 1) + ": ",
                                   material,
                                   self.remove_region_frame,
-                                  is_original, material)
+                                  is_original, material, index)
         rgn_frm.grid(row=index, column=0, sticky="WE")
         self.region_frames.insert(index, rgn_frm)
         self.update_add_buttons()
@@ -236,7 +236,7 @@ class EditWindow(tk.Tk):
         # original material list and iv_data
         if frame.is_original and frame.get_name() == frame.orig_text:
             # this line removes the entry from both
-            self.iv_dict.remove_region(index)
+            self.iv_dict.remove_region(frame.orig_index)
 
         # reconfigure all other frame grid positions after the removed one
         # to keep the numbering right
@@ -247,6 +247,11 @@ class EditWindow(tk.Tk):
                                                column=0,
                                                sticky="WE")
                     self.region_frames[i].set_label("Region " + str(i) + ":")
+                    # if and original frame is removed, the indexes of the ones
+                    # after it need to be decreased to point to the right
+                    # position in the iv_dict
+                    if frame.is_original and self.region_frames[i].is_original:
+                        self.region_frames[i].orig_index -= 1
         # actually remove the frame
         self.region_frames.remove(frame)
         frame.destroy()
@@ -285,7 +290,7 @@ class EditWindow(tk.Tk):
             # original material list and iv_data
             if rgn_frm.is_original and rgn_frm.get_name() != rgn_frm.orig_text:
                 # this line removes the entry from both
-                self.iv_dict.remove_region(self.region_frames.index(rgn_frm))
+                self.iv_dict.remove_region(rgn_frm.orig_index)
                 regions_indexes.append(index)  # append changed region
             if not rgn_frm.is_original:
                 regions_indexes.append(index)  # append added region
@@ -440,7 +445,7 @@ class RegionEditFrame(tk.Frame):
     """
 
     def __init__(self, parent, text, material, on_delete,
-                 is_original, orig_text="", *args, **kwargs):
+                 is_original, orig_text="", orig_index=0, *args, **kwargs):
         """
         Constructor. Sets up the widget layout.
 
@@ -460,6 +465,7 @@ class RegionEditFrame(tk.Frame):
         self.is_original = is_original
         if is_original:
             self.orig_text = orig_text
+            self.orig_index = orig_index
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
