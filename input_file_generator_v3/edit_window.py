@@ -232,12 +232,6 @@ class EditWindow(tk.Tk):
         # index of the current frame in the region list
         index = self.region_frames.index(frame)
 
-        # if an original material is deleted, delete it from the
-        # original material list and iv_data
-        if frame.is_original and frame.get_name() == frame.orig_text:
-            # this line removes the entry from both
-            self.iv_dict.remove_region(frame.orig_index)
-
         # reconfigure all other frame grid positions after the removed one
         # to keep the numbering right
         if len(self.region_frames) > index:
@@ -281,19 +275,16 @@ class EditWindow(tk.Tk):
         # get the new values from the entry boxes
         new_ion = self.entry_ion.get()
         new_materials = []
-        # the indexes of newly added or changed regions
-        regions_indexes = []
+
         # iterating reversed because some elements get deleted
-        for index, rgn_frm in reversed(list(enumerate(self.region_frames))):
-            new_materials.insert(0, rgn_frm.get_name())
-            # if an original material was changed, delete it from the
-            # original material list and iv_data
-            if rgn_frm.is_original and rgn_frm.get_name() != rgn_frm.orig_text:
-                # this line removes the entry from both
-                self.iv_dict.remove_region(rgn_frm.orig_index)
-                regions_indexes.append(index)  # append changed region
-            if not rgn_frm.is_original:
-                regions_indexes.append(index)  # append added region
+        for index, rgn_frm in enumerate(self.region_frames):
+            new_materials.append(rgn_frm.get_name())
+
+        # check for duplicates
+        if len(new_materials) != len(set(new_materials)):
+            tk.messagebox.showerror("Invalid Input",
+                                    "Region names should only occur once.")
+            return
 
         # check if an entry is empty
         empty_error = False
@@ -336,9 +327,44 @@ class EditWindow(tk.Tk):
         if mb_result == "no":
             return
 
-        # add the new regions
-        for index in regions_indexes:
-            self.iv_dict.add_region_at(index)
+        # process of changing regions:
+
+        orig_mat_copy = self.materials.copy()
+
+        # remove all materials that are no longer in the region list
+        for i in reversed(range(len(orig_mat_copy))):
+            found = False
+            for j in range(len(new_materials)):
+                if orig_mat_copy[i] == new_materials[j]:
+                    found = True
+                    break
+            if not found:
+                self.iv_dict.remove_region(i)
+                del orig_mat_copy[i]
+
+        # add new regions
+        for i in range(len(new_materials)):
+            found = False
+            for j in range(len(orig_mat_copy)):
+                if orig_mat_copy[j] == new_materials[i]:
+                    found = True
+                    break
+            if not found:
+                self.iv_dict.add_region_at(i)
+                orig_mat_copy.insert(i, new_materials[i])
+
+        # if they're not the same length, something went wrong
+        assert len(orig_mat_copy) == len(new_materials)
+
+        # swap unordered regions
+        for i in range(len(new_materials)):
+            if new_materials[i] != orig_mat_copy[i]:
+                for j in range(i, len(new_materials)):
+                    if new_materials[i] == orig_mat_copy[j]:
+                        orig_mat_copy[i], orig_mat_copy[j] = \
+                            orig_mat_copy[j], orig_mat_copy[i]
+                        self.iv_dict.swap_region(i, j)
+                        break
 
         # For the Atoms do the same process
         # but for the ions and materials individually
