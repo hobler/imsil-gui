@@ -168,6 +168,9 @@ class EditWindow(tk.Tk):
         self.shift_region_frames(index)
         self.add_region_frame(index, "", False)
 
+        # add region to the temporary IVDict
+        self.iv_dict.add_region_at(index)
+
     def set_button(self, widget, file, text):
         """
         Set up the Button with the specified text and picture.
@@ -219,8 +222,13 @@ class EditWindow(tk.Tk):
     def on_btn_add_region(self):
         """
         Adds a new empty RegionEditFrame at the end of the Material Section.
+
+        Currently unused.
         """
         self.add_region_frame(len(self.region_frames), "", False)
+
+        # add region to the temporary IVDict
+        self.iv_dict.add_region()
 
     def remove_region_frame(self, frame):
         """
@@ -251,6 +259,9 @@ class EditWindow(tk.Tk):
         frame.destroy()
         self.update_add_buttons()
 
+        # add region to the temporary IVDict
+        self.iv_dict.remove_region(index)
+
     def on_btn_cancel(self):
         """
         Callback for the Cancel Button. Asks if the cancellation was intended.
@@ -276,15 +287,16 @@ class EditWindow(tk.Tk):
         new_ion = self.entry_ion.get()
         new_materials = []
 
-        # iterating reversed because some elements get deleted
-        for index, rgn_frm in enumerate(self.region_frames):
+        for rgn_frm in self.region_frames:
             new_materials.append(rgn_frm.get_name())
 
-            # check for duplicates
+        """
+        # check for duplicates
         if len(new_materials) != len(set(new_materials)):
             tk.messagebox.showerror("Invalid Input",
                                     "Region names should only occur once.")
             return
+        """
 
         # check if an entry is empty
         empty_error = False
@@ -327,6 +339,16 @@ class EditWindow(tk.Tk):
         if mb_result == "no":
             return
 
+        orig_mat_copy = self.materials.copy()
+        for i in range(len(new_materials)):
+            if new_materials[i] != orig_mat_copy[i]:
+                for j in range(i, len(new_materials)):
+                    if new_materials[i] == orig_mat_copy[j]:
+                        orig_mat_copy[i], orig_mat_copy[j] = \
+                            orig_mat_copy[j], orig_mat_copy[i]
+                        self.iv_dict.swap_region(i, j)
+                        break
+        """
         # process of changing regions:
 
         orig_mat_copy = self.materials.copy()
@@ -365,6 +387,7 @@ class EditWindow(tk.Tk):
                             orig_mat_copy[j], orig_mat_copy[i]
                         self.iv_dict.swap_region(i, j)
                         break
+        """
 
         # For the Atoms do the same process
         # but for the ions and materials individually
