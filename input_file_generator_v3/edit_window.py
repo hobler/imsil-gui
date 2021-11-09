@@ -50,8 +50,8 @@ class EditWindow(tk.Tk):
 
         # window setup
         self.title("Edit Materials/Ions")
-        self.minsize(470, 200)
-        self.maxsize(500, 1000)
+        self.minsize(530, 200)
+        self.maxsize(560, 1000)
         self.columnconfigure(0, weight=1)
         center_window(self)
 
@@ -168,6 +168,9 @@ class EditWindow(tk.Tk):
         self.shift_region_frames(index)
         self.add_region_frame(index, "", False)
 
+        self.update_region_indexes()
+        self.update_all_swap_buttons()
+
         # add region to the temporary IVDict
         self.iv_dict.add_region_at(index)
 
@@ -202,10 +205,13 @@ class EditWindow(tk.Tk):
                                   "Region " + str(index + 1) + ": ",
                                   material,
                                   self.remove_region_frame,
+                                  index, self.swap_region,
                                   is_original, material, index)
         rgn_frm.grid(row=index, column=0, sticky="WE")
         self.region_frames.insert(index, rgn_frm)
         self.update_add_buttons()
+        self.update_region_indexes()
+        self.update_all_swap_buttons()
 
     def shift_region_frames(self, index):
         """
@@ -218,6 +224,23 @@ class EditWindow(tk.Tk):
             if i >= index:
                 rgn_frm.grid(row=i+1, column=0, sticky="WE")
                 rgn_frm.set_label("Region " + str(i+2) + ":")
+                rgn_frm.set_index(i+1)
+
+    def update_region_indexes(self):
+        """
+        Updates the indexes of all region frames after a change of positions.
+        """
+        for i, rgn_frm in enumerate(self.region_frames):
+            rgn_frm.set_index(i)
+
+    def update_all_swap_buttons(self):
+        """
+        Updates the state of the swap buttons according to their position.
+        Needs to be called when the amount or the position of regions is changed
+        """
+        length = len(self.region_frames)
+        for rgn_frm in self.region_frames:
+            rgn_frm.update_swap_buttons(length)
 
     def on_btn_add_region(self):
         """
@@ -258,6 +281,8 @@ class EditWindow(tk.Tk):
         self.region_frames.remove(frame)
         frame.destroy()
         self.update_add_buttons()
+        self.update_region_indexes()
+        self.update_all_swap_buttons()
 
         # add region to the temporary IVDict
         self.iv_dict.remove_region(index)
@@ -339,15 +364,6 @@ class EditWindow(tk.Tk):
         if mb_result == "no":
             return
 
-        orig_mat_copy = self.materials.copy()
-        for i in range(len(new_materials)):
-            if new_materials[i] != orig_mat_copy[i]:
-                for j in range(i, len(new_materials)):
-                    if new_materials[i] == orig_mat_copy[j]:
-                        orig_mat_copy[i], orig_mat_copy[j] = \
-                            orig_mat_copy[j], orig_mat_copy[i]
-                        self.iv_dict.swap_region(i, j)
-                        break
         """
         # process of changing regions:
 
@@ -487,13 +503,36 @@ class EditWindow(tk.Tk):
         # destroy this window
         self.destroy()
 
+    def swap_region(self, index1, index2):
+        # swap grid position
+        self.region_frames[index1].grid(row=index2, column=0, sticky="WE")
+        self.region_frames[index2].grid(row=index1, column=0, sticky="WE")
+
+        # swap label text
+        self.region_frames[index1].set_label("Region " + str(index2 + 1) + ":")
+        self.region_frames[index2].set_label("Region " + str(index1 + 1) + ":")
+
+        # swap list position
+        self.region_frames[index1], self.region_frames[index2] = self.region_frames[index2], self.region_frames[index1]
+
+        # set correct index
+        self.region_frames[index1].set_index(index2)
+        self.region_frames[index2].set_index(index1)
+
+        # update index and swap buttons
+        self.update_region_indexes()
+        self.update_all_swap_buttons()
+
+        # swap IVDict position
+        self.iv_dict.swap_region(index1, index2)
+
 
 class RegionEditFrame(tk.Frame):
     """
     Frame to edit the Material names. Inherits from tk.Frame.
     """
 
-    def __init__(self, parent, text, material, on_delete,
+    def __init__(self, parent, text, material, on_delete, index, on_swap,
                  is_original, orig_text="", orig_index=0, *args, **kwargs):
         """
         Constructor. Sets up the widget layout.
@@ -511,6 +550,9 @@ class RegionEditFrame(tk.Frame):
 
         self.on_delete = on_delete
 
+        self.index = index
+        self.on_swap = on_swap
+
         self.is_original = is_original
         if is_original:
             self.orig_text = orig_text
@@ -519,6 +561,8 @@ class RegionEditFrame(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
+        self.columnconfigure(3, weight=1)
+        self.columnconfigure(4, weight=1)
 
         self.lbl_name = tk.Label(self, text=text)
         self.lbl_name.grid(row=0, column=0)
@@ -533,7 +577,18 @@ class RegionEditFrame(tk.Frame):
                                     command=self.on_btn_delete)
         self.set_button(self.btn_delete, os.path.join("pics", "minus.gif"),
                         "delete")
-        self.btn_delete.grid(row=0, column=2)
+        self.btn_delete.grid(row=0, column=4)
+
+        self.btn_up = tk.Button(self, text="up", width=20, height=20,
+                                command=self.on_btn_up)
+        self.set_button(self.btn_up, os.path.join("pics", "arrow_u.gif"), "up")
+        self.btn_up.grid(row=0, column=2)
+
+        self.btn_down = tk.Button(self, text="down", width=20, height=20,
+                                  command=self.on_btn_down)
+        self.set_button(self.btn_down, os.path.join("pics", "arrow_d.gif"),
+                        "down")
+        self.btn_down.grid(row=0, column=3)
 
     def set_button(self, widget, file, text):
         """
@@ -558,6 +613,20 @@ class RegionEditFrame(tk.Frame):
         """
         self.on_delete(self)
 
+    def on_btn_up(self):
+        """
+        Callback for the Up Button
+        Swaps this Region with the one above it in the List and IVDict.
+        """
+        self.on_swap(self.index, self.index - 1)
+
+    def on_btn_down(self):
+        """
+        Callback for the Down Button
+        Swaps this Region with the one below it in the List and IVDict.
+        """
+        self.on_swap(self.index, self.index + 1)
+
     def set_label(self, text):
         """
         Sets the label text.
@@ -571,3 +640,27 @@ class RegionEditFrame(tk.Frame):
         Returns the text in the entry box.
         """
         return self.ent_name.get()
+
+    def set_index(self, index):
+        """
+        Sets the index variable for swapping.
+
+        :param index: The index.
+        """
+        self.index = index
+
+    def update_swap_buttons(self, length):
+        """
+        Disables the first up- and last down-swap buttons,
+        so that no index error occurs.
+
+        :param length: length of the region frames array
+        """
+        if self.index == 0:
+            self.btn_up["state"] = "disabled"
+        if self.index > 0:
+            self.btn_up["state"] = "normal"
+        if self.index == length - 1:
+            self.btn_down["state"] = "disabled"
+        if self.index < length - 1:
+            self.btn_down["state"] = "normal"
