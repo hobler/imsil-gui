@@ -8,7 +8,7 @@ Classes:
 import os
 import sys
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 
 from data_model.element import get_unique_atoms, get_all_elements
 from utility import center_window
@@ -206,7 +206,8 @@ class EditWindow(tk.Tk):
                                   material,
                                   self.remove_region_frame,
                                   index, self.swap_region,
-                                  is_original, material, index)
+                                  is_original, self.all_elements,
+                                  material, index)
         rgn_frm.grid(row=index, column=0, sticky="WE")
         self.region_frames.insert(index, rgn_frm)
         self.update_add_buttons()
@@ -315,14 +316,6 @@ class EditWindow(tk.Tk):
         for rgn_frm in self.region_frames:
             new_materials.append(rgn_frm.get_name())
 
-        """
-        # check for duplicates
-        if len(new_materials) != len(set(new_materials)):
-            tk.messagebox.showerror("Invalid Input",
-                                    "Region names should only occur once.")
-            return
-        """
-
         # check if an entry is empty
         empty_error = False
         if new_ion == "":
@@ -363,47 +356,6 @@ class EditWindow(tk.Tk):
                                       icon="info")
         if mb_result == "no":
             return
-
-        """
-        # process of changing regions:
-
-        orig_mat_copy = self.materials.copy()
-
-        # remove all materials that are no longer in the region list
-        for i in reversed(range(len(orig_mat_copy))):
-            found = False
-            for j in range(len(new_materials)):
-                if orig_mat_copy[i] == new_materials[j]:
-                    found = True
-                    break
-            if not found:
-                self.iv_dict.remove_region(i)
-                del orig_mat_copy[i]
-
-        # add new regions
-        for i in range(len(new_materials)):
-            found = False
-            for j in range(len(orig_mat_copy)):
-                if orig_mat_copy[j] == new_materials[i]:
-                    found = True
-                    break
-            if not found:
-                self.iv_dict.add_region_at(i)
-                orig_mat_copy.insert(i, new_materials[i])
-
-        # if they're not the same length, something went wrong
-        assert len(orig_mat_copy) == len(new_materials)
-
-        # swap unordered regions
-        for i in range(len(new_materials)):
-            if new_materials[i] != orig_mat_copy[i]:
-                for j in range(i, len(new_materials)):
-                    if new_materials[i] == orig_mat_copy[j]:
-                        orig_mat_copy[i], orig_mat_copy[j] = \
-                            orig_mat_copy[j], orig_mat_copy[i]
-                        self.iv_dict.swap_region(i, j)
-                        break
-        """
 
         # For the Atoms do the same process
         # but for the ions and materials individually
@@ -504,6 +456,12 @@ class EditWindow(tk.Tk):
         self.destroy()
 
     def swap_region(self, index1, index2):
+        """
+        Swaps the regions with the given indexes.
+
+        :param index1: Index of the first region.
+        :param index2: Index of the second region.
+        """
         # swap grid position
         self.region_frames[index1].grid(row=index2, column=0, sticky="WE")
         self.region_frames[index2].grid(row=index1, column=0, sticky="WE")
@@ -513,7 +471,8 @@ class EditWindow(tk.Tk):
         self.region_frames[index2].set_label("Region " + str(index1 + 1) + ":")
 
         # swap list position
-        self.region_frames[index1], self.region_frames[index2] = self.region_frames[index2], self.region_frames[index1]
+        self.region_frames[index1], self.region_frames[index2] = \
+            self.region_frames[index2], self.region_frames[index1]
 
         # set correct index
         self.region_frames[index1].set_index(index2)
@@ -533,7 +492,7 @@ class RegionEditFrame(tk.Frame):
     """
 
     def __init__(self, parent, text, material, on_delete, index, on_swap,
-                 is_original, orig_text="", orig_index=0, *args, **kwargs):
+                 is_original, all_elements, orig_text="", orig_index=0, *args, **kwargs):
         """
         Constructor. Sets up the widget layout.
 
@@ -558,6 +517,8 @@ class RegionEditFrame(tk.Frame):
             self.orig_text = orig_text
             self.orig_index = orig_index
 
+        self.all_elements = all_elements
+
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
@@ -571,6 +532,11 @@ class RegionEditFrame(tk.Frame):
         self.ent_name.grid(row=0, column=1)
         self.ent_name.delete(0, "end")
         self.ent_name.insert(0, material)
+        self.ent_name.bind("<1>", self.on_ent_click)
+        if material == "":
+            self.ent_name.delete(0, "end")
+            self.ent_name.insert(0, "<click to change>")
+        self.ent_name["state"] = "readonly"
 
         self.btn_delete = tk.Button(self, text="delete",
                                     width=20, height=20,
@@ -641,6 +607,15 @@ class RegionEditFrame(tk.Frame):
         """
         return self.ent_name.get()
 
+    def set_name(self, name):
+        """
+        Sets the text in the entry box.
+        """
+        self.ent_name["state"] = "normal"
+        self.ent_name.delete(0, "end")
+        self.ent_name.insert(0, name)
+        self.ent_name["state"] = "readonly"
+
     def set_index(self, index):
         """
         Sets the index variable for swapping.
@@ -664,3 +639,60 @@ class RegionEditFrame(tk.Frame):
             self.btn_down["state"] = "disabled"
         if self.index < length - 1:
             self.btn_down["state"] = "normal"
+
+    def on_ent_click(self, event):
+        """
+        Callback for the on-click event of the Entry-box
+
+        Opens a new simpledialog window that asks the user for the
+        new material name and checks for a valid molecule name.
+        """
+        # disable another instance of this method from opening
+        self.ent_name.unbind("<1>")
+
+        # initial value for the simpledialog
+        initial = "" if self.get_name().startswith("<") else self.get_name()
+        # retry on false inputs
+        retry = True
+        # new material name
+        new_name = None
+
+        # while no valid name is given
+        while retry:
+            new_name = simpledialog.askstring(title="Change Material Name",
+                                              prompt="New Material name:",
+                                              initialvalue=initial)
+            # result of the cancel button
+            if new_name is None:
+                # re-enable on-click event
+                self.ent_name.bind("<1>", self.on_ent_click)
+                return
+            initial = new_name
+
+            # check for correct spelling of the molecule
+            unique_atoms = []
+            error = False
+            try:
+                unique_atoms = get_unique_atoms([new_name],
+                                                   self.all_elements)
+            except ValueError:
+                error = True
+
+            # check if the given string was a molecule name
+            if len(unique_atoms) == 0:
+                error = True
+
+            # info for wrong input
+            if error:
+                tk.messagebox.showerror("Invalid Input",
+                                        "Invalid Material Name.")
+            # if name is valid, proceed
+            if not error:
+                break
+
+        # set new name if user didn't cancel
+        if new_name is not None:
+            self.set_name(new_name)
+
+        # re-enable on-click event
+        self.ent_name.bind("<1>", self.on_ent_click)
