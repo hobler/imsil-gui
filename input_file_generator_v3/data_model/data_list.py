@@ -1,22 +1,18 @@
 class DataList:
     """
-    DataList contains one list with tuples where a tuple has the
-    following format:
+    List of parameters with their widgets, values, and default values.
 
-    (PARAMETER_NAME, TKINTER_WIDGET [Entry/Checkbutton], WIDGET_VARIABLE,
-    DEFAULT_VALUE)
+    Each parameter is represented by a tuple (par_name, tk_widget,
+    widget_variable, default_value), where
 
-    PARAMETER_NAME:     name of parameter from database
-                        type:   str
-    TKINTER_WIDGET:     Checkbutton for logical parameters, Entry else
-    WIDGET_VARIABLE:    contains the current value of the parameter
-                        type:   StringVar
-    DEFAULT_VALUE:      text from database column 'default value'
-                        type:   str
+    par_name: (str) name of parameter from database
+    tk_widget: Tkinter widget (Checkbutton for logical parameters, Entry else)
+    widget_variable: (StringVar) Current value of the parameter
+    default_value: (str) text from database column 'default value'
     """
 
     def __init__(self):
-        self.data_list = list()
+        self.data_list = []
 
     def add(self, par_name, tk_widget, widget_variable, default_value):
         self.data_list.append((par_name, tk_widget, widget_variable,
@@ -28,7 +24,7 @@ class DataList:
                   "default:", data[3])
 
     def get_widgets(self, name):
-        widgets = list()
+        widgets = []
         for data in self.data_list:
             if name.lower() == data[0].lower():
                 widgets.append(data[1])

@@ -32,18 +32,18 @@ DATABASE_RANGE_COL = 5
 DATABASE_BASIC_COL = 6
 
 
-def _run_query(database, query):
+def _run_query(db_file, query):
     """
     Open a connection to an SQLite database and run a query.
 
-    :param database: filename of the database
-    :param query: SQLite query string
-    :return: list of table rows
+    :param db_file: (string) filename of the database
+    :param query: (string) SQLite query string
+    :return: (list of tuples) list of table rows
     """
     conn = None
     table_rows = None
     try:
-        conn = sqlite3.connect(database)
+        conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
         table_rows = cursor.execute(query).fetchall()
     except sqlite3.Error as e:
@@ -55,27 +55,26 @@ def _run_query(database, query):
     return table_rows
 
 
-def _load_database_table(database, table, conditions=None):
+def _load_database_table(db_file, table, conditions=None):
     """
-    This function loads the content of the SQLite database file *database*
-    for a specific *table*. list_where is a list of strings which will be
-    placed to the WHERE clause.
-    :param database: filename of the database
-    :param table: table to be loaded from database database
-    :param conditions: list of conditions to be passed in WHERE clauses
-    :return: list of table rows
+    Load a table from an SQLite database.
+
+    :param db_file: (string) filename of the database
+    :param table: (string) table to be loaded from database
+    :param conditions: (list of strings) list of conditions to be passed to
+    WHERE clauses
+    :return: (list of tuples) list of table rows
     """
     query = "SELECT * FROM " + table
 
-    if conditions is None:
-        conditions = list()
-    for i, condition in enumerate(conditions):
-        if i == 0:
-            query += " WHERE " + condition
-        else:
-            query += " AND " + condition
+    if conditions is not None:
+        for i, condition in enumerate(conditions):
+            if i == 0:
+                query += " WHERE " + condition
+            else:
+                query += " AND " + condition
 
-    table_rows = _run_query(database, query)
+    table_rows = _run_query(db_file, query)
 
     return table_rows
 
@@ -84,13 +83,13 @@ def get_database_table_names(db_file):
     """
     Retrieve the names of the database tables.
 
-    :param db_file: Name of the database file.
-    :return: Table names
+    :param db_file: (string) Name of the database file
+    :return: (list of strings) Table names
     """
     table_rows = _load_database_table(db_file,
                                       DATABASE_SQLITE_MASTER_TABLE_NAME,
                                       ["type='table'"])
-    table_names = list()
+    table_names = []
     for table_row in table_rows:
         table_names.append(table_row[DATABASE_TBL_NAME_COL])
 
@@ -99,17 +98,21 @@ def get_database_table_names(db_file):
 
 class DatabaseTable:
     """
-    One table in a database.
+    One table in a database corresponding to an IMSIL 'record'.
 
     The table is represented by a list of DatabaseTableRow objects.
     Iterating over the DatabaseTable returns DatabaseTableRows.
 
-    The rows are ordered alphabetically. Optionally, the rows may be grouped
-    using the regroup method.
+    Upon initialization, the rows are ordered alphabetically. Optionally,
+    the rows may be grouped using the regroup method.
     """
 
-    def __init__(self, database_file, table_name):
-        table_row_list = _load_database_table(database_file, table_name)
+    def __init__(self, db_file, table_name):
+        """
+        :param db_file: (string) Name of the database file.
+        :param table_name: (string) Table name.
+        """
+        table_row_list = _load_database_table(db_file, table_name)
         table_row_list.sort()
         self.table_row_list = []
         for table_row in table_row_list:
@@ -128,13 +131,15 @@ class DatabaseTable:
             return table_row
 
     def regroup(self):
-        # Create empty lists for all of the categories
+        """
+        Regroup the table rows.
+
+        Regroup the table rows so booleans come first followed by entries and
+        index variable arrays.
+        """
         bool_list = []
         entry_list = []
         index_list = []
-
-        # Iterate through the table and append the entries to the
-        # corresponding list
         for table_row in self.table_row_list:
             if table_row.is_logical():
                 bool_list.append(table_row)
@@ -142,17 +147,17 @@ class DatabaseTable:
                 index_list.append(table_row)
             else:
                 entry_list.append(table_row)
-
-        # Overwrite the table so the boolean values come first, followed
-        # by the entries and finally the index variable arrays
         self.table_row_list = bool_list + entry_list + index_list
 
 
 class DatabaseTableRow:
     """
-    One row in a database table corresponding to a "parameter".
+    One row in a database table corresponding to an IMSIL 'parameter'.
     """
     def __init__(self, table_row):
+        """
+        :param table_row: (tuple of strings) Table row
+        """
         self.table_row = table_row
 
     def _get_cell_text(self, column_index):
@@ -191,7 +196,7 @@ class DatabaseTableRow:
         return self._get_cell_text(DATABASE_BASIC_COL)
 
     def get_index_vars(self):
-        """Return the list of index variables for the parameter."""
+        """Return a list of index variables for the parameter."""
         index_vars_list = []
         type_value = self.get_type()
         if self.is_index_var():
@@ -199,19 +204,19 @@ class DatabaseTableRow:
             # The type_value variable has a format of:
             # "index variable array (index variables) of datatype_of_parameter"
             index_vars = type_value[type_value.index("(") + 1:
-                                    type_value.index(")")]
+                                    type_value.index(")")].split(",")
             # Iterate through every index variable
-            for index_var in index_vars.split(","):
+            for index_var in index_vars:
                 index_var = index_var.strip()  # Remove blanks
-                # Add the element to the list
+                # Add the element to the list avoiding duplicates
                 if index_var not in index_vars_list:
                     index_vars_list.append(index_var)
         return index_vars_list
 
     def is_logical(self):
         """Check if the parameter is a boolean"""
-        return ("logical" in self.get_type())
+        return "logical" in self.get_type()
 
     def is_index_var(self):
         """Check if the parameter is an index variable array."""
-        return ("index variable" in self.get_type())
+        return "index variable" in self.get_type()

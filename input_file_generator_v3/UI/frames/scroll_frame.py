@@ -21,19 +21,19 @@ INFO_HEIGHT = 10 # info Button height
 # Number of parameters per row for each type of parameter
 BOOL_PARAMS_PER_ROW = 4
 ENTRY_PARAMS_PER_ROW = 2
-# Number of elements (columns) per parameter. Currently three
+# Number of elements (columns) per parameter. Currently, three
 # elements are used: Label, info Button, Entry/Checkbox
 ELEMENTS_PER_PARAM = 3
 
 
 class ScrollFrame(BlancFrame):
     """
-    Scrollable Frame for one IMSIL record.
+    Scrollable frame holding all parameters of an IMSIL record.
 
     The ScrollFrame holds the Boolean and the Entry BlancFrames,
     as well as all IndexVariableArrayFrames of the (parent) tab.
-
     """
+
     def __init__(self, parent, nr, natom, *args, **kwargs):
         """
         In the initialization of the ScrollFrame all object parameters are
@@ -57,9 +57,8 @@ class ScrollFrame(BlancFrame):
         # Define the number of columns for the Boolean and Entry params
         self.columns_b = BOOL_PARAMS_PER_ROW * ELEMENTS_PER_PARAM
         self.columns_e = ENTRY_PARAMS_PER_ROW * ELEMENTS_PER_PARAM
-        # The number of columns for index variable arrays as well as the
-        # Frames for each index variable array parameter are created
-        # dynamically
+        # The number of columns for index variable arrays and the frames for
+        # each index variable array are created dynamically
 
         # Initialize the counter variable to track the number of
         # parameters in the current row
@@ -69,11 +68,9 @@ class ScrollFrame(BlancFrame):
         self.num_entries = 0
         self.num_ivarrays = 0
 
-        # Create the lists holding the Frames
-        #TODO: par_frame_list could possibly be eliminated
-        self.par_frame_list = []
+        # List holding the parameters
         self.ui_data_list = DataList()
-        # List that stores the IndexVariableArrays, to access them easier
+        # List that stores the IndexVariableArrays (for easier access)
         self.ivarray_list = []
 
         # Build the scrolling area
@@ -102,10 +99,6 @@ class ScrollFrame(BlancFrame):
         self.content_frame_entry.grid(sticky="NESW")
         # Each index variable array will get its own frame, so these frames
         # can be created only when these parameters are added.
-
-        # Add the two Frames to the list of Frames
-        self.par_frame_list.append(self.content_frame_bool)
-        self.par_frame_list.append(self.content_frame_entry)
 
         # Update the UI
         self.content_frame.update_idletasks()
@@ -144,8 +137,6 @@ class ScrollFrame(BlancFrame):
             # Place the new Frame and set up the mouse bind event
             par_frame.grid(sticky="NESW")
             self.bind_mouse_event(par_frame)
-            # Add the new Frame to the list of Frames
-            self.par_frame_list.append(par_frame)
 
             # Add the IndexVariableArray to the ivarray_list to make it
             # easily accessible from the outside
@@ -248,14 +239,14 @@ class ScrollFrame(BlancFrame):
             self.params_in_row = 0
             # Add the parameter to the content Frame
             self.add_content_in_par_frame(
-                par_name=par_name,
-                index_var_list=index_var_list,
-                default_value=default_value,
-                short_desc=short_desc,
-                long_desc=long_desc,
-                is_bool=is_bool,
-                row_index=0,
-                is_index_var=is_index_var)
+                    par_name=par_name,
+                    index_var_list=index_var_list,
+                    default_value=default_value,
+                    short_desc=short_desc,
+                    long_desc=long_desc,
+                    is_bool=is_bool,
+                    row_index=0,
+                    is_index_var=is_index_var)
             # Increase the counter
             self.num_ivarrays += 1
         elif is_bool:
@@ -273,7 +264,7 @@ class ScrollFrame(BlancFrame):
                      short_desc=short_desc,
                      long_desc=long_desc,
                      is_bool=is_bool,
-                     row_index= self.num_bools // BOOL_PARAMS_PER_ROW,
+                     row_index=self.num_bools // BOOL_PARAMS_PER_ROW,
                      is_index_var=is_index_var)
             # Increase the counters
             self.num_bools += 1
@@ -289,14 +280,14 @@ class ScrollFrame(BlancFrame):
             self.bind_mouse_event(par_frame)
             # Add the parameter to the content Frame
             self.add_content_in_par_frame(
-                par_name=par_name,
-                index_var_list=index_var_list,
-                default_value=default_value,
-                short_desc=short_desc,
-                long_desc=long_desc,
-                is_bool=is_bool,
-                row_index=self.num_entries // ENTRY_PARAMS_PER_ROW,
-                is_index_var=is_index_var)
+                    par_name=par_name,
+                    index_var_list=index_var_list,
+                    default_value=default_value,
+                    short_desc=short_desc,
+                    long_desc=long_desc,
+                    is_bool=is_bool,
+                    row_index=self.num_entries // ENTRY_PARAMS_PER_ROW,
+                    is_index_var=is_index_var)
             # Increase the counters
             self.num_entries += 1
             self.params_in_row += 1

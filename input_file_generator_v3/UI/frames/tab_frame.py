@@ -8,9 +8,8 @@ class TabFrame(BlancFrame):
     TabFrame contains all widgets for a notebook tab.
 
     Note that a tab in the GUI presents the parameters of one IMSIL "record".
-    Note that a tab in the GUI presents the parameters of one IMSIL "record".
     TabFrame contains a ScrollFrame which contains the widgets for the
-    parameters. The ScrollFrame allows to scroll up and down the parameter
+    parameters. The ScrollFrame allows scrolling up and down the parameter
     list in case the window does not provide enough space for all of them.
     """
     def __init__(self, parent, db_file, table_name, type_of_simulation,
@@ -45,13 +44,13 @@ class TabFrame(BlancFrame):
 
     def get_ivarrays(self):
         """
-        Returns the IndexVariableArrays that are placed inside this Tab_Frame.
+        Return the IndexVariableArrays that are placed inside this Tab_Frame.
         """
         return self.scroll_frame.get_ivarrays()
 
     def clear_ivarray_list(self):
         """
-        Clears the ivarray_list in the scroll_frame.
+        Clear the ivarray_list in the scroll_frame.
         """
         self.scroll_frame.clear_ivarray_list()
 
