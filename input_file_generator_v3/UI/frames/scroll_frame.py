@@ -105,109 +105,6 @@ class ScrollFrame(BlancFrame):
         self.content_frame.bind("<Configure>", self.update_scrollregion)
         self.main_canvas.bind('<Configure>', self.update_frame_width)
 
-    #TODO: add_content_in_par_frame could possibly be merged into add_parameter
-    def add_content_in_par_frame(self, par_name, index_var_list, default_value,
-                                 short_desc, long_desc, is_bool, is_index_var,
-                                 row_index):
-        """
-        Add the parameter to the corresponding content Frame.
-
-        :param par_name: the parameter name
-        :param index_var_list: the list of all index variables for this
-                               parameter
-        :param default_value: the default value of the parameter
-        :param short_desc: the short description of the parameter
-        :param long_desc: the long description of the parameter
-        :param is_bool: True if the parameter is a boolean, False otherwise
-        :param is_index_var: True if the parameter is an index variable
-                             array parameter, False otherwise
-        :param row_index: the row number where the parameter should
-                          be placed
-        """
-        # Check the type of the parameter
-        if is_index_var:
-            # If it is an index variable array parameter, create a new
-            # IndexVariableArrayFrame
-            par_frame = IndexVariableArrayFrame(self, par_name,
-                                                index_var_list, default_value,
-                                                short_desc, long_desc,
-                                                row_index,
-                                                self.nr, self.natom)
-
-            # Place the new Frame and set up the mouse bind event
-            par_frame.grid(sticky="NESW")
-            self.bind_mouse_event(par_frame)
-
-            # Add the IndexVariableArray to the ivarray_list to make it
-            # easily accessible from the outside
-            self.ivarray_list.append(par_frame)
-
-        # If the parameter is a Boolean (Checkbutton)
-        elif is_bool:
-            # Set the boolean Frame as the parent Frame
-            par_frame = self.content_frame_bool
-
-            # Add the Checkbutton for the parameter
-            checkbutton = self.add_checkbutton(parent=par_frame,
-                                               par_name=par_name,
-                                               cb_value=default_value,
-                                               default_value=default_value)
-            checkbutton.grid(row=row_index,
-                             column=ELEMENTS_PER_PARAM*self.params_in_row,
-                             sticky="NESW")
-            # Add the Label for the parameter
-            label = self.add_label(parent=par_frame,label_text=par_name)
-            label.grid(row=row_index,
-                       column=1 + ELEMENTS_PER_PARAM*self.params_in_row,
-                       sticky="NESW")
-            # Add the info Button for the parameter
-            btn_info = self.add_button(parent=par_frame,
-                                       w=INFO_WIDTH,
-                                       h=INFO_HEIGHT,
-                                       tool_tip_text=short_desc)
-            self.photo = tk.PhotoImage(
-                    file=os.path.join("pics", "info_sign_1.gif"))
-            btn_info.config(image=self.photo)
-            btn_info.image = self.photo
-            btn_info.config(takefocus=False)
-            btn_info.config(
-                    command=lambda: messagebox.showinfo(par_name, long_desc))
-            btn_info.grid(row=row_index,
-                          column=2 + ELEMENTS_PER_PARAM*self.params_in_row,
-                          sticky="W")
-        # If the parameter is an Entry
-        else:
-            # Set the Entry Frame as the parent Frame
-            par_frame = self.content_frame_entry
-
-            # Add the Label for the parameter
-            label = self.add_label(parent=par_frame, label_text=par_name)
-            label.grid(row=row_index,
-                       column=ELEMENTS_PER_PARAM*self.params_in_row,
-                       sticky="NESW")
-            # Add the info Button for the parameter
-            btn_info = self.add_button(parent=par_frame,
-                                       w=INFO_WIDTH,
-                                       h=INFO_HEIGHT,
-                                       tool_tip_text=short_desc)
-            self.photo = tk.PhotoImage(
-                    file=os.path.join("pics", "info_sign_1.gif"))
-            btn_info.config(image=self.photo)
-            btn_info.image = self.photo
-            btn_info.config(takefocus=False)
-            btn_info.config(
-                command=lambda: messagebox.showinfo(par_name, long_desc))
-            btn_info.grid(row=row_index,
-                          column=1 + ELEMENTS_PER_PARAM*self.params_in_row,
-                          sticky="W")
-            # Add the Entry for the parameter
-            entry = self.add_entry(parent=par_frame, par_name=par_name,
-                                   entry_text=default_value,
-                                   default_value=default_value)
-            entry.grid(row=row_index,
-                       column=2 + ELEMENTS_PER_PARAM*self.params_in_row,
-                       sticky="NESW")
-
     def add_parameter(self, par_name, index_var_list=None, default_value="",
                       short_desc="", long_desc="",
                       is_bool=False, is_index_var=False):
@@ -231,68 +128,149 @@ class ScrollFrame(BlancFrame):
         """
         if index_var_list is None:
             index_var_list = []
-
-        # Check the type of the parameter
         if is_index_var:
-            # Reset the counter, since there is only 1 index variable
-            # parameter per row
-            self.params_in_row = 0
-            # Add the parameter to the content Frame
-            self.add_content_in_par_frame(
-                    par_name=par_name,
-                    index_var_list=index_var_list,
-                    default_value=default_value,
-                    short_desc=short_desc,
-                    long_desc=long_desc,
-                    is_bool=is_bool,
-                    row_index=0,
-                    is_index_var=is_index_var)
-            # Increase the counter
-            self.num_ivarrays += 1
+            self.add_ivarray_parameter(par_name, index_var_list, default_value,
+                                       short_desc, long_desc)
         elif is_bool:
-            # If the parameter is the first boolean, reset the counter
-            if self.num_bools == 0:
-                self.params_in_row = 0
-            # Set the boolean Frame as the parent Frame
-            par_frame = self.content_frame_bool
-            self.bind_mouse_event(par_frame)
-            # Add the parameter to the content Frame
-            self.add_content_in_par_frame(
-                     par_name=par_name,
-                     index_var_list=index_var_list,
-                     default_value=default_value,
-                     short_desc=short_desc,
-                     long_desc=long_desc,
-                     is_bool=is_bool,
-                     row_index=self.num_bools // BOOL_PARAMS_PER_ROW,
-                     is_index_var=is_index_var)
-            # Increase the counters
-            self.num_bools += 1
-            self.params_in_row += 1
-            # Fold the counter at the end of the row
-            self.params_in_row = self.params_in_row % BOOL_PARAMS_PER_ROW
+            self.add_bool_parameter(par_name, default_value,
+                                    short_desc, long_desc)
         else:
-            # If the parameter is the first entry, reset the counter
-            if self.num_entries == 0:
-                self.params_in_row = 0
-            # Set the entry Frame as the parent Frame
-            par_frame = self.content_frame_entry
-            self.bind_mouse_event(par_frame)
-            # Add the parameter to the content Frame
-            self.add_content_in_par_frame(
-                    par_name=par_name,
-                    index_var_list=index_var_list,
-                    default_value=default_value,
-                    short_desc=short_desc,
-                    long_desc=long_desc,
-                    is_bool=is_bool,
-                    row_index=self.num_entries // ENTRY_PARAMS_PER_ROW,
-                    is_index_var=is_index_var)
-            # Increase the counters
-            self.num_entries += 1
-            self.params_in_row += 1
-            # Fold the counter at the end of the row
-            self.params_in_row = self.params_in_row % ENTRY_PARAMS_PER_ROW
+            self.add_entry_parameter(par_name, default_value,
+                                     short_desc, long_desc)
+
+    def add_ivarray_parameter(self, par_name, index_var_list, default_value,
+                              short_desc, long_desc):
+        """
+        Add an IVArray parameter to its frame.
+
+        :param par_name: the parameter name
+        :param index_var_list: list of all index variables for this parameter
+        :param default_value: the default value of the parameter
+        :param short_desc: the short description of the parameter
+        :param long_desc: the long description of the parameter
+        """
+        row_index = 0
+        # Reset the counter, since there is only 1 index variable
+        # parameter per row
+        self.params_in_row = 0
+
+        # Create a new IndexVariableArrayFrame and set it as the parent frame
+        par_frame = IndexVariableArrayFrame(self, par_name,
+                                            index_var_list, default_value,
+                                            short_desc, long_desc,
+                                            row_index,
+                                            self.nr, self.natom)
+        par_frame.grid(sticky="NESW")
+        self.bind_mouse_event(par_frame)
+
+        # Add the IndexVariableArrayFrame to the ivarray_list to make it
+        # easily accessible from the outside
+        self.ivarray_list.append(par_frame)
+
+        # Increase the counter
+        self.num_ivarrays += 1
+
+    def add_bool_parameter(self, par_name, default_value,
+                           short_desc, long_desc):
+        """
+        Add an Entry parameter to its frame.
+
+        :param par_name: the parameter name
+        :param default_value: the default value of the parameter
+        :param short_desc: the short description of the parameter
+        :param long_desc: the long description of the parameter
+        """
+        row_index = self.num_bools // BOOL_PARAMS_PER_ROW
+        # If the parameter is the first boolean, reset the counter
+        if self.num_bools == 0:
+            self.params_in_row = 0
+        # Set the boolean Frame as the parent Frame
+        par_frame = self.content_frame_bool
+        self.bind_mouse_event(par_frame)
+
+        # Add the Checkbutton for the parameter
+        checkbutton = self.add_checkbutton(parent=par_frame,
+                                           par_name=par_name,
+                                           cb_value=default_value,
+                                           default_value=default_value)
+        checkbutton.grid(row=row_index,
+                         column=ELEMENTS_PER_PARAM * self.params_in_row,
+                         sticky="NESW")
+        # Add the Label for the parameter
+        label = self.add_label(parent=par_frame, label_text=par_name)
+        label.grid(row=row_index,
+                   column=ELEMENTS_PER_PARAM * self.params_in_row + 1,
+                   sticky="NESW")
+        # Add the info Button for the parameter
+        btn_info = self.add_button(parent=par_frame,
+                                   w=INFO_WIDTH,
+                                   h=INFO_HEIGHT,
+                                   tool_tip_text=short_desc)
+        photo = tk.PhotoImage(file=os.path.join("pics", "info_sign_1.gif"))
+        btn_info.config(image=photo)
+        btn_info.image = photo
+        btn_info.config(takefocus=False)
+        btn_info.config(
+            command=lambda: messagebox.showinfo(par_name, long_desc))
+        btn_info.grid(row=row_index,
+                      column=ELEMENTS_PER_PARAM * self.params_in_row + 2,
+                      sticky="W")
+
+        # Increase the counters
+        self.num_bools += 1
+        self.params_in_row += 1
+        # Fold the counter at the end of the row
+        self.params_in_row = self.params_in_row % BOOL_PARAMS_PER_ROW
+
+    def add_entry_parameter(self, par_name, default_value,
+                            short_desc, long_desc):
+        """
+        Add an Entry parameter to its frame.
+
+        :param par_name: the parameter name
+        :param default_value: the default value of the parameter
+        :param short_desc: the short description of the parameter
+        :param long_desc: the long description of the parameter
+        """
+        row_index = self.num_entries // ENTRY_PARAMS_PER_ROW
+        # If the parameter is the first entry, reset the counter
+        if self.num_entries == 0:
+            self.params_in_row = 0
+        # Set the entry Frame as the parent Frame
+        par_frame = self.content_frame_entry
+        self.bind_mouse_event(par_frame)
+
+        # Add the Label for the parameter
+        label = self.add_label(parent=par_frame, label_text=par_name)
+        label.grid(row=row_index,
+                   column=ELEMENTS_PER_PARAM * self.params_in_row,
+                   sticky="NESW")
+        # Add the info Button for the parameter
+        btn_info = self.add_button(parent=par_frame,
+                                   w=INFO_WIDTH, h=INFO_HEIGHT,
+                                   tool_tip_text=short_desc)
+        photo = tk.PhotoImage(file=os.path.join("pics", "info_sign_1.gif"))
+        btn_info.config(image=photo)
+        btn_info.image = photo
+        btn_info.config(takefocus=False)
+        btn_info.config(
+            command=lambda: messagebox.showinfo(par_name, long_desc))
+        btn_info.grid(row=row_index,
+                      column=ELEMENTS_PER_PARAM * self.params_in_row + 1,
+                      sticky="W")
+        # Add the Entry for the parameter
+        entry = self.add_entry(parent=par_frame, par_name=par_name,
+                               entry_text=default_value,
+                               default_value=default_value)
+        entry.grid(row=row_index,
+                   column=ELEMENTS_PER_PARAM * self.params_in_row + 2,
+                   sticky="NESW")
+
+        # Increase the counters
+        self.num_entries += 1
+        self.params_in_row += 1
+        # Fold the counter at the end of the row
+        self.params_in_row = self.params_in_row % ENTRY_PARAMS_PER_ROW
 
     def add_button(self, parent, btn_text="Button", w=3, h=3,
                    tool_tip_text=None):
