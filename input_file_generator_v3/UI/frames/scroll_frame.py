@@ -126,9 +126,9 @@ class ScrollFrame(BlancFrame):
         :param is_index_var: True if the parameter is an index variable
                              array parameter, False otherwise
         """
-        if index_var_list is None:
-            index_var_list = []
         if is_index_var:
+            if index_var_list is None:
+                index_var_list = []
             self.add_ivarray_parameter(par_name, index_var_list, default_value,
                                        short_desc, long_desc)
         elif is_bool:
@@ -274,27 +274,28 @@ class ScrollFrame(BlancFrame):
 
     def add_button(self, parent, btn_text="Button", w=3, h=3,
                    tool_tip_text=None):
+        """Add a button to its parent frame and return it."""
         btn = tk.Button(parent, text=btn_text, width=w, height=h)
-        if tool_tip_text != None:
+        if tool_tip_text is not None:
             balloon = Pmw.Balloon(btn)
             balloon.bind(btn, tool_tip_text)
-
         self.bind_mouse_event(btn)
         return btn
 
     def add_label(self, parent, label_text, label_text_anchor=tk.W, width=None):
+        """Add a Label to its parent frame and return it."""
         if width is None:
             label = tk.Label(parent, text=label_text, anchor=label_text_anchor)
         else:
-            label = tk.Label(parent, text=label_text,
-                             anchor=label_text_anchor, width=width)
-
+            label = tk.Label(parent, text=label_text, anchor=label_text_anchor,
+                             width=width)
         self.bind_mouse_event(label)
         return label
 
     def add_entry(self, parent, par_name, entry_text, default_value="",
                   tool_tip_text="", disabledbackground="gray",
                   disabledforeground="white", add_to_list=True):
+        """Add an entry to its parent frame and return it."""
         # Change the entry texts and default values of NR and NATOM to
         # the values specified in the welcome window, if the datatype
         # of the default value is not an int (if it is, it should be
@@ -315,7 +316,7 @@ class ScrollFrame(BlancFrame):
                          disabledbackground=disabledbackground,
                          disabledforeground=disabledforeground)
 
-        # Disable the fields NR, NATOM and NAME in the GUI
+        # Disable the fields NR, NATOM, and NAME in the GUI
         if par_name == 'NR' or par_name == 'NATOM':
             entry.config(state='disabled')
 
@@ -323,9 +324,10 @@ class ScrollFrame(BlancFrame):
             entry.config(state='readonly')
 
         # Adding the Entries for the index variable array "POINT" to
-        # the list caused some issues. Since these are never obligatory
-        # these issues can be bypassed, by not adding the Entries for
+        # the list caused some issues. Since these are never obligatory,
+        # these issues can be bypassed by not adding the Entries for
         # that index variable array to the list (add_to_list=False)
+        # TODO: Other solution?
         if add_to_list:
             self.ui_data_list.add(par_name=par_name,
                                   tk_widget=entry,
@@ -347,8 +349,8 @@ class ScrollFrame(BlancFrame):
                                      onvalue=on_value,
                                      offvalue=off_value)
         cb_string_var.set(cb_value)
-        checkbutton.config(command=lambda: self.update_if_obligatory_entry(
-            par_name=par_name))
+        checkbutton.config(command=lambda:
+                           self.update_if_obligatory_entry(par_name=par_name))
         self.ui_data_list.add(par_name=par_name, tk_widget=checkbutton,
                               widget_variable=cb_string_var,
                               default_value=default_value)
@@ -358,14 +360,13 @@ class ScrollFrame(BlancFrame):
 
     def update_if_obligatory_entry(self, par_name):
         """
-        Check for each tk.Entry if "obligatory if" condition is True
-        or False and set the state of the tk.Entry to activate or
-        deactivate the parameter.
+        Check for each tk.Entry "obligatory if" condition and set the state of
+        the tk.Entry to activate or deactivate the parameter.
 
-        :par_name: Name of a bool parameter
+        :param par_name: Name of a bool parameter
         """
         widget_variable = self.ui_data_list.get_variable(par_name)
-        obligatory_if = str(par_name + "=" + widget_variable.get())
+        obligatory_if = par_name + "=" + widget_variable.get()
 
         for ui_data in self.ui_data_list.data_list:
             if ui_data[1].winfo_class() == "Entry":
@@ -393,7 +394,7 @@ class ScrollFrame(BlancFrame):
         """
         Is automatically called, if window is resized
 
-        :param event: the event, which gets triggered by resizing
+        :param event: the event that gets triggered by resizing
         """
         self.main_canvas.itemconfig("self.content_frame", width=event.width)
 

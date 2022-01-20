@@ -2,7 +2,7 @@
 `IMSIL-GUI` is a GUI for the binary collision simulator `IMSIL`, written in
 python with Tkinter.
 
-# Versions: 
+## Versions: 
 The files in the directory `input_file_generator` represent the first version
 of the GUI containing the code for the Boolean and Entry areas as well as
 initial code to implement the index variable arrays (Author: Filip Humaj).
@@ -12,13 +12,17 @@ the GUI with the index variable arrays implemented. Furthermore, the code is
 cleaned up and restructured (Author: Christian Alacs).
 
 The files in the directory `input_file_generator_v3` represent the current
-state of the project.
+state of the project (Author: Florian Asperger).
 
-# IMSIL input file generator
-The main program file of the IMSIL input file generator is `main.py` 
+## How to start `IMSIL-GUI`
+The main script of the IMSIL input file generator is `main.py` 
 (https://github.com/hobler/imsil-gui/blob/master/input_file_generator_v3/main.py). 
-This program defines two windows: The Welcome Window and the
-IMSIL Input Parameter Editor. 
+The only functionality of the `main.py` script is to generate the Welcome 
+window, which in turn allows to open the IMSIL Input Parameter Editor. Start
+`IMSIL-GUI` by passing the main script to a Python 3 interpreter:
+
+    $ python3 main.py
+
 
 ## Welcome window
 The Welcome Window serves the purpose to preconfigure the IMSIL Input
@@ -59,7 +63,7 @@ which are bound to index variables, this class has to be extended with
 the ability to set/get not only the widget of a parameter but also the
 widgets and variables of the index variables of the parameter.        
 
-On top of the Window is a menu bar, with which the Edit Materials/Ions Window 
+On top of the window is a menu bar, with which the Edit Materials/Ions Window 
 can be opened under the "Edit" menu. The File and View Menus currently don't 
 have a use.
 
@@ -96,7 +100,7 @@ described
 -	`edit_window.py`: contains the `EditWindow` and `RegionFrame` classes.
 -	`utility.py`: contains the `center_window` function
 
-#### `input_file_generator_v3\pics`:
+#### `input_file_generator_v3/pics`:
 -	`add.gif`, `minus.gif`: the pictures used for the +/- Buttons to 
      add/delete rows from the `POINT` index variable array 
 -	`arrow.png`, `arrow_r.gif`, `arrow_l.gif`, `arrow_d.gif`, `arrow_u.gif`: 
@@ -105,18 +109,18 @@ described
 -	`info_sign.gif`, `info_sign_1.gif`: the pictures used for the info Button 
     (`info_sign_1.gif` is currently used)
 
-#### `input_file_generator_v3\data_model`:
+#### `input_file_generator_v3/data_model`:
 -   `read_sqlite.py`, `data_list.py`, `input_file.py`: Classes used to manage
     the data or access the database
 -   `element.py`, `element.f90`: Classes and files to manage molecular formulas
 -   `iv_data.py`: Classes `IVData` and `IVDict` to store the data from index 
     variable arrays and provide some helper functions.
 
-#### `input_file_generator_v3\UI\canvas`:
+#### `input_file_generator_v3/UI/canvas`:
 -   `blanc_canvas.py`: this class implements the canvas used for the scrolling 
     area in `ScrollFrame`
 
-#### `input_file_generator_v3\UI\frames`:
+#### `input_file_generator_v3/UI/frames`:
 -   `tab_frame.py`: this module implements the Frame used as a container for 
     the ScrollFrames in every tab of the notebook. This module also calls the
     methods to retrieve the data from the database, regroup it and add it to
@@ -134,7 +138,7 @@ described
     them, add/delete rows, track their values and set them accordingly as well
     as the general logic for their layout.
 
-#### `input_file_generator_v3\UI\widgets`:
+#### `input_file_generator_v3/UI/widgets`:
 -	`ShowAdvParButton.py`: this class was used to separate and toggle basic 
      and advanced parameters in the UI. This functionality is not in use in 
      the current version of the program.

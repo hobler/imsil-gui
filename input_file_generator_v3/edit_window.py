@@ -17,14 +17,13 @@ from utility import center_window
 class EditWindow(tk.Tk):
     """
     Edit Ion/Material Window. Inherits from tk.Tk.
-
     """
 
-    def __init__(self, ions, materials, iv_dict, on_close):
+    def __init__(self, ion, materials, iv_dict, on_close):
         """
         Init method.
 
-        :param ions: Current Ion name
+        :param ion: Current Ion name
         :param materials: List of current Material names
         :param iv_dict: IVDict object, containing the IVArray data
         :param on_close: Callback function for returning the new data
@@ -32,16 +31,17 @@ class EditWindow(tk.Tk):
         super().__init__()
 
         self.on_close = on_close  # callback function
-        # callback when window gets closed
+        # when window gets closed behave as if cancel button has been pressed
         self.protocol("WM_DELETE_WINDOW", self.on_btn_cancel)
-        self.ions = ions
+        self.ion = ion
         self.materials = materials
         self.all_elements = get_all_elements()
-        self.unique_ions = get_unique_atoms([self.ions], self.all_elements)
-        self.unique_materials = get_unique_atoms(self.materials, self.all_elements)
+        self.unique_ion_atoms = get_unique_atoms([self.ion], self.all_elements)
+        self.unique_material_atoms = get_unique_atoms(self.materials,
+                                                      self.all_elements)
         # temporary changeable array for possible swapping
-        self.ions_swap = self.unique_ions.copy()
-        self.materials_swap = self.unique_materials.copy()
+        self.ion_atoms_swap = self.unique_ion_atoms.copy()
+        self.material_atoms_swap = self.unique_material_atoms.copy()
         self.iv_dict = iv_dict
         self.nr = len(materials)
 
@@ -49,7 +49,7 @@ class EditWindow(tk.Tk):
         self.add_buttons = []
 
         # window setup
-        self.title("Edit Materials/Ions")
+        self.title("Edit Ion/Materials")
         self.minsize(530, 200)
         self.maxsize(560, 1000)
         self.columnconfigure(0, weight=1)
@@ -62,7 +62,7 @@ class EditWindow(tk.Tk):
         self.frame.columnconfigure(0, weight=1)
 
         # top left frame, containing the ion field
-        self.frame_ion = tk.LabelFrame(self.frame, text="Ions", padx=5, pady=5)
+        self.frame_ion = tk.LabelFrame(self.frame, text="Ion", padx=5, pady=5)
         self.frame_ion.grid(row=0, column=0, padx=10, pady=5, sticky="WE")
 
         # bottom left frame, containing the region frame list
@@ -82,7 +82,7 @@ class EditWindow(tk.Tk):
         # frame to contain the add buttons
         self.frame_mat_add = tk.Frame(self.frame_mat)
         self.frame_mat_add.grid(row=0, column=1,
-                                 pady=10, sticky="NS")
+                                pady=10, sticky="NS")
 
         # for 'Cancel' and 'OK' button and the info label
         self.frame_right = tk.Frame(self.frame)
@@ -110,14 +110,15 @@ class EditWindow(tk.Tk):
         self.entry_ion = tk.Entry(self.frame_ion)
         self.entry_ion.grid(row=0, column=1, padx=10, pady=10)
         self.entry_ion.delete(0, "end")
-        self.entry_ion.insert(0, str(self.ions))
+        self.entry_ion.insert(0, str(self.ion))
 
         self.label_info = tk.Label(self.frame_info,
-                                   text="Add Ions and Materials by writing "
+                                   text="Add Ion and Materials by writing "
                                         "their molecular formula into the "
                                         "entry fields.",
                                    justify='left', wraplengt=100)
-        self.label_info.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky='NWE')
+        self.label_info.grid(row=0, column=0, columnspan=2, padx=10, pady=10,
+                             sticky='NWE')
         self.btn_cancel = tk.Button(self.frame_dialog, text="Cancel",
                                     command=self.on_btn_cancel)
         self.btn_cancel.grid(row=1, column=0, padx=10, pady=10, sticky="WE")
@@ -126,7 +127,7 @@ class EditWindow(tk.Tk):
         self.btn_ok.grid(row=1, column=1, padx=10, pady=10, sticky="WE")
 
         for i, material in enumerate(self.materials):
-            self.add_region_frame(i, material, True)
+            self.add_region_frame(i, material, is_original=True)
 
         self.update_add_buttons()
 
@@ -152,7 +153,7 @@ class EditWindow(tk.Tk):
         Add a new "add" button
         """
         btn_temp = tk.Button(self.frame_mat_add, text="add",
-                                    width=20, height=20)
+                             width=20, height=20)
         btn_temp.config(command=lambda button=btn_temp: self.on_btn_add(button))
         self.set_button(btn_temp, os.path.join("pics", "add.gif"), "add")
         btn_temp.grid(row=len(self.add_buttons), column=0)
@@ -166,7 +167,7 @@ class EditWindow(tk.Tk):
         """
         index = self.add_buttons.index(sender)
         self.shift_region_frames(index)
-        self.add_region_frame(index, "", False)
+        self.add_region_frame(index, "", is_original=False)
 
         self.update_region_indexes()
         self.update_all_swap_buttons()
@@ -193,55 +194,57 @@ class EditWindow(tk.Tk):
 
     def add_region_frame(self, index, material, is_original):
         """
-        Adds a new RegionEditFrame to the Material section w
-        ith a given name on a given position.
+        Add a RegionEditFrame at a given position.
 
-        :param index: Where to add the frame (has to be free in the grid)
-        :param material: Name of the Material
-        :param is_original: If this RegionEditFrame was created while loading
+        :param index: position of the frame (has to be free in the grid)
+        :param material: name of the material
+        :param is_original: if this function is called during initialization of
             this window
         """
-        rgn_frm = RegionEditFrame(self.frame_mat_left,
-                                  "Region " + str(index + 1) + ": ",
-                                  material,
-                                  self.remove_region_frame,
-                                  index, self.swap_region,
-                                  is_original, self.all_elements,
-                                  material, index)
-        rgn_frm.grid(row=index, column=0, sticky="WE")
-        self.region_frames.insert(index, rgn_frm)
+        region_frame = RegionEditFrame(self.frame_mat_left,
+                                       f"Region {index + 1}: ",
+                                       material,
+                                       self.remove_region_frame,
+                                       index, self.swap_region,
+                                       is_original, self.all_elements,
+                                       material, index)
+        region_frame.grid(row=index, column=0, sticky="WE")
+        self.region_frames.insert(index, region_frame)
         self.update_add_buttons()
         self.update_region_indexes()
         self.update_all_swap_buttons()
 
     def shift_region_frames(self, index):
         """
-        Shifts all RegionFrames above the index to the next position in the grid
-        to make place for a new RegionFrame.
+        Shift all RegionFrames above the index to the next position in the grid.
 
-        :param index: Every RegionFrame above tha index gets shifted.
+        This is to make room for a new RegionFrame.
+
+        :param index: Every RegionFrame above that index gets shifted.
         """
-        for i, rgn_frm in enumerate(self.region_frames):
+        for i, region_frame in enumerate(self.region_frames):
             if i >= index:
-                rgn_frm.grid(row=i+1, column=0, sticky="WE")
-                rgn_frm.set_label("Region " + str(i+2) + ":")
-                rgn_frm.set_index(i+1)
+                region_frame.grid(row=i + 1, column=0, sticky="WE")
+                region_frame.set_label(f"Region {i + 2}:")
+                region_frame.set_index(i + 1)
 
     def update_region_indexes(self):
         """
         Updates the indexes of all region frames after a change of positions.
         """
-        for i, rgn_frm in enumerate(self.region_frames):
-            rgn_frm.set_index(i)
+        for i, region_frame in enumerate(self.region_frames):
+            region_frame.set_index(i)
 
     def update_all_swap_buttons(self):
         """
         Updates the state of the swap buttons according to their position.
-        Needs to be called when the amount or the position of regions is changed
+        
+        Needs to be called when the amount or the position of regions is 
+        changed.
         """
         length = len(self.region_frames)
-        for rgn_frm in self.region_frames:
-            rgn_frm.update_swap_buttons(length)
+        for region_frame in self.region_frames:
+            region_frame.update_swap_buttons(length)
 
     def on_btn_add_region(self):
         """
@@ -249,7 +252,7 @@ class EditWindow(tk.Tk):
 
         Currently unused.
         """
-        self.add_region_frame(len(self.region_frames), "", False)
+        self.add_region_frame(len(self.region_frames), "", is_original=False)
 
         # add region to the temporary IVDict
         self.iv_dict.add_region()
@@ -260,24 +263,22 @@ class EditWindow(tk.Tk):
 
         :param frame: The frame to remove
         """
-
         # index of the current frame in the region list
         index = self.region_frames.index(frame)
 
         # reconfigure all other frame grid positions after the removed one
         # to keep the numbering right
-        if len(self.region_frames) > index:
-            for i in range(index, len(self.region_frames)):
-                if i != 0:
-                    self.region_frames[i].grid(row=i - 1,
-                                               column=0,
-                                               sticky="WE")
-                    self.region_frames[i].set_label("Region " + str(i) + ":")
-                    # if and original frame is removed, the indexes of the ones
-                    # after it need to be decreased to point to the right
-                    # position in the iv_dict
-                    if frame.is_original and self.region_frames[i].is_original:
-                        self.region_frames[i].orig_index -= 1
+        for i in range(index, len(self.region_frames)):
+            if i != 0:
+                self.region_frames[i].grid(row=i - 1,
+                                           column=0,
+                                           sticky="WE")
+                self.region_frames[i].set_label(f"Region {i}:")
+                # if an original frame is removed, the indexes of the ones
+                # after it need to be decreased to point to the right
+                # position in the iv_dict
+                if frame.is_original and self.region_frames[i].is_original:
+                    self.region_frames[i].orig_index -= 1
         # actually remove the frame
         self.region_frames.remove(frame)
         frame.destroy()
@@ -293,28 +294,28 @@ class EditWindow(tk.Tk):
         Callback for the Cancel Button. Asks if the cancellation was intended.
         Closes the Window if the user selects "yes".
         """
-        mb_result = \
-            tk.messagebox.askquestion("Cancel Editing",
-                                      "Are you sure you want to "
-                                      "exit the Edit Window?"
-                                      "\nAll unsaved changes will be lost.",
-                                      icon="warning")
+        mb_result = tk.messagebox.askquestion(
+            "Cancel Editing",
+            "Are you sure you want to exit the Edit Window?"
+            "\nAll unsaved changes will be lost.", icon="warning")
         if mb_result == "yes":
             self.on_close()
             self.destroy()
 
     def on_btn_ok(self):
         """
-        Callback for the OK Button. Asks if the click was intended,
-        calculates the new atoms, regions, nr and natom
-        and returns them with the callback function to the main window
+        Callback for the OK Button. 
+        
+        Asks if the click was intended, calculates the new atoms, regions, nr,
+        and natom, and returns them with the callback function to the main 
+        window.
         """
         # get the new values from the entry boxes
         new_ion = self.entry_ion.get()
         new_materials = []
 
-        for rgn_frm in self.region_frames:
-            new_materials.append(rgn_frm.get_name())
+        for region_frame in self.region_frames:
+            new_materials.append(region_frame.get_name())
 
         # check if an entry is empty
         empty_error = False
@@ -326,118 +327,116 @@ class EditWindow(tk.Tk):
                 break
         if empty_error:
             tk.messagebox.showerror("Invalid Input",
-                                    "Ion or Materials can't be empty.")
+                                    "Empty Ion or Material name.")
             return
 
         # check for correct spelling of the molecules
         try:
-            new_unique_ions = get_unique_atoms([new_ion], self.all_elements)
-            new_unique_materials = get_unique_atoms(new_materials,
+            new_unique_ion_atoms = get_unique_atoms([new_ion],
                                                     self.all_elements)
+            new_unique_material_atoms = get_unique_atoms(new_materials,
+                                                         self.all_elements)
         except ValueError:
             tk.messagebox.showerror("Invalid Input",
                                     "Invalid Ion or Material name.")
             return
 
         # check if the given string was even a molecule name
-        if len(new_unique_ions) == 0:
+        if len(new_unique_ion_atoms) == 0:
             tk.messagebox.showerror("Invalid Input", "Invalid Ion name.")
             return
-        if len(new_unique_materials) == 0:
+        if len(new_unique_material_atoms) == 0:
             tk.messagebox.showerror("Invalid Input", "Invalid Material name.")
             return
 
         # make sure that the user wants to apply the changes
-        mb_result = \
-            tk.messagebox.askquestion("Apply Changes",
-                                      "Are you sure you want to "
-                                      "apply the changes?"
-                                      "\nThis may take a while.",
-                                      icon="info")
+        mb_result = tk.messagebox.askquestion(
+            "Apply Changes",
+            "Are you sure you want to apply the changes?",
+            icon="info")
         if mb_result == "no":
             return
 
-        # For the Atoms do the same process
-        # but for the ions and materials individually
+        # For the atoms do the same process, but separately for the ions and
+        # materials
 
-        # calculate the atoms that need to be removed from
-        # and added to the original iv_dict
-        unique_ions_to_delete = \
-            [item for item in self.unique_ions if
-             item not in new_unique_ions]
-        unique_materials_to_delete = \
-            [item for item in self.unique_materials if
-             item not in new_unique_materials]
-        unique_ions_to_add = \
-            [item for item in new_unique_ions if
-             item not in set(self.unique_ions)]
-        unique_materials_to_add = \
-            [item for item in new_unique_materials if
-             item not in self.unique_materials]
+        # calculate the atoms that need to be removed from or added to the
+        # original iv_dict
+        unique_ion_atoms_to_delete = \
+            [atom for atom in self.unique_ion_atoms if
+             atom not in new_unique_ion_atoms]
+        unique_material_atoms_to_delete = \
+            [atom for atom in self.unique_material_atoms if
+             atom not in new_unique_material_atoms]
+        unique_ion_atoms_to_add = \
+            [atom for atom in new_unique_ion_atoms if
+             atom not in set(self.unique_ion_atoms)]
+        unique_material_atoms_to_add = \
+            [atom for atom in new_unique_material_atoms if
+             atom not in self.unique_material_atoms]
 
-        for atom in reversed(unique_ions_to_delete):
-            index = self.unique_ions.index(atom)
+        for atom in reversed(unique_ion_atoms_to_delete):
+            index = self.unique_ion_atoms.index(atom)
             self.iv_dict.remove_atom(index)
-            del self.ions_swap[index]
-        for atom in unique_ions_to_add:
-            self.iv_dict.add_atom_at(new_unique_ions.index(atom))
-            self.ions_swap.insert(new_unique_ions.index(atom), atom.name)
+            del self.ion_atoms_swap[index]
+        for atom in unique_ion_atoms_to_add:
+            self.iv_dict.add_atom_at(new_unique_ion_atoms.index(atom))
+            self.ion_atoms_swap.insert(new_unique_ion_atoms.index(atom), atom.name)
 
-        for atom in reversed(unique_materials_to_delete):
-            index = self.unique_materials.index(atom)
-            self.iv_dict.remove_atom(index + len(new_unique_ions))
-            del self.materials_swap[index]
-        for atom in unique_materials_to_add:
-            self.iv_dict.add_atom_at(new_unique_materials.index(atom) +
-                                     len(new_unique_ions))
-            self.materials_swap.insert(new_unique_materials.index(atom),
-                                       atom.name)
+        for atom in reversed(unique_material_atoms_to_delete):
+            index = self.unique_material_atoms.index(atom)
+            self.iv_dict.remove_atom(index + len(new_unique_ion_atoms))
+            del self.material_atoms_swap[index]
+        for atom in unique_material_atoms_to_add:
+            self.iv_dict.add_atom_at(new_unique_material_atoms.index(atom) +
+                                     len(new_unique_ion_atoms))
+            self.material_atoms_swap.insert(new_unique_material_atoms.index(atom),
+                                            atom.name)
 
         # used to set the names correctly
         new_unique_atoms = []
-        new_unique_atoms.extend(new_unique_ions)
-        new_unique_atoms.extend(new_unique_materials)
+        new_unique_atoms.extend(new_unique_ion_atoms)
+        new_unique_atoms.extend(new_unique_material_atoms)
 
-        # check if the atoms are in order
-        # and swap the contents to match the new order of atoms
-        if len(new_unique_atoms) == len(self.ions_swap) + \
-                                    len(self.materials_swap):
-
+        # check if the atoms are in order and swap the contents to match the
+        # new order of atoms
+        if len(new_unique_atoms) == len(self.ion_atoms_swap) + \
+                len(self.material_atoms_swap):
             # check and swap ions
-            for i in range(len(new_unique_ions)):
+            for i in range(len(new_unique_ion_atoms)):
                 # if they aren't in order
-                if new_unique_ions[i] != self.ions_swap[i]:
+                if new_unique_ion_atoms[i] != self.ion_atoms_swap[i]:
                     # search the right atom to swap
-                    for j in range(i, len(new_unique_ions)):
+                    for j in range(i, len(new_unique_ion_atoms)):
                         # if the right atom index is found
-                        if self.ions_swap[j] == new_unique_ions[i]:
+                        if self.ion_atoms_swap[j] == new_unique_ion_atoms[i]:
                             # swap atoms
-                            self.ions_swap[i], self.ions_swap[j] = \
-                                self.ions_swap[j], self.ions_swap[i]
+                            self.ion_atoms_swap[i], self.ion_atoms_swap[j] = \
+                                self.ion_atoms_swap[j], self.ion_atoms_swap[i]
                             self.iv_dict.swap_atom(i, j)
                             break
 
             # check and swap materials
-            for i in range(len(new_unique_materials)):
+            for i in range(len(new_unique_material_atoms)):
                 # if they aren't in order
-                if new_unique_materials[i] != self.materials_swap[i]:
+                if new_unique_material_atoms[i] != self.material_atoms_swap[i]:
                     # search the right atom to swap
-                    for j in range(i, len(new_unique_materials)):
+                    for j in range(i, len(new_unique_material_atoms)):
                         # if the right atom index is found
-                        if self.materials_swap[j] == new_unique_materials[i]:
+                        if self.material_atoms_swap[j] == new_unique_material_atoms[i]:
                             # swap atoms
-                            self.materials_swap[i], self.materials_swap[j] = \
-                                self.materials_swap[j], self.materials_swap[i]
-                            self.iv_dict.swap_atom(len(self.ions_swap) + i,
-                                                   len(self.ions_swap) + j)
+                            self.material_atoms_swap[i], self.material_atoms_swap[j] = \
+                                self.material_atoms_swap[j], self.material_atoms_swap[i]
+                            self.iv_dict.swap_atom(len(self.ion_atoms_swap) + i,
+                                                   len(self.ion_atoms_swap) + j)
                             break
 
-        # calculating the new nr and natom
+        # calculate the new nr and natom
         natom = len(new_unique_atoms)
         nr = len(new_materials)
 
-        # adding the new atom and region names
-        # in their corresponding IVArray Entries
+        # add the new atom and region names in their corresponding IVArray
+        # entries
         for i, tab in enumerate(self.iv_dict):
             if i == 1:
                 self.iv_dict[tab][3].values[0] = \
@@ -492,17 +491,18 @@ class RegionEditFrame(tk.Frame):
     """
 
     def __init__(self, parent, text, material, on_delete, index, on_swap,
-                 is_original, all_elements, orig_text="", orig_index=0, *args, **kwargs):
+                 is_original, all_elements, orig_text="", orig_index=0,
+                 *args, **kwargs):
         """
-        Constructor. Sets up the widget layout.
+        Init. Set up the widget layout.
 
         :param parent: parent frame
         :param text: Frame Label description. Usually "Region n:"
-        :param material: Name of the Material
-        :param on_delete: Callback function that gets called
-            when the Region is removed
-        :param is_original: If this RegionEditFrame was created while loading
-            this window
+        :param material: name of the material
+        :param on_delete: callback function that gets called
+            when the region is removed
+        :param is_original: if this is called during initialization of the
+            window
         :param orig_text: original text, if the REF is original
         """
         super().__init__(parent, *args, **kwargs)
@@ -652,13 +652,11 @@ class RegionEditFrame(tk.Frame):
 
         # initial value for the simpledialog
         initial = "" if self.get_name().startswith("<") else self.get_name()
-        # retry on false inputs
-        retry = True
         # new material name
         new_name = None
 
         # while no valid name is given
-        while retry:
+        while True:
             new_name = simpledialog.askstring(title="Change Material Name",
                                               prompt="New Material name:",
                                               initialvalue=initial)
@@ -671,23 +669,23 @@ class RegionEditFrame(tk.Frame):
 
             # check for correct spelling of the molecule
             unique_atoms = []
-            error = False
             try:
                 unique_atoms = get_unique_atoms([new_name],
-                                                   self.all_elements)
+                                                self.all_elements)
             except ValueError:
                 error = True
-
+            else:
+                error = False
             # check if the given string was a molecule name
             if len(unique_atoms) == 0:
                 error = True
 
-            # info for wrong input
             if error:
+                # info for wrong input
                 tk.messagebox.showerror("Invalid Input",
                                         "Invalid Material Name.")
-            # if name is valid, proceed
-            if not error:
+            else:
+                # if name is valid, proceed
                 break
 
         # set new name if user didn't cancel

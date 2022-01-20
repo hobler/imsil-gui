@@ -67,23 +67,22 @@ class ImsilInputParameterEditor:
         if not os.path.isfile(DATABASE_FILE):
             sys.exit(DATABASE_FILE + " does not exist.")
 
-        # Create the root window, adjust its title, make it non-
-        # resizable and center it
+        # Create the root window, adjust its title, make it non-resizable and
+        # center it
         self.root = tk.Tk()
         self.root.title('IMSIL Input Parameter Editor')
         self.root.resizable(False, False)
         center_window(self.root)
 
-        # Add a loading message (becomes visible after the user presses
-        # the button to open the IMSIL Input Parameter Editor in the
-        # Welcome Window)
+        # Add a loading message (becomes visible after the user presses the
+        # button to open the IMSIL Input Parameter Editor in the Welcome Window)
         label = tk.Label(self.root, text="Loading data...")
         label.pack()
 
         # Create the Notebook
         self.nb = ttk.Notebook(self.root, width=900, height=600)
 
-        # Add the necessary tabs
+        # Add and populate the necessary tabs
         for table_name in get_database_table_names(DATABASE_FILE):
             tab_frame = TabFrame(parent=self.nb,
                                  db_file=DATABASE_FILE,
@@ -110,8 +109,8 @@ class ImsilInputParameterEditor:
         view_menu = tk.Menu(self.menu)
         self.menu.add_cascade(label="File", menu=file_menu)
         self.menu.add_cascade(label="Edit", menu=edit_menu)
-        edit_menu.add_command(label="Materials/Ions",
-                             command=self.open_edit_material_window)
+        edit_menu.add_command(label="Ion/Materials",
+                              command=self.open_edit_material_window)
         self.menu.add_cascade(label="View", menu=view_menu)
 
         # If the user has passed the name of an IMSIL input file
@@ -471,7 +470,7 @@ class ImsilInputParameterEditor:
                             child.insert(0, str(nr))
                             child["state"] = 'disabled'
 
-                # writing the atom name in it's entry
+                # write the atom name into its entry
                 if tab_num == 2:
                     content_frame_entry = scroll_frame.content_frame_entry
 
