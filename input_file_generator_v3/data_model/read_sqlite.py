@@ -117,6 +117,7 @@ class DatabaseTable:
         self.table_row_list = []
         for table_row in table_row_list:
             self.table_row_list.append(DatabaseTableRow(table_row))
+        self.table_name = table_name
 
     def __iter__(self):
         self.index = 0

@@ -3,13 +3,16 @@ Classes:
     :WelcomeWindow: The main window, where the user can configure the
                     Input Parameter Editor settings.
 """
+import os, sys
 import tkinter as tk
 from tkinter import ttk, filedialog
 
 from UI.frames.blanc_frame import BlancFrame, WELCOME
 from utility import center_window
 from parameter_editor_window import ImsilInputParameterEditor
+from data_model.read_sqlite import get_database_table_names, DatabaseTable
 
+DATABASE_FILE = "parameters.db"
 
 class WelcomeWindow(tk.Tk):
     """
@@ -130,6 +133,10 @@ class WelcomeWindow(tk.Tk):
         self.natom_entry.grid(row=0, column=3, padx=(0, 5), pady=0,
                               sticky="NESW")
 
+        # load structure, names and content of the tabs
+        self.db_tables = []
+        self.load_database_tables()
+
         # Center the window and show it
         center_window(self)
         self.mainloop()
@@ -171,6 +178,28 @@ class WelcomeWindow(tk.Tk):
 
         return True
 
+    def load_database_tables(self):
+        """
+        Loads the data for each tab from the Database
+        and fills the db_tables list.
+
+        Exits the program if the database file was not found.
+        """
+
+        # clear the list if it already contains data
+        if len(self.db_tables) > 0:
+            self.db_tables.clear()
+
+        # load database tables to create and populate the tabs
+        if not os.path.isfile(DATABASE_FILE):
+            sys.exit(DATABASE_FILE + " does not exist.")
+
+        # get database table for each tab
+        for table_name in get_database_table_names(DATABASE_FILE):
+            db_table = DatabaseTable(DATABASE_FILE, table_name)
+            db_table.regroup()
+            self.db_tables.append(db_table)
+
     def open_imsil_input_parameter_editor(self):
         """
         Open the Imsil Input Parameter Editor.
@@ -209,4 +238,5 @@ class WelcomeWindow(tk.Tk):
             type_of_simulation=self.type_sim_combobox_variable.get(),
             input_file_path=self.load_existing_file_variable.get(),
             nr=self.nr_var,
-            natom=self.natom_var)
+            natom=self.natom_var,
+            db_tables=self.db_tables)

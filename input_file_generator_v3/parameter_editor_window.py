@@ -7,7 +7,6 @@ Classes:
 """
 
 import os
-import sys
 import tkinter as tk
 from collections import OrderedDict
 from tkinter import ttk
@@ -15,11 +14,8 @@ from tkinter import ttk
 from UI.frames.tab_frame import TabFrame
 from data_model.input_file import InputFile
 from data_model.iv_data import IVData, IVDict
-from data_model.read_sqlite import get_database_table_names
 from edit_window import EditWindow
 from utility import center_window
-
-DATABASE_FILE = "parameters.db"
 
 
 def read_existing_input_file(file_path):
@@ -50,7 +46,7 @@ class ImsilInputParameterEditor:
     where each tab corresponds to a database table.
     """
 
-    def __init__(self, type_of_simulation, input_file_path, nr, natom):
+    def __init__(self, type_of_simulation, input_file_path, nr, natom, db_tables):
         """
         In the initialization of the IMSIL Input Parameter Editor a
         notebook is added to the window. For each table of the database
@@ -64,8 +60,6 @@ class ImsilInputParameterEditor:
         :param nr: (textvariable) number of regions for index variable arrays
         :param natom: (textvariable) number of atoms for index variable arrays
         """
-        if not os.path.isfile(DATABASE_FILE):
-            sys.exit(DATABASE_FILE + " does not exist.")
 
         # Create the root window, adjust its title, make it non-resizable and
         # center it
@@ -83,15 +77,14 @@ class ImsilInputParameterEditor:
         self.nb = ttk.Notebook(self.root, width=900, height=600)
 
         # Add and populate the necessary tabs
-        for table_name in get_database_table_names(DATABASE_FILE):
+        for db_table in db_tables:
             tab_frame = TabFrame(parent=self.nb,
-                                 db_file=DATABASE_FILE,
-                                 table_name=table_name,
+                                 db_table=db_table,
                                  type_of_simulation=type_of_simulation,
                                  nr=nr,
                                  natom=natom,
-                                 name=table_name)
-            self.nb.add(tab_frame, text=table_name)
+                                 name=db_table.table_name)
+            self.nb.add(tab_frame, text=db_table.table_name)
 
         # Remove the loading message and place the notebook
         label.pack_forget()

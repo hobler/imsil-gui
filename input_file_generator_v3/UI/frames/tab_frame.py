@@ -1,4 +1,3 @@
-from data_model.read_sqlite import DatabaseTable
 from UI.frames.scroll_frame import ScrollFrame
 from UI.frames.blanc_frame import BlancFrame
 
@@ -12,13 +11,12 @@ class TabFrame(BlancFrame):
     parameters. The ScrollFrame allows scrolling up and down the parameter
     list in case the window does not provide enough space for all of them.
     """
-    def __init__(self, parent, db_file, table_name, type_of_simulation,
+    def __init__(self, parent, db_table, type_of_simulation,
                  nr, natom, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
         # Get the database table and regroup the parameters
-        self.db_table = DatabaseTable(db_file, table_name)
-        self.db_table.regroup()
+        self.db_table = db_table
 
         # Create a ScrollFrame specifically developed for this project
         self.scroll_frame = ScrollFrame(self, nr, natom)
