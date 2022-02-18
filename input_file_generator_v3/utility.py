@@ -26,3 +26,46 @@ def center_window(tk_window):
     tk_window.geometry("+{}+{}".format(pos_x, pos_y))
     # Show widget
     tk_window.deiconify()
+
+
+def get_size_string(par_name, index_var_list):
+    """
+    Returns the width and height of the grid as a list
+    depending on the variables to display.
+
+    For example an IVArray with dimension of 1 and
+    ATOM as index variable returns ["1", "a"].
+    Whereas a dimension of 2 containing an atom and a region returns ["r", "a"].
+
+    :param par_name: Parameter Name.
+    :param index_var_list: Index Variable List.
+
+    :return: With and height of the grid as a list. [1/a/r, 1/a/r]
+    """
+    size = ["0", "0"]
+
+    dim = len(index_var_list)
+    if dim == 1:
+        if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
+                "ATOM" in index_var_list):
+            # 1 x NATOM array
+            size = ["1", "a"]
+        elif ("REGION" in index_var_list and
+              # POINTS in parameter name
+              "POINTS" in par_name):
+            # NR x 1 array
+            size = ["r", "1"]
+        elif "REGION" in index_var_list:
+            # 1 x NR array
+            size = ["1", "r"]
+    elif dim == 2:
+        if ("REGION" in index_var_list and
+                ("ATOM1" in index_var_list or
+                 "ATOM2" in index_var_list)):
+            # NR x NATOM array
+            size = ["r", "a"]
+        elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
+            # NATOM x NATOM array
+            size = ["a", "a"]
+
+    return size

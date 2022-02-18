@@ -12,6 +12,8 @@ from UI.frames.blanc_frame import INDEX_EXPAND_D_2D
 from UI.frames.blanc_frame import INDEX_EXPAND_RD
 
 # Configure the width and height of the widgets
+from utility import get_size_string
+
 INFO_WIDTH = 10  # info Button width
 INFO_HEIGHT = 10  # info Button height
 ARROW_WIDTH = 20  # Width of the arrow (and '+'/'-') Button(s)
@@ -1331,8 +1333,8 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         array_state = self.get_state_simple()
         array_settings = self.get_array_settings()
-        size_string = self.get_size_string(array_settings[0],
-                                           array_settings[1])
+        size_string = get_size_string(array_settings[0],
+                                      array_settings[1])
 
         # open the array to write all values into the textboxes to read them
         self.open_array_with_parameters(array_state, size_string)
@@ -1556,42 +1558,42 @@ class IndexVariableArrayFrame(BlancFrame):
 
         return size
 
-    def get_size_string(self, par_name, index_var_list):
-        """
-        Returns the width and height of the grid as a list.
-
-        :param par_name: Parameter Name.
-        :param index_var_list: Index Variable List.
-
-        :return: With and height of the grid as a list.
-        """
-        size = ["0", "0"]
-
-        dim = len(index_var_list)
-        if dim == 1:
-            if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
-                    "ATOM" in index_var_list):
-                # 1 x NATOM array
-                size = ["1", "a"]
-            elif ("REGION" in index_var_list and
-                  # POINTS in parameter name
-                  "POINTS" in par_name):
-                # NR x 1 array
-                size = ["r", "1"]
-            elif "REGION" in index_var_list:
-                # 1 x NR array
-                size = ["1", "r"]
-        elif dim == 2:
-            if ("REGION" in index_var_list and
-                    ("ATOM1" in index_var_list or
-                     "ATOM2" in index_var_list)):
-                # NR x NATOM array
-                size = ["r", "a"]
-            elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
-                # NATOM x NATOM array
-                size = ["a", "a"]
-
-        return size
+    # def get_size_string(self, par_name, index_var_list):
+    #     """
+    #     Returns the width and height of the grid as a list.
+    #
+    #     :param par_name: Parameter Name.
+    #     :param index_var_list: Index Variable List.
+    #
+    #     :return: With and height of the grid as a list.
+    #     """
+    #     size = ["0", "0"]
+    #
+    #     dim = len(index_var_list)
+    #     if dim == 1:
+    #         if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
+    #                 "ATOM" in index_var_list):
+    #             # 1 x NATOM array
+    #             size = ["1", "a"]
+    #         elif ("REGION" in index_var_list and
+    #               # POINTS in parameter name
+    #               "POINTS" in par_name):
+    #             # NR x 1 array
+    #             size = ["r", "1"]
+    #         elif "REGION" in index_var_list:
+    #             # 1 x NR array
+    #             size = ["1", "r"]
+    #     elif dim == 2:
+    #         if ("REGION" in index_var_list and
+    #                 ("ATOM1" in index_var_list or
+    #                  "ATOM2" in index_var_list)):
+    #             # NR x NATOM array
+    #             size = ["r", "a"]
+    #         elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
+    #             # NATOM x NATOM array
+    #             size = ["a", "a"]
+    #
+    #     return size
 
     def open_array(self):
         """
@@ -1600,7 +1602,7 @@ class IndexVariableArrayFrame(BlancFrame):
         """
         array_state = self.get_state_simple()
         array_settings = self.get_array_settings()
-        size_string = self.get_size_string(array_settings[0], array_settings[1])
+        size_string = get_size_string(array_settings[0], array_settings[1])
         self.open_array_with_parameters(array_state, size_string)
 
     def open_array_with_parameters(self, opened_state, size_string):

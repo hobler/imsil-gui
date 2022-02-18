@@ -15,7 +15,7 @@ from UI.frames.tab_frame import TabFrame
 from data_model.input_file import InputFile
 from data_model.iv_data import IVData, IVDict
 from edit_window import EditWindow
-from utility import center_window
+from utility import center_window, get_size_string
 
 
 def read_existing_input_file(file_path):
@@ -551,7 +551,7 @@ class ImsilInputParameterEditor:
             nr = self.nr
 
         data = IVData(
-                ivarray.get_size_string(array_settings[0], array_settings[1]),
+                get_size_string(array_settings[0], array_settings[1]),
                 natom, nr, values[1], values[2])
         # points doesn't get changed, so it's just saved as it is
         if "POINT" in array_settings[1]:
