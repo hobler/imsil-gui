@@ -659,7 +659,8 @@ class RegionEditFrame(tk.Frame):
         while True:
             new_name = simpledialog.askstring(title="Change Material Name",
                                               prompt="New Material name:",
-                                              initialvalue=initial)
+                                              initialvalue=initial,
+                                              parent=self)
             # result of the cancel button
             if new_name is None:
                 # re-enable on-click event
