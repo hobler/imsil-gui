@@ -11,6 +11,7 @@ from UI.frames.blanc_frame import BlancFrame, WELCOME
 from utility import center_window
 from parameter_editor_window import ImsilInputParameterEditor
 from data_model.read_sqlite import get_database_table_names, DatabaseTable
+from data_model.parameter_data import ParameterData
 
 DATABASE_FILE = "parameters.db"
 
@@ -136,6 +137,10 @@ class WelcomeWindow(tk.Tk):
         # load structure, names and content of the tabs
         self.db_tables = []
         self.load_database_tables()
+
+        # create ParameterData, this object contains
+        # every parameter value and its entries
+        self.parameter_data = ParameterData(self.db_tables)
 
         # Center the window and show it
         center_window(self)
