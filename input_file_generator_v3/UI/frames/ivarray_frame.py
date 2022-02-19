@@ -12,6 +12,7 @@ from UI.frames.blanc_frame import INDEX_EXPAND_D_2D
 from UI.frames.blanc_frame import INDEX_EXPAND_RD
 
 # Configure the width and height of the widgets
+from data_model.iv_data import IVData
 from utility import get_size_string
 
 INFO_WIDTH = 10  # info Button width
@@ -1391,6 +1392,52 @@ class IndexVariableArrayFrame(BlancFrame):
                 self.short_desc,
                 self.long_desc)
 
+    def get_ivdata(self):
+        """
+        Returns all the values and array state as an IVData object
+
+        """
+        # structure of values described in ivarray_frame.py -> get_values()
+        values = self.get_values()
+        # settings to re-create the array
+        array_settings = values[2]
+        size = self.get_size(array_settings[0],
+                                array_settings[1],
+                                self.n_r, self.n_atom)
+        m = size[0]  # number of rows in the iv_array
+        n = size[1]  # number of columns
+        if type(m) != int:
+            m = m.get()
+        if type(n) != int:
+            n = n.get()
+
+        # points has an extra region
+        if "POINTS" in array_settings[0]:
+            m += 1
+
+        if type(self.n_atom) != int:
+            natom = self.n_atom.get()
+        else:
+            natom = self.n_atom
+        if type(self.n_r) != int:
+            nr = self.n_r.get()
+        else:
+            nr = self.n_r
+
+        data = IVData(
+                get_size_string(array_settings[0], array_settings[1]),
+                natom, nr, values[1], values[2])
+        # points doesn't get changed, so it's just saved as it is
+        if "POINT" in array_settings[1]:
+            data.values = values[0]
+        else:
+            # save the values in a 2D grid to re-add them easier later
+            for i in range(m * n):
+                if i % n == 0:
+                    data.values.append([])
+                data.values[i // n].append(values[0][i + 1])
+        return data
+
     def set_values_from_ivdata(self, ivdata, nr, natom):
         """
         This method is used to re-add the values
@@ -1557,43 +1604,6 @@ class IndexVariableArrayFrame(BlancFrame):
                 size = [natom, natom]
 
         return size
-
-    # def get_size_string(self, par_name, index_var_list):
-    #     """
-    #     Returns the width and height of the grid as a list.
-    #
-    #     :param par_name: Parameter Name.
-    #     :param index_var_list: Index Variable List.
-    #
-    #     :return: With and height of the grid as a list.
-    #     """
-    #     size = ["0", "0"]
-    #
-    #     dim = len(index_var_list)
-    #     if dim == 1:
-    #         if ("ATOM1" in index_var_list or "ATOM2" in index_var_list or
-    #                 "ATOM" in index_var_list):
-    #             # 1 x NATOM array
-    #             size = ["1", "a"]
-    #         elif ("REGION" in index_var_list and
-    #               # POINTS in parameter name
-    #               "POINTS" in par_name):
-    #             # NR x 1 array
-    #             size = ["r", "1"]
-    #         elif "REGION" in index_var_list:
-    #             # 1 x NR array
-    #             size = ["1", "r"]
-    #     elif dim == 2:
-    #         if ("REGION" in index_var_list and
-    #                 ("ATOM1" in index_var_list or
-    #                  "ATOM2" in index_var_list)):
-    #             # NR x NATOM array
-    #             size = ["r", "a"]
-    #         elif "ATOM1" in index_var_list and "ATOM2" in index_var_list:
-    #             # NATOM x NATOM array
-    #             size = ["a", "a"]
-    #
-    #     return size
 
     def open_array(self):
         """

@@ -512,54 +512,7 @@ class ImsilInputParameterEditor:
             tab_ivarrays = self.get_ivarrays_from_tab(tab_name)
             ivarray_tab_values = []
             for ivarray in tab_ivarrays:
-                values = self.get_data_from_ivarray(ivarray)
+                values = ivarray.get_ivdata()
                 ivarray_tab_values.append(values)
             iv_dict[tab_name] = ivarray_tab_values
         return iv_dict
-
-    def get_data_from_ivarray(self, ivarray):
-        """
-        Returns all the values and array state as an IVData object
-
-        :param ivarray: IndexVariableArray
-        """
-        # structure of values described in ivarray_frame.py -> get_values()
-        values = ivarray.get_values()
-        # settings to re-create the array
-        array_settings = values[2]
-        size = ivarray.get_size(array_settings[0],
-                                array_settings[1],
-                                self.nr, self.natom)
-        m = size[0]  # number of rows in the iv_array
-        n = size[1]  # number of columns
-        if type(m) != int:
-            m = m.get()
-        if type(n) != int:
-            n = n.get()
-
-        # points has an extra region
-        if "POINTS" in array_settings[0]:
-            m += 1
-
-        if type(self.natom) != int:
-            natom = self.natom.get()
-        else:
-            natom = self.natom
-        if type(self.nr) != int:
-            nr = self.nr.get()
-        else:
-            nr = self.nr
-
-        data = IVData(
-                get_size_string(array_settings[0], array_settings[1]),
-                natom, nr, values[1], values[2])
-        # points doesn't get changed, so it's just saved as it is
-        if "POINT" in array_settings[1]:
-            data.values = values[0]
-        else:
-            # save the values in a 2D grid to re-add them easier later
-            for i in range(m * n):
-                if i % n == 0:
-                    data.values.append([])
-                data.values[i // n].append(values[0][i + 1])
-        return data
