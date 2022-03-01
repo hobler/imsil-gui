@@ -216,6 +216,7 @@ class DatabaseTableRow:
 
     def is_logical(self):
         """Check if the parameter is a boolean"""
+        # TODO: change, because arrays of logical aren't represented as arrays
         return "logical" in self.get_type()
 
     def is_index_var(self):

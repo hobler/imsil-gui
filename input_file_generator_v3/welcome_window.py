@@ -15,6 +15,7 @@ from data_model.parameter_data import ParameterData
 
 DATABASE_FILE = "parameters.db"
 
+
 class WelcomeWindow(tk.Tk):
     """
     This is the class for the Welcome Window.
@@ -138,7 +139,7 @@ class WelcomeWindow(tk.Tk):
         self.db_tables = []
         self.load_database_tables()
 
-        # create ParameterData, this object contains
+        # create ParameterData from database tables, this object contains
         # every parameter value and its entries
         self.parameter_data = ParameterData(self.db_tables)
 
@@ -242,6 +243,6 @@ class WelcomeWindow(tk.Tk):
         ImsilInputParameterEditor(
             type_of_simulation=self.type_sim_combobox_variable.get(),
             input_file_path=self.load_existing_file_variable.get(),
-            nr=self.nr_var,
-            natom=self.natom_var,
-            db_tables=self.db_tables)
+            nr=self.parameter_data.get_nr(),
+            natom=self.parameter_data.get_natom(),
+            parameter_data=self.parameter_data)

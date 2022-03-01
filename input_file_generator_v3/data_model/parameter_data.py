@@ -156,8 +156,9 @@ class ParameterEntry:
     def set_gui_object(self, gui_object):
         """
         Sets the reference to the gui object associated with this entry.
+        Has to be called for each entry when building the GUI.
 
-        :param gui_object: the gui object
+        :param gui_object: the gui object (entry, checkbutton, iv_Array)
 
         """
         self.gui_object = gui_object
@@ -173,8 +174,48 @@ class ParameterEntry:
         """
         if self.gui_object is not None:
             if self.is_index_var:
-                value = self.gui_object.get_ivdata()
+                return self.gui_object.get_ivdata()
             else:
-                value = self.gui_object.get()
+                return self.gui_object.get()
         else:
             return None
+
+    def get_name(self):
+        """Return the name of the parameter."""
+        return self.name
+
+    def get_short_desc(self):
+        """Return the short description of the parameter."""
+        return self.desc_short
+
+    def get_long_desc(self):
+        """Return the long description of the parameter."""
+        return self.desc_long
+
+    def get_type(self):
+        """Return the type of the parameter."""
+        return self.p_type
+
+    def get_default_value(self):
+        """Return the default value of the parameter"""
+        return self.default_value
+
+    def get_range(self):
+        """Return the range of the parameter"""
+        return self.p_range
+
+    def get_basic(self):
+        """Return the basic flag of the parameter."""
+        return self.basic
+
+    def get_index_vars(self):
+        """Return a list of index variables for the parameter."""
+        return self.index_vars
+
+    def is_logical(self):
+        """Check if the parameter is a boolean"""
+        return self.is_logical
+
+    def is_index_var(self):
+        """Check if the parameter is an index variable array."""
+        return self.is_index_var

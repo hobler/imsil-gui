@@ -11,6 +11,7 @@ from UI.frames.ivarray_frame import IndexVariableArrayFrame
 from UI.frames.blanc_frame import MAIN as MAIN
 from UI.frames.blanc_frame import BOOLEAN as BOOLEAN
 from UI.frames.blanc_frame import ENTRY as ENTRY
+from utility import create_info_button_text
 
 OS = platform.system()
 
@@ -49,8 +50,8 @@ class ScrollFrame(BlancFrame):
         super().__init__(parent, *args, **kwargs)
 
         # Assign the number of Regions and Atoms
-        self.nr = nr.get()
-        self.natom = natom.get()
+        self.nr = nr
+        self.natom = natom
         self.nr_new = self.nr
         self.natom_new = self.natom
 
@@ -105,17 +106,15 @@ class ScrollFrame(BlancFrame):
         self.content_frame.bind("<Configure>", self.update_scrollregion)
         self.main_canvas.bind('<Configure>', self.update_frame_width)
 
-    def add_parameter(self, par_name, index_var_list=None, default_value="",
+    def add_parameter_old(self, par_name, index_var_list=None, default_value="",
                       short_desc="", long_desc="",
                       is_bool=False, is_index_var=False):
         """
         Add a new parameter.
-
         This method keeps track of the number of parameters and their
         position by calculating the row index as well as the column
         index and passing the according arguments to the method
         add_content_in_par_frame.
-
         :param par_name: the parameter name
         :param index_var_list: the list of all index variables for this
                                parameter
@@ -125,6 +124,10 @@ class ScrollFrame(BlancFrame):
         :param is_bool: True if the parameter is a boolean, False otherwise
         :param is_index_var: True if the parameter is an index variable
                              array parameter, False otherwise
+
+        TODO: WILL BE DELETED IN FUTURE UPDATE.
+        Currently used for resizing the ivarrays.
+        This functionality will be moved to the welcome window.
         """
         if is_index_var:
             if index_var_list is None:
@@ -138,6 +141,45 @@ class ScrollFrame(BlancFrame):
             self.add_entry_parameter(par_name, default_value,
                                      short_desc, long_desc)
 
+    def add_parameter(self, parameter_entry):
+        """
+        Add a new parameter.
+
+        This method keeps track of the number of parameters and their
+        position by calculating the row index as well as the column
+        index and passing the according arguments to the method
+        add_content_in_par_frame.
+
+        :param parameter_entry: ParameterEntry object representing the parameter.
+        """
+
+        par_name = parameter_entry.get_name()
+        index_var_list = parameter_entry.get_index_vars()
+        default_value = parameter_entry.get_default_value()
+        short_desc = parameter_entry.get_short_desc()
+        long_desc = create_info_button_text(parameter_entry)
+        is_bool = parameter_entry.is_logical
+        is_index_var = parameter_entry.is_index_var
+
+        gui_object_ref = None
+
+        if is_index_var:
+            if index_var_list is None:
+                index_var_list = []
+            gui_object_ref = self.add_ivarray_parameter(par_name, index_var_list,
+                                                        default_value,
+                                                        short_desc, long_desc)
+        elif is_bool:
+            gui_object_ref = self.add_bool_parameter(par_name, default_value,
+                                                     short_desc, long_desc)
+        else:
+            gui_object_ref = self.add_entry_parameter(par_name, default_value,
+                                                      short_desc, long_desc)
+
+        # set the gui object to retrieve the
+        # value by calling "get()" or "get_ivdata()" on this object
+        parameter_entry.set_gui_object(gui_object_ref)
+
     def add_ivarray_parameter(self, par_name, index_var_list, default_value,
                               short_desc, long_desc):
         """
@@ -148,6 +190,8 @@ class ScrollFrame(BlancFrame):
         :param default_value: the default value of the parameter
         :param short_desc: the short description of the parameter
         :param long_desc: the long description of the parameter
+
+        :returns: Reference to the now added GUI object
         """
         row_index = 0
         # Reset the counter, since there is only 1 index variable
@@ -170,6 +214,8 @@ class ScrollFrame(BlancFrame):
         # Increase the counter
         self.num_ivarrays += 1
 
+        return par_frame
+
     def add_bool_parameter(self, par_name, default_value,
                            short_desc, long_desc):
         """
@@ -179,6 +225,8 @@ class ScrollFrame(BlancFrame):
         :param default_value: the default value of the parameter
         :param short_desc: the short description of the parameter
         :param long_desc: the long description of the parameter
+
+        :returns: Reference to the now added GUI object
         """
         row_index = self.num_bools // BOOL_PARAMS_PER_ROW
         # If the parameter is the first boolean, reset the counter
@@ -189,7 +237,7 @@ class ScrollFrame(BlancFrame):
         self.bind_mouse_event(par_frame)
 
         # Add the Checkbutton for the parameter
-        checkbutton = self.add_checkbutton(parent=par_frame,
+        checkbutton, cb_variable = self.add_checkbutton(parent=par_frame,
                                            par_name=par_name,
                                            cb_value=default_value,
                                            default_value=default_value)
@@ -222,6 +270,9 @@ class ScrollFrame(BlancFrame):
         # Fold the counter at the end of the row
         self.params_in_row = self.params_in_row % BOOL_PARAMS_PER_ROW
 
+        # return reference to the variable that stores the current value
+        return cb_variable
+
     def add_entry_parameter(self, par_name, default_value,
                             short_desc, long_desc):
         """
@@ -231,6 +282,8 @@ class ScrollFrame(BlancFrame):
         :param default_value: the default value of the parameter
         :param short_desc: the short description of the parameter
         :param long_desc: the long description of the parameter
+
+        :returns: Reference to the now added GUI object
         """
         row_index = self.num_entries // ENTRY_PARAMS_PER_ROW
         # If the parameter is the first entry, reset the counter
@@ -271,6 +324,8 @@ class ScrollFrame(BlancFrame):
         self.params_in_row += 1
         # Fold the counter at the end of the row
         self.params_in_row = self.params_in_row % ENTRY_PARAMS_PER_ROW
+
+        return entry
 
     def add_button(self, parent, btn_text="Button", w=3, h=3,
                    tool_tip_text=None):
@@ -356,7 +411,7 @@ class ScrollFrame(BlancFrame):
                               default_value=default_value)
 
         self.bind_mouse_event(checkbutton)
-        return checkbutton
+        return checkbutton, cb_string_var
 
     def update_if_obligatory_entry(self, par_name):
         """

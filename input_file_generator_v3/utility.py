@@ -69,3 +69,23 @@ def get_size_string(par_name, index_var_list):
             size = ["a", "a"]
 
     return size
+
+
+def create_info_button_text(parameter_entry):
+    """
+    Create the info message text for a parameter.
+
+    Create a string, which contains all information that should be
+    shown to the user when the user presses the info Button.
+
+    :param parameter_entry: The ParameterEntry holding
+    all data of the parameter.
+    """
+    return (parameter_entry.get_long_desc().rstrip()
+            + "\n\n"
+            + "Type: " + parameter_entry.get_type().rstrip()
+            + "\n\n"
+            + "Default value: "
+            + parameter_entry.get_default_value().rstrip()
+            + "\n\n"
+            + "Range: " + parameter_entry.get_range().rstrip())

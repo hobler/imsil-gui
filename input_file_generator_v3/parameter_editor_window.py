@@ -46,7 +46,8 @@ class ImsilInputParameterEditor:
     where each tab corresponds to a database table.
     """
 
-    def __init__(self, type_of_simulation, input_file_path, nr, natom, db_tables):
+    def __init__(self, type_of_simulation, input_file_path, nr, natom,
+                 parameter_data):
         """
         In the initialization of the IMSIL Input Parameter Editor a
         notebook is added to the window. For each table of the database
@@ -76,22 +77,29 @@ class ImsilInputParameterEditor:
         # Create the Notebook
         self.nb = ttk.Notebook(self.root, width=900, height=600)
 
+        # convert nr and natom into int if they are string
+        # if the values aren't set, use the minimum values
+        # (1 region + 1 atom are nr=1 & natom=2)
+        self.nr = 1
+        self.natom = 2
+        if nr.isnumeric():
+            self.nr = int(nr)
+        if natom.isnumeric():
+            self.natom = int(natom)
+
         # Add and populate the necessary tabs
-        for db_table in db_tables:
+        for tab_name in parameter_data:
             tab_frame = TabFrame(parent=self.nb,
-                                 db_table=db_table,
+                                 parameter_list=parameter_data[tab_name],
                                  type_of_simulation=type_of_simulation,
-                                 nr=nr,
-                                 natom=natom,
-                                 name=db_table.table_name)
-            self.nb.add(tab_frame, text=db_table.table_name)
+                                 nr=self.nr,
+                                 natom=self.natom,
+                                 name=tab_name)
+            self.nb.add(tab_frame, text=tab_name)
 
         # Remove the loading message and place the notebook
         label.pack_forget()
         self.nb.grid(row=0, column=0, sticky="NESW")
-
-        self.nr = nr
-        self.natom = natom
 
         # Create a menu bar
         # (can also be used to read in files or save files later)
@@ -351,7 +359,7 @@ class ImsilInputParameterEditor:
         tab_frame = self.nb.nametowidget(tab_name)
         if tab_frame is not None:
             self.change_dim_of_scroll_frame(tab_frame.scroll_frame, nr, natom)
-            tab_frame.scroll_frame.add_parameter(
+            tab_frame.scroll_frame.add_parameter_old(
                 array_settings[0],  # par_name
                 array_settings[1],  # index_var_list
                 array_settings[2],  # default_value
