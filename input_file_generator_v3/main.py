@@ -1,9 +1,12 @@
 """
     Main method, starts the welcome window.
 """
-
+from main_window import MainWindow
 from welcome_window import WelcomeWindow
 
-
 if __name__ == '__main__':
-    welcome_window = WelcomeWindow()
+    # old welcome window
+    # welcome_window = WelcomeWindow()
+
+    # new welcome window
+    main_window = MainWindow()
