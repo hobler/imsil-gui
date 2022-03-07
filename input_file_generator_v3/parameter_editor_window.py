@@ -82,9 +82,13 @@ class ImsilInputParameterEditor:
         # (1 region + 1 atom are nr=1 & natom=2)
         self.nr = 1
         self.natom = 2
-        if nr.isnumeric():
+        if type(nr) == int:
+            self.nr = nr
+        elif nr.isnumeric():
             self.nr = int(nr)
-        if natom.isnumeric():
+        if type(natom) == int:
+            self.natom = natom
+        elif natom.isnumeric():
             self.natom = int(natom)
 
         # Add and populate the necessary tabs

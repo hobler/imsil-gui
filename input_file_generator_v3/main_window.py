@@ -7,6 +7,8 @@ import os, sys
 import tkinter as tk
 from tkinter import ttk, filedialog
 
+from data_model.iv_data import IVData
+from edit_window import EditWindow
 from utility import center_window
 from parameter_editor_window import ImsilInputParameterEditor
 from data_model.read_sqlite import get_database_table_names, DatabaseTable
@@ -30,7 +32,6 @@ class MainWindow(tk.Tk):
     simulation. These parameters have to be defined in the database (not yet
     implemented).
     """
-    WINDOW_WIDTH = 470  # Define the window width
 
     def __init__(self):
         super().__init__()
@@ -141,7 +142,7 @@ class MainWindow(tk.Tk):
             col_span=1, command=None, state="disabled")
         self.frame_btn_edit_rgn, self.btn_edit_rgn = self.create_control_btn(
             row=3, column=0, text="Region Editor...",
-            col_span=2, command=None, state="normal")
+            col_span=2, command=self.open_region_editor, state="normal")
         self.frame_btn_edit_param, self.btn_edit_param = self.create_control_btn(
             row=4, column=0, text="Parameter Editor...", col_span=2,
             command=self.open_imsil_input_parameter_editor, state="normal")
@@ -212,6 +213,58 @@ class MainWindow(tk.Tk):
             db_table = DatabaseTable(DATABASE_FILE, table_name)
             db_table.regroup()
             self.db_tables.append(db_table)
+
+    def open_region_editor(self):
+        """
+        Open the Region Editor to edit the Ion an Materials. (edit_window.py)
+
+        """
+
+        iv_dict = self.parameter_data.to_iv_dict()
+
+        ions = self.parameter_data.get_entry("ions", "NAME").get_value()
+        materials = self.parameter_data.get_entry("material", "NAME").get_value()
+
+        # first time opening
+        if materials == "-- (obligatory)":
+            materials = [""]
+        else:
+            # convert from ivdata to simple list of strings
+            materials = materials.to_list()
+
+        # hide this window
+        self.withdraw()
+        # open edit window with callback function to return new ivdata
+        edit_window = EditWindow(ions, materials, iv_dict,
+                                 self.on_close_region_editor)
+
+    def on_close_region_editor(self, change=False, iv_dict=None,
+                                      new_ion=None, natom=0, nr=0,
+                                      atoms=None, regions=None):
+        """
+                Callback function. Gets called when the EditWindow closes.
+
+                :param change: True, if the arrays should get updated.
+                :param iv_dict: The data structure containing the entries (IVDict object)
+                :param new_ion: New ion name
+                :param natom: new number of atoms
+                :param nr: new number of regions
+                :param atoms: names of the atoms
+                :param regions: names of the regions
+                """
+        # re-enable this window
+        self.deiconify()
+        # if something has changed
+        if change:
+            # load values to parameter_data
+            self.parameter_data.load_from_iv_dict(iv_dict)
+            # set correct ion name
+            # (material and atom names are already
+            # named in edit_window.py on_btn_ok())
+            self.parameter_data.set_entry_value("ions", "NAME", new_ion)
+            # set new NR and NATOM
+            self.parameter_data.set_entry_value("setup", "NR", nr)
+            self.parameter_data.set_entry_value("setup", "NATOM", natom)
 
     def open_imsil_input_parameter_editor(self):
         """

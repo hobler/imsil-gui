@@ -9,6 +9,7 @@ Classes:
         Datatype to re-create and re-fill the same
         IndexVariableArray along with some helper-functions.
 """
+from utility import get_size_string
 
 
 class IVDict(dict):
@@ -295,3 +296,71 @@ class IVData:
                 return self.nr
             else:
                 return 1
+
+    def print_data(self):
+        """
+        Prints all available data of the array.
+        """
+        print("nr: " + str(self.nr))
+        print("natom: " + str(self.natom))
+        print("size_string: " + str(self.size_string))
+        print("array_state: " + str(self.array_state))
+        print("array_settings: " + str(self.array_settings))
+
+        # special case of POS array
+        if self.size_string[0] == "0":
+            print(self.values)
+        else:
+            for m in range(self.get_m()):
+                for n in range(self.get_n()):
+                    print(self.values[m][n])
+
+    def to_list(self):
+        """
+        return the values as a list.
+
+        :return: list of values.
+        """
+        values = []
+        # special case of POS array
+        if self.size_string[0] == "0":
+            return self.values
+        else:
+            for m in range(self.get_m()):
+                for n in range(self.get_n()):
+                    values.append(self.values[m][n])
+
+        return values
+
+    @staticmethod
+    def create_iv_data_from_list(values, parameter_entry, nr, natom):
+        """
+        Create and return an IVData object, based on a list of values.
+        Structure of the IV Array is provided
+        with the parameter_entry, nr and natom.
+
+        :param values: value list, has to be the right size.
+            Size depends on size_string, nr and natom
+        :param parameter_entry: ParameterEntry object
+        :param nr: number of regions
+        :param natom: number of atoms
+
+        :return: IVData representation
+        """
+        # copy previous data
+        size_string = get_size_string(parameter_entry.get_name(),
+                                      parameter_entry.get_index_vars())
+        array_settings = (parameter_entry.get_name(),
+                          parameter_entry.get_index_vars(),
+                          parameter_entry.get_default_value(),
+                          parameter_entry.get_short_desc(),
+                          parameter_entry.get_long_desc())
+        ivdata = IVData(size_string, natom, nr, (False, False), array_settings)
+        # fill new values into array
+        m = ivdata.get_m()
+        n = ivdata.get_n()
+        for i in range(m * n):
+            if i % n == 0:
+                ivdata.values.append([])
+            ivdata.values[i // n].append(values[i])
+        return ivdata
