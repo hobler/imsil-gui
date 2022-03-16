@@ -106,41 +106,6 @@ class ScrollFrame(BlancFrame):
         self.content_frame.bind("<Configure>", self.update_scrollregion)
         self.main_canvas.bind('<Configure>', self.update_frame_width)
 
-    def add_parameter_old(self, par_name, index_var_list=None, default_value="",
-                      short_desc="", long_desc="",
-                      is_bool=False, is_index_var=False):
-        """
-        Add a new parameter.
-        This method keeps track of the number of parameters and their
-        position by calculating the row index as well as the column
-        index and passing the according arguments to the method
-        add_content_in_par_frame.
-        :param par_name: the parameter name
-        :param index_var_list: the list of all index variables for this
-                               parameter
-        :param default_value: the default value of the parameter
-        :param short_desc: the short description of the parameter
-        :param long_desc: the long description of the parameter
-        :param is_bool: True if the parameter is a boolean, False otherwise
-        :param is_index_var: True if the parameter is an index variable
-                             array parameter, False otherwise
-
-        TODO: WILL BE DELETED IN FUTURE UPDATE.
-        Currently used for resizing the ivarrays.
-        This functionality will be moved to the welcome window.
-        """
-        if is_index_var:
-            if index_var_list is None:
-                index_var_list = []
-            self.add_ivarray_parameter(par_name, index_var_list, default_value,
-                                       short_desc, long_desc)
-        elif is_bool:
-            self.add_bool_parameter(par_name, default_value,
-                                    short_desc, long_desc)
-        else:
-            self.add_entry_parameter(par_name, default_value,
-                                     short_desc, long_desc)
-
     def add_parameter(self, parameter_entry):
         """
         Add a new parameter.
@@ -161,6 +126,8 @@ class ScrollFrame(BlancFrame):
         is_bool = parameter_entry.is_logical
         is_index_var = parameter_entry.is_index_var
 
+        value = parameter_entry.get_value()
+
         gui_object_ref = None
 
         if is_index_var:
@@ -168,20 +135,23 @@ class ScrollFrame(BlancFrame):
                 index_var_list = []
             gui_object_ref = self.add_ivarray_parameter(par_name, index_var_list,
                                                         default_value,
-                                                        short_desc, long_desc)
+                                                        short_desc, long_desc,
+                                                        value)
         elif is_bool:
             gui_object_ref = self.add_bool_parameter(par_name, default_value,
-                                                     short_desc, long_desc)
+                                                     short_desc, long_desc,
+                                                     value)
         else:
             gui_object_ref = self.add_entry_parameter(par_name, default_value,
-                                                      short_desc, long_desc)
+                                                      short_desc, long_desc,
+                                                      value)
 
         # set the gui object to retrieve the
         # value by calling "get()" or "get_ivdata()" on this object
         parameter_entry.set_gui_object(gui_object_ref)
 
     def add_ivarray_parameter(self, par_name, index_var_list, default_value,
-                              short_desc, long_desc):
+                              short_desc, long_desc, value):
         """
         Add an IVArray parameter to its frame.
 
@@ -203,7 +173,8 @@ class ScrollFrame(BlancFrame):
                                             index_var_list, default_value,
                                             short_desc, long_desc,
                                             row_index,
-                                            self.nr, self.natom)
+                                            value.nr, value.natom)
+        par_frame.set_values_from_ivdata(value, value.nr, value.natom)
         par_frame.grid(sticky="NESW")
         self.bind_mouse_event(par_frame)
 
@@ -217,7 +188,7 @@ class ScrollFrame(BlancFrame):
         return par_frame
 
     def add_bool_parameter(self, par_name, default_value,
-                           short_desc, long_desc):
+                           short_desc, long_desc, value):
         """
         Add an Entry parameter to its frame.
 
@@ -225,6 +196,7 @@ class ScrollFrame(BlancFrame):
         :param default_value: the default value of the parameter
         :param short_desc: the short description of the parameter
         :param long_desc: the long description of the parameter
+        :param value: currently stored value
 
         :returns: Reference to the now added GUI object
         """
@@ -237,10 +209,12 @@ class ScrollFrame(BlancFrame):
         self.bind_mouse_event(par_frame)
 
         # Add the Checkbutton for the parameter
-        checkbutton, cb_variable = self.add_checkbutton(parent=par_frame,
-                                           par_name=par_name,
-                                           cb_value=default_value,
-                                           default_value=default_value)
+        checkbutton, cb_variable = self.add_checkbutton(
+                                                    parent=par_frame,
+                                                    par_name=par_name,
+                                                    cb_value=default_value,
+                                                    default_value=default_value,
+                                                    value=value)
         checkbutton.grid(row=row_index,
                          column=ELEMENTS_PER_PARAM * self.params_in_row,
                          sticky="NESW")
@@ -274,7 +248,7 @@ class ScrollFrame(BlancFrame):
         return cb_variable
 
     def add_entry_parameter(self, par_name, default_value,
-                            short_desc, long_desc):
+                            short_desc, long_desc, value):
         """
         Add an Entry parameter to its frame.
 
@@ -282,6 +256,7 @@ class ScrollFrame(BlancFrame):
         :param default_value: the default value of the parameter
         :param short_desc: the short description of the parameter
         :param long_desc: the long description of the parameter
+        :param value: currently stored value
 
         :returns: Reference to the now added GUI object
         """
@@ -313,7 +288,8 @@ class ScrollFrame(BlancFrame):
                       sticky="W")
         # Add the Entry for the parameter
         entry = self.add_entry(parent=par_frame, par_name=par_name,
-                               entry_text=default_value,
+                               entry_text=value if value is not None
+                                                else default_value,
                                default_value=default_value)
         entry.grid(row=row_index,
                    column=ELEMENTS_PER_PARAM * self.params_in_row + 2,
@@ -355,15 +331,15 @@ class ScrollFrame(BlancFrame):
         # the values specified in the welcome window, if the datatype
         # of the default value is not an int (if it is, it should be
         # kept as it is likely the value from the specified file)
-        # TODO: consider input files
-        if par_name == 'NR':
-            if not isinstance(default_value, int):
-                entry_text = str(self.nr)
-                default_value = self.nr
-        elif par_name == 'NATOM':
-            if not isinstance(default_value, int):
-                entry_text = str(self.natom)
-                default_value = self.natom
+        # TODO: consider input files, probably solved
+        # if par_name == 'NR':
+        #     if not isinstance(default_value, int):
+        #         entry_text = str(self.nr)
+        #         default_value = self.nr
+        # elif par_name == 'NATOM':
+        #     if not isinstance(default_value, int):
+        #         entry_text = str(self.natom)
+        #         default_value = self.natom
 
         entry_string_var = tk.StringVar(value=entry_text)
         entry = tk.Entry(parent,
@@ -396,14 +372,14 @@ class ScrollFrame(BlancFrame):
         self.bind_mouse_event(entry)
         return entry
 
-    def add_checkbutton(self, parent, par_name, cb_value="T",
-                        default_value="", on_value="T", off_value="F"):
+    def add_checkbutton(self, parent, par_name, cb_value="T", default_value="",
+                        on_value="T", off_value="F", value=None):
         cb_string_var = tk.StringVar()
         checkbutton = tk.Checkbutton(parent, text="",
                                      variable=cb_string_var,
                                      onvalue=on_value,
                                      offvalue=off_value)
-        cb_string_var.set(cb_value)
+        cb_string_var.set(value if value is not None else default_value)
         checkbutton.config(command=lambda:
                            self.update_if_obligatory_entry(par_name=par_name))
         self.ui_data_list.add(par_name=par_name, tk_widget=checkbutton,

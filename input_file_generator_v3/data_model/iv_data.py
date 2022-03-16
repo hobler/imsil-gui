@@ -192,6 +192,8 @@ class IVData:
             return
         else:
             if change_m:
+                if self.array_settings[0] == "POINTS":
+                    index = index+1
                 self.values.insert(index, [''] * pre_n)
                 pre_m += 1
             if change_n:
@@ -229,6 +231,8 @@ class IVData:
             return
         else:
             if change_m:
+                if self.array_settings[0] == "POINTS":
+                    index = index+1
                 del self.values[index]
                 pre_m -= 1
             if change_n:
@@ -260,6 +264,9 @@ class IVData:
             return
         else:
             if change_m:
+                if self.array_settings[0] == "POINTS":
+                    index_1 = index_1+1
+                    index_2 = index_2+1
                 temp = self.values[index_1]
                 self.values[index_1] = self.values[index_2]
                 self.values[index_2] = temp
@@ -279,6 +286,9 @@ class IVData:
             return self.natom
         else:
             if self.size_string[0] == "r":
+                # POINTS has NR+1 values
+                if self.array_settings[0] == "POINTS":
+                    return self.nr+1
                 return self.nr
             else:
                 return 1

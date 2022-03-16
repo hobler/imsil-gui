@@ -222,11 +222,12 @@ class MainWindow(tk.Tk):
 
         # control frame
 
-        self.btn_open_param = self.create_control_btn(column=0,
-                                                      text="Parameter Editor...",
-                                                      width=150, padx=(6, 2),
-                                                      command=None,
-                                                      state="disabled")
+        self.btn_open_param = self.create_control_btn(
+                            column=0,
+                            text="Parameter Editor...",
+                            width=150, padx=(6, 2),
+                            command=self.open_imsil_input_parameter_editor,
+                            state="disabled")
         self.btn_save = self.create_control_btn(column=1, text="Save",
                                                 width=80, padx=(11, 2),
                                                 command=None, state="disabled")
@@ -733,12 +734,30 @@ class MainWindow(tk.Tk):
         input file and nr and natom) specified by the user.
         """
 
-        self.destroy()  # Close the current Window
+        # self.destroy()  # Close the current Window
+        self.withdraw()
 
         # Open the ImsilInputParameterEditor
         ImsilInputParameterEditor(
             type_of_simulation=None,
-            input_file_path=self.load_existing_file_variable.get(),
+            input_file_path="",
             nr=self.parameter_data.get_nr(),
             natom=self.parameter_data.get_natom(),
-            parameter_data=self.parameter_data)
+            parameter_data=self.parameter_data,
+            on_close=self.on_close_parameter_editor)
+
+    def on_close_parameter_editor(self, apply=False):
+        """
+        Callback when closing the parameter editor.
+
+        :param apply: True if the user wants to apply the changes.
+        """
+        if apply:
+            self.parameter_data.readout_parameter_editor()
+            self.load_region_frame()
+            ions = self.parameter_data.get_entry_value("ions", "NAME")
+            ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
+            self.variable_entry_ion_name.set(ions)
+            self.variable_entry_ion_energy.set(ion_energy)
+
+        self.deiconify()

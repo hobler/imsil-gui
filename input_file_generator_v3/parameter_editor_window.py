@@ -47,7 +47,7 @@ class ImsilInputParameterEditor:
     """
 
     def __init__(self, type_of_simulation, input_file_path, nr, natom,
-                 parameter_data):
+                 parameter_data, on_close):
         """
         In the initialization of the IMSIL Input Parameter Editor a
         notebook is added to the window. For each table of the database
@@ -64,10 +64,13 @@ class ImsilInputParameterEditor:
 
         # Create the root window, adjust its title, make it non-resizable and
         # center it
-        self.root = tk.Tk()
+        self.root = tk.Toplevel()
         self.root.title('IMSIL Input Parameter Editor')
         self.root.resizable(False, False)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_btn_quit)
         center_window(self.root)
+
+        self.on_close = on_close
 
         # Add a loading message (becomes visible after the user presses the
         # button to open the IMSIL Input Parameter Editor in the Welcome Window)
@@ -105,19 +108,7 @@ class ImsilInputParameterEditor:
         label.pack_forget()
         self.nb.grid(row=0, column=0, sticky="NESW")
 
-        # Create a menu bar
-        # (can also be used to read in files or save files later)
-        self.menu = tk.Menu(self.root)
-        self.root.config(menu=self.menu)
-        file_menu = tk.Menu(self.menu)
-        edit_menu = tk.Menu(self.menu)
-        view_menu = tk.Menu(self.menu)
-        self.menu.add_cascade(label="File", menu=file_menu)
-        self.menu.add_cascade(label="Edit", menu=edit_menu)
-        edit_menu.add_command(label="Ion/Materials",
-                              command=self.open_edit_material_window)
-        self.menu.add_cascade(label="View", menu=view_menu)
-
+        # TODO will be moved to main window
         # If the user has passed the name of an IMSIL input file
         if input_file_path != "":
             # Read IMSIL input file
@@ -397,122 +388,6 @@ class ImsilInputParameterEditor:
         for i in range(len(self.nb.tabs())):
             self.nb.tab(i, state="normal")
 
-    def open_edit_material_window(self):
-        """
-        Opens the window for editing the Ion and Material names.
-        """
-        # get all data
-        iv_dict = self.get_ivdict()
-        ions = None
-        materials = []
-
-        #   get current Ion + Materials
-        for tab_num, tab_name in enumerate(self.nb.tabs()):
-            # ion is saved on the 3rd tab (ions) in the entry box entry8
-            if tab_num == 2:
-                # get all the parent frames to get to the entries
-                tab_frame = self.nb.nametowidget(tab_name)
-                scroll_frame = tab_frame.scroll_frame
-                content_frame_entry = scroll_frame.content_frame_entry
-
-                for child in content_frame_entry.winfo_children():
-                    if "entry8" in str(child):
-                        ions = child.get()
-            # materials are saved in an IndexVariableArray on tab 4 (material)
-            elif tab_num == 3:
-                # can be read from the iv_dict because it's already read before
-                # 2nd iv_array -> 1, 1st entry -> 0
-                materials = iv_dict[tab_name][1].values[0]
-                break
-
-        # hide this window
-        self.root.withdraw()
-        # open edit window with callback function to return new ivdata
-        edit_window = EditWindow(ions, materials, iv_dict,
-                                 self.on_close_edit_material_window)
-
-    def on_close_edit_material_window(self, change=False, iv_dict=None,
-                                      new_ion=None, natom=0, nr=0,
-                                      atoms=None, regions=None):
-        """
-        Callback function. Gets called when the EditWindow closes.
-
-        :param change: True, if the arrays should get updated.
-        :param iv_dict: The data structure containing the entries (IVDict object)
-        :param new_ion: New ion name
-        :param natom: new number of atoms
-        :param nr: new number of regions
-        :param atoms: names of the atoms
-        :param regions: names of the regions
-        """
-        # re-enable this window
-        self.root.deiconify()
-        # if something has changed
-        if change:
-            # call the update method to re-size and re-fill the arrays
-            self.update_all_iv_arrays(iv_dict, natom, nr, atoms, regions)
-
-            # write the ion name in the corresponding entries
-            # (see open_edit_material_window())
-            # material names are already in the iv_dict
-            # switch ATOM and REGION with corresponding name
-            for tab_num, tab_name in enumerate(self.nb.tabs()):
-                tab_frame = self.nb.nametowidget(tab_name)
-                scroll_frame = tab_frame.scroll_frame
-
-                # updating NATOM & NR in &SETUP
-                if tab_num == 0:
-                    content_frame_entry = scroll_frame.content_frame_entry
-                    for child in content_frame_entry.winfo_children():
-                        if "entry12" in str(child):
-                            child["state"] = 'normal'
-                            child.delete(0, "end")
-                            child.insert(0, str(natom))
-                            child["state"] = 'disabled'
-                        elif "entry14" in str(child):
-                            child["state"] = 'normal'
-                            child.delete(0, "end")
-                            child.insert(0, str(nr))
-                            child["state"] = 'disabled'
-
-                # write the atom name into its entry
-                if tab_num == 2:
-                    content_frame_entry = scroll_frame.content_frame_entry
-
-                    for child in content_frame_entry.winfo_children():
-                        if "entry8" in str(child):
-                            child["state"] = 'normal'
-                            child.delete(0, "end")
-                            child.insert(0, str(new_ion))
-                            child["state"] = 'readonly'
-
-                # iterate over every ivarray and change
-                # ATOM and REGION with the corresponding name
-                for iv_num, ivarray in enumerate(scroll_frame.get_ivarrays()):
-                    # skip these 2 ivarrays, because
-                    # they are arrays that hold the names
-                    if (tab_num == 1 and iv_num == 3) \
-                            or (tab_num == 3 and iv_num == 1):
-                        for child in ivarray.winfo_children():
-                            if "entry" in str(child):
-                                child["state"] = 'readonly'
-                        continue
-
-                    # check for labels with ATOM or REGION in it
-                    # and write the correct name in them
-                    for child in ivarray.winfo_children():
-                        if "label" in str(child):
-                            if "ATOM" in child["text"]:
-                                index = int(child["text"].split(' ')[-1])
-                                if index > 0:
-                                    child["text"] = "ATOM " + str(index) \
-                                                + ": " + str(atoms[index - 1])
-                            if "REGION" in child["text"]:
-                                index = int(child["text"].split(' ')[-1])
-                                if index > 0:
-                                    child["text"] = "REGION " + str(index) \
-                                                + ": " + str(regions[index - 1])
-
     def get_ivdict(self):
         """
         Get the data from all IVArrays and store them in an IVDict dictionary.
@@ -528,3 +403,20 @@ class ImsilInputParameterEditor:
                 ivarray_tab_values.append(values)
             iv_dict[tab_name] = ivarray_tab_values
         return iv_dict
+
+    def on_btn_quit(self):
+        """
+        Callback for the Cancel Button. Asks if the cancellation was intended.
+        Closes the Window if the user selects "yes".
+        """
+        mb_result = tk.messagebox.askyesnocancel(
+            "Exit Parameter Editor",
+            "Apply changes?")
+
+        # cancel button
+        if mb_result is None:
+            return
+
+        # mb_result is true if yes was selected
+        self.on_close(apply=mb_result)
+        self.root.destroy()
