@@ -24,20 +24,32 @@ window, which in turn allows to open the IMSIL Input Parameter Editor. Start
     $ python3 main.py
 
 
-## Welcome window
-The Welcome Window serves the purpose to preconfigure the IMSIL Input
-Parameter Editor by setting the simulation type and the number of regions
-and atoms. Optionally, an existing input file may be loaded (currently
-untested).   
- 
-To proceed to the IMSIL Input Parameter Editor, the user must press the `Open
-IMSIL Input Parameter Editor` Button. This Button is only enabled if both
-the `Number of Regions` and `Number of Atoms` values are greater than 0. 
-In order to activate the Button, the fields have to lose focus (click in first 
-field and fill in first value; click in second field, fill in second value and 
-click out of field). In case the Button is enabled and the user enters invalid 
-values before pressing the Button, a warning will be displayed, and the Button 
-will be disabled again.  
+## Main window
+The Main Window serves the purpose create a new or load an existing input 
+file for IMSIL. 
+
+To **create a new input file**, click on the "New Input File..." button. This will 
+open a file dialog which asks you for a name and directory for the new file.
+After that, the parameters will be initialized with the default values.
+
+For **loading an existing input file**, click on the "Load Existing Input File..." 
+button, which opens a file dialog to select the file.
+After that, the parameters will be loaded from the existing file.
+
+The currently selected file will be visible on the bottom of the window.
+
+Ions and Regions can be edited directly in the Main Window. Additional regions 
+can be inserted by using the "+" buttons next to the regions. Remove regions by 
+clicking the "-" button next to them. Region positions can be swapped by the
+arrow buttons. To change the name of the Ions or Regions, click on the entry
+box containing either a previous name or "< click to change >". Editing will
+directly change the parameters NR and NATOM as well as Ions and Regions 
+parameters.
+
+Additional the Ion energy and the Regions geometry can be edited in this window.
+
+To edit other parameters, the user has to open the Parameter Editor by clicking 
+on the "Parameter Editor..." button.
 
 ## IMSIL Input Parameter Editor window
 The IMSIL Input Parameter Editor window contains a notebook with tabs. The
@@ -61,41 +73,20 @@ table in the GUI to save the parameter name, the corresponding widget and
 the variable that holds the value of the widget. As there are parameters
 which are bound to index variables, this class has to be extended with
 the ability to set/get not only the widget of a parameter but also the
-widgets and variables of the index variables of the parameter.        
+widgets and variables of the index variables of the parameter.
 
-On top of the window is a menu bar, with which the Edit Materials/Ions Window 
-can be opened under the "Edit" menu. The File and View Menus currently don't 
-have a use.
-
-## Edit Materials/Ions Window
-The Edit Window makes it possible to alter the amount and types of Materials 
-and Ions. The changes made in this window affect the size of the index variable 
-arrays by changing the two variables `NATOM` and `NR` and updating the IMSIL 
-Input Parameter Editor Window.
-
-It consists of 3 Label Frames inside an outer frame. The "Ions" frame holds an 
-entry for the ions molecular formula. The "Materials" frame has
-a list of `RegionEditFrames` which can be added and removed with the plus and 
-minus buttons on the side. Each `RegionEditFrame` consists primarily of an entry
-to edit the molecular formula, and a button to delete the frame. On the left 
-side of the "Materials" frame are buttons to insert a `RegionEditFrame` at the 
-corresponding position. The "Info" Frame on the right holds a small info text 
-and two buttons to discard (Cancel) or apply (OK) the changes. 
-
-After clicking the "OK" button all the text entries are checked for a correct
-molecular formula. If any of them is wrong, a MessageBox shows up, describing 
-the error. If no errors are found, the `IVDict` object is updated with the
-changes and passed to the callback function of the IMSIL Input Parameter Editor 
-Window.
+When closing the Parameter Editor, a message box will appear, asking the user to
+confirm or cancel the changes.
 
 # Files
 In the following section (almost) all files of the project are briefly
-described  
+described.
 
 #### `input_file_generator_v3`:
 -	`parameters.db`: the SQLite database
 -	`main.py`: contains the main function, which opens the Welcome Window
 -	`welcome_window.py`: The `WelcomeWindow` class
+-	`mein_window.py`: The MainWindow class. replacing the WelcomeWindow
 -	`parameter_editor_window.py`: contains the `ImsilInputParameterEditor` class.
 -	`edit_window.py`: contains the `EditWindow` and `RegionFrame` classes.
 -	`utility.py`: contains the `center_window` function
@@ -115,6 +106,7 @@ described
 -   `element.py`, `element.f90`: Classes and files to manage molecular formulas
 -   `iv_data.py`: Classes `IVData` and `IVDict` to store the data from index 
     variable arrays and provide some helper functions.
+-   `parameter_data.py`: ParameterData class. Stores parameters.
 
 #### `input_file_generator_v3/UI/canvas`:
 -   `blanc_canvas.py`: this class implements the canvas used for the scrolling 
@@ -137,6 +129,8 @@ described
     variable arrays. It contains methods to get their state, expand/collapse
     them, add/delete rows, track their values and set them accordingly as well
     as the general logic for their layout.
+-	`target_frame.py`: Frame containing region edit frames. Used in the Main 
+    Window to edit the regions.
 
 #### `input_file_generator_v3/UI/widgets`:
 -	`ShowAdvParButton.py`: this class was used to separate and toggle basic 
@@ -147,11 +141,9 @@ described
 The functionality of the program is briefly explained as follows:
  
 The program can be started by running the file main.py. By doing so, the
-Welcome Window will appear. In this window, the `Number of Regions` and
-`Number of Atoms` values must be set to valid values (>0). Additionally, the
-type of simulation can be set, and an input file can be loaded. If 
-the values are set, the user can press the `Open IMSIL Input Parameter
-Editor` Button.     
+Main Window will appear. After creating or loading a file, the Ions and Regions 
+can be edited. To edit other Parameters, the user can press the 
+`Parameter Editor...` Button.
 
 Next, a small window will appear, informing the user that the data is loading. 
 Once the data has been fully loaded, and the notebook is set up, the small
@@ -161,26 +153,13 @@ consist of three sections: The Flags, the Entries and the index variable
 arrays. Some tabs contain all three sections, some contain only one or
 two of them. Regardless, their order is always the same. First the Flags
 are displayed, followed by the Entries, followed by the index variable
-arrays. Within each section the elements are ordered alphabetically.        
+arrays. Within each section the elements are ordered alphabetically.
  
 The number of Flags and Entries per row can be set in the program using the
 two variables `BOOL_PARAMS_PER_ROW` and `ENTRY_PARAMS_PER_ROW` in the
 `scroll_frame.py` file. For index variable arrays only one array is
 possible per row, thus there is no variable defining the number of index
 variable arrays per row.
-
-To change the Ion or the materials, click on "Edit" -> "Materials/Ions". A new 
-window is opened which is used to alter the molecular formulas of existing 
-materials and ions, or to add and remove regions/materials. The Regions can be 
-removed by clicking the "minus" button next to a region, and added by clicking
-a "plus" button next to the regions. The new Region is inserted at the position 
-of the "plus" button. After editing click "OK" to apply the changes or "Cancel" 
-to discard them. A message box will show either way, to make sure the user 
-intentionally clicked the buttons, or to indicate any errors. After that, the 
-Editing window closes, and the Parameter editor window re-opens with the 
-`on_close_edit_material_window` callback function being called. If "OK" was 
-clicked and changes were made, the window will be locked until the changes are 
-applied, and a progress bar shows up to indicate the progress.
 
 ## Index Variable Arrays
 
