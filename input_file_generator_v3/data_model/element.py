@@ -57,6 +57,9 @@ def get_unique_atoms(molecule_list, elements):
     """
     unique_atoms = []
     for molecule in molecule_list:
+        if molecule == "":
+            unique_atoms.append("")
+            continue
         molec = [molecule.strip()]
         while True:
             molec = analyze_molecule(molec[0], get_element_names(elements))

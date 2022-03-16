@@ -115,6 +115,26 @@ class ParameterData:
         """
         return self.get_entry_value("setup", "NATOM")
 
+    def get_materials(self):
+        """
+        Returns the material names as a list of strings.
+
+        """
+        if type(self.get_entry_value("material", "NAME")) == IVData:
+            return self.get_entry_value("material", "NAME").to_list()
+        else:
+            return []
+
+    def get_atoms(self):
+        """
+        Returns the atom names as a list of strings.
+
+        """
+        if type(self.get_entry_value("atoms", "NAME")) == IVData:
+            return self.get_entry_value("atoms", "NAME").to_list()
+        else:
+            return []
+
     def to_iv_dict(self):
         """
         Creates an IVDict object for using the edit_window.py
@@ -123,45 +143,8 @@ class ParameterData:
 
         """
         iv_dict = IVDict()
-        # if the iv_arrays are already initialized
-        if (type(self.get_nr()) == int or self.get_nr().isnumeric()) and \
-                (type(self.get_natom()) == int or self.get_natom().isnumeric()):
-            for tab_name in self:
-                iv_dict[tab_name] = self.get_ivdata_list_from_tab(tab_name)
-        # create new empty IVData objects with NR=1 and NATOM=2
-        else:
-            for tab_name in self:
-                ivdata_list = []
-                for param_entry in self[tab_name]:
-                    if param_entry.get_is_index_var():
-                        # create dummy ivdata. using default values
-                        size_string = get_size_string(param_entry.get_name(),
-                                                      param_entry.get_index_vars())
-                        array_settings = (param_entry.get_name(),
-                                          param_entry.get_index_vars(),
-                                          param_entry.get_default_value(),
-                                          param_entry.get_short_desc(),
-                                          param_entry.get_long_desc())
-                        # NR=1 and NATOM=2
-                        ivdata = IVData(size_string, 2, 1, (False, False),
-                                        array_settings)
-
-                        # points doesn't get changed, so it's just saved as is
-                        if "POINT" in array_settings[1]:
-                            ivdata.values = ['', '']
-                        else:
-                            # save the values in a 2D grid
-                            # to re-add them easier later
-                            m = ivdata.get_m()
-                            n = ivdata.get_n()
-                            for i in range(m * n):
-                                if i % n == 0:
-                                    ivdata.values.append([])
-                                ivdata.values[i // n].append("")
-                        # store all IVData in list
-                        ivdata_list.append(ivdata)
-                # set IVDict list
-                iv_dict[tab_name] = ivdata_list
+        for tab_name in self:
+            iv_dict[tab_name] = self.get_ivdata_list_from_tab(tab_name)
         return iv_dict
 
     def load_from_iv_dict(self, iv_dict):
@@ -175,7 +158,6 @@ class ParameterData:
         for tab_name in self:
             for entry in iv_dict[tab_name]:
                 entry_name = entry.array_settings[0]
-                # entry.print_data()
                 self.set_entry_value(tab_name, entry_name, entry)
 
     def get_ivdata_list_from_tab(self, tab_name):
@@ -204,6 +186,102 @@ class ParameterData:
             for param_entry in self[tab_name]:
                 param_entry.readout_gui()
 
+    def add_atom(self):
+        """
+        Adds an Atom to every Entry
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.add_atom()
+
+    def add_region(self):
+        """
+        Adds a Region to every Entry
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.add_region()
+
+    def add_atom_at(self, index):
+        """
+        Adds an Atom to every Entry at a given position
+
+        :param index: index
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.add_atom_at(index)
+
+    def add_region_at(self, index):
+        """
+        Adds a Region to every Entry at a given position
+
+        :param index: index
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.add_region_at(index)
+
+    def remove_atom(self, index):
+        """
+        Removes an Atom from every Entry at a given position
+
+        :param index: index
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.remove_atom(index)
+
+    def remove_region(self, index):
+        """
+        Removes a Region from every Entry at a given position
+
+        :param index: index
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.remove_region(index)
+
+    def swap_atom(self, index_1, index_2):
+        """
+        Swap the contents of the atoms at index 1 and 2
+
+        :param index_1: index of the first atom
+        :param index_2: index of the second atom
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.swap_atom(index_1, index_2)
+
+    def swap_region(self, index_1, index_2):
+        """
+        Swap the contents of the regions at index 1 and 2
+
+        :param index_1: index of the first regions
+        :param index_2: index of the second regions
+        """
+        for tab in self:
+            # for all index variable arrays in that tab
+            for p_entry in self[tab]:
+                p_entry.swap_region(index_1, index_2)
+
+    def set_material_name_at(self, index, name):
+        """
+        Sets the material name at the given index
+
+        :param index: index of the material
+        :param name: material name
+        """
+        mat_name_ivdata = self.get_entry_value("material", "NAME")
+        mat_name_ivdata.values[0][index] = name
+
 
 class ParameterEntry:
     """
@@ -231,6 +309,31 @@ class ParameterEntry:
         # can be boolean (logical), string or similar (entry)
         # or IVData (Index Variable Array)
         self.current_value = default_value
+
+        # insert new, empty IVData with minimum size
+        if self.get_is_index_var():
+            self.current_value = IVData(size_string=
+                                        get_size_string(self.name,
+                                                        self.index_vars),
+                                        natom=2, nr=1,
+                                        array_state=(False, False),
+                                        array_settings=(self.name,
+                                                        self.index_vars,
+                                                        self.default_value,
+                                                        self.desc_short,
+                                                        self.desc_long))
+            # fill empty values
+            if "POINT" in self.index_vars:
+                self.current_value.values = ['', '']
+            else:
+                # save the values in a 2D grid
+                # to re-add them easier later
+                m = self.current_value.get_m()
+                n = self.current_value.get_n()
+                for i in range(m * n):
+                    if i % n == 0:
+                        self.current_value.values.append([])
+                    self.current_value.values[i // n].append("")
 
         # stores a reference to the gui entry object in the parameter editor
         # that represents this parameter. Used to get the current value easier
@@ -332,3 +435,81 @@ class ParameterEntry:
     def get_is_index_var(self):
         """Check if the parameter is an index variable array."""
         return self.is_index_var
+
+    def add_atom(self):
+        """
+        Adds an Atom to every IVArray
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().add_atom()
+
+    def add_region(self):
+        """
+        Adds a Region to every IVArray
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().add_region()
+
+    def add_atom_at(self, index):
+        """
+        Adds an Atom to every IVArray at a given position
+
+        :param index: index
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().add_atom_at(index)
+
+    def add_region_at(self, index):
+        """
+        Adds a Region to every IVArray at a given position
+
+        :param index: index
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().add_region_at(index)
+
+    def remove_atom(self, index):
+        """
+        Removes an Atom from every IVArray at a given position
+
+        :param index: index
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().remove_atom(index)
+
+    def remove_region(self, index):
+        """
+        Removes a Region from every IVArray at a given position
+
+        :param index: index
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().remove_region(index)
+
+    def swap_atom(self, index_1, index_2):
+        """
+        Swap the contents of the atoms at index 1 and 2
+
+        :param index_1: index of the first atom
+        :param index_2: index of the second atom
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().swap_atom(index_1, index_2)
+
+    def swap_region(self, index_1, index_2):
+        """
+        Swap the contents of the regions at index 1 and 2
+
+        :param index_1: index of the first regions
+        :param index_2: index of the second regions
+        """
+        if self.get_is_index_var():
+            if type(self.get_value()) == IVData:
+                self.get_value().swap_region(index_1, index_2)
