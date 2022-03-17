@@ -106,7 +106,7 @@ class ScrollFrame(BlancFrame):
         self.content_frame.bind("<Configure>", self.update_scrollregion)
         self.main_canvas.bind('<Configure>', self.update_frame_width)
 
-    def add_parameter(self, parameter_entry):
+    def add_parameter(self, parameter_entry, atom_names, region_names):
         """
         Add a new parameter.
 
@@ -116,6 +116,8 @@ class ScrollFrame(BlancFrame):
         add_content_in_par_frame.
 
         :param parameter_entry: ParameterEntry object representing the parameter.
+        :param atom_names: names of the atoms
+        :param region_names: names of the regions
         """
 
         par_name = parameter_entry.get_name()
@@ -136,7 +138,8 @@ class ScrollFrame(BlancFrame):
             gui_object_ref = self.add_ivarray_parameter(par_name, index_var_list,
                                                         default_value,
                                                         short_desc, long_desc,
-                                                        value)
+                                                        value, atom_names,
+                                                        region_names)
         elif is_bool:
             gui_object_ref = self.add_bool_parameter(par_name, default_value,
                                                      short_desc, long_desc,
@@ -151,7 +154,8 @@ class ScrollFrame(BlancFrame):
         parameter_entry.set_gui_object(gui_object_ref)
 
     def add_ivarray_parameter(self, par_name, index_var_list, default_value,
-                              short_desc, long_desc, value):
+                              short_desc, long_desc, value,
+                              atom_names, region_names):
         """
         Add an IVArray parameter to its frame.
 
@@ -160,6 +164,9 @@ class ScrollFrame(BlancFrame):
         :param default_value: the default value of the parameter
         :param short_desc: the short description of the parameter
         :param long_desc: the long description of the parameter
+        :param value: currently stored value
+        :param atom_names: names of the atoms
+        :param region_names: names of the regions
 
         :returns: Reference to the now added GUI object
         """
@@ -168,11 +175,16 @@ class ScrollFrame(BlancFrame):
         # parameter per row
         self.params_in_row = 0
 
+        if par_name == "NAME":
+            atom_names = None
+            region_names = None
+
         # Create a new IndexVariableArrayFrame and set it as the parent frame
         par_frame = IndexVariableArrayFrame(self, par_name,
                                             index_var_list, default_value,
                                             short_desc, long_desc,
                                             row_index,
+                                            atom_names, region_names,
                                             value.nr, value.natom)
         par_frame.set_values_from_ivdata(value, value.nr, value.natom)
         par_frame.grid(sticky="NESW")

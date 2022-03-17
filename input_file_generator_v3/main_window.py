@@ -736,6 +736,8 @@ class MainWindow(tk.Tk):
 
         # self.destroy()  # Close the current Window
         self.withdraw()
+        atom_names = self.parameter_data.get_atoms()
+        region_names = self.parameter_data.get_materials()
 
         # Open the ImsilInputParameterEditor
         ImsilInputParameterEditor(
@@ -744,6 +746,8 @@ class MainWindow(tk.Tk):
             nr=self.parameter_data.get_nr(),
             natom=self.parameter_data.get_natom(),
             parameter_data=self.parameter_data,
+            atom_names=atom_names,
+            region_names=region_names,
             on_close=self.on_close_parameter_editor)
 
     def on_close_parameter_editor(self, apply=False):

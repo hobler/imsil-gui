@@ -45,7 +45,7 @@ class IndexVariableArrayFrame(BlancFrame):
     """
 
     def __init__(self, parent, par_name, index_var_list, default_value,
-                 short_desc, long_desc, row_index, nr=3, natom=2,
+                 short_desc, long_desc, row_index, atom_names, region_names, nr=3, natom=2,
                  *args, **kwargs):
         """
         In the initialization of the IndexVariableArrayFrame all object
@@ -85,8 +85,8 @@ class IndexVariableArrayFrame(BlancFrame):
         # track of the values regardless of the current state of the array
         self.values = []
         # Saves the atom and region names for the labels
-        self.atom_names = []
-        self.region_names = []
+        self.atom_names = atom_names
+        self.region_names = region_names
 
         # Get the number of elements for the current parameter
         dim = len(index_var_list)
@@ -169,8 +169,11 @@ class IndexVariableArrayFrame(BlancFrame):
                                               label_text=header_text,
                                               width=INDEX_LABEL_WIDTH_1D)
                 for i in range(self.n_atom):
+                    label_text = ("ATOM " + str(i + 1) + ": " + atom_names[i]
+                                  if atom_names is not None
+                                  else "ATOM " + str(i + 1))
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM " + str(i + 1))
+                                                  label_text=label_text)
                 # Add a new row with a Label and Entries
                 label = self.parent.add_label(parent=self, label_text="")
                 for i in range(self.n_atom):
@@ -192,7 +195,9 @@ class IndexVariableArrayFrame(BlancFrame):
                 # Add new rows with a Label and Entry
                 # Add an extra row REGION 0
                 for i in range(self.n_r + 1):
-                    label_text = "REGION " + str(i)
+                    label_text = ("REGION " + str(i) + ": " + region_names[i-1]
+                                  if (region_names is not None and i > 0)
+                                  else "REGION " + str(i))
                     label = self.parent.add_label(parent=self,
                                                   label_text=label_text)
                     entry = self.parent.add_entry(parent=self,
@@ -210,8 +215,11 @@ class IndexVariableArrayFrame(BlancFrame):
                                               label_text=header_text,
                                               width=INDEX_LABEL_WIDTH_1D)
                 for i in range(self.n_r):
+                    label_text = ("REGION " + str(i+1) + ": " + region_names[i]
+                                  if region_names is not None
+                                  else "REGION " + str(i+1))
                     label = self.parent.add_label(parent=self,
-                                                  label_text="REGION "+str(i+1))
+                                                  label_text=label_text)
                 # Add a new row with a Label and Entries
                 label = self.parent.add_label(parent=self, label_text="")
                 for i in range(self.n_r):
@@ -259,12 +267,18 @@ class IndexVariableArrayFrame(BlancFrame):
                                               label_text=header_text,
                                               width=INDEX_LABEL_WIDTH_2D)
                 for i in range(self.n_atom):
+                    label_text = ("ATOM " + str(i + 1) + ": " + atom_names[i]
+                                  if atom_names is not None
+                                  else "ATOM " + str(i + 1))
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM " + str(i + 1))
+                                                  label_text=label_text)
                 # Add new rows with a Label and Entries
                 for i in range(self.n_r):
+                    label_text = ("REGION " + str(i+1) + ": " + region_names[i]
+                                  if region_names is not None
+                                  else "REGION " + str(i+1))
                     label = self.parent.add_label(parent=self,
-                                                  label_text="REGION " + str(i + 1))
+                                                  label_text=label_text)
                     for i in range(self.n_atom):
                         entry = self.parent.add_entry(parent=self,
                                                       par_name=par_name,
@@ -286,12 +300,18 @@ class IndexVariableArrayFrame(BlancFrame):
                                               label_text=header_text,
                                               width=INDEX_LABEL_WIDTH_2D)
                 for i in range(self.n_atom):
+                    label_text = ("ATOM " + str(i + 1) + ": " + atom_names[i]
+                                  if atom_names is not None
+                                  else "ATOM " + str(i + 1))
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM " + str(i + 1))
+                                                  label_text=label_text)
                 # Add new rows with a Label and Entries
                 for i in range(self.n_atom):
+                    label_text = ("ATOM " + str(i + 1) + ": " + atom_names[i]
+                                  if atom_names is not None
+                                  else "ATOM " + str(i + 1))
                     label = self.parent.add_label(parent=self,
-                                                  label_text="ATOM " + str(i + 1))
+                                                  label_text=label_text)
                     for i in range(self.n_atom):
                         entry = self.parent.add_entry(parent=self,
                                                       par_name=par_name,

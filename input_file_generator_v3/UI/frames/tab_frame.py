@@ -11,8 +11,8 @@ class TabFrame(BlancFrame):
     parameters. The ScrollFrame allows scrolling up and down the parameter
     list in case the window does not provide enough space for all of them.
     """
-    def __init__(self, parent, parameter_list, type_of_simulation,
-                 nr, natom, *args, **kwargs):
+    def __init__(self, parent, parameter_list, atom_names, region_names,
+                 type_of_simulation, nr, natom, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
         # Get the database table and regroup the parameters
@@ -23,16 +23,19 @@ class TabFrame(BlancFrame):
 
         # Add parameters to the ScrollFrame
         for parameter in self.parameter_list:
-            self.add_parameter(parameter)
+            self.add_parameter(parameter, atom_names, region_names)
 
-    def add_parameter(self, parameter_entry):
+    def add_parameter(self, parameter_entry, atom_names, region_names):
         """
         Add a parameter to the ScrollFrame.
 
         :param parameter_entry: the ParameterEntry object to be added
-        containing all information about the parameter.
+            containing all information about the parameter.
+        :param atom_names: names of the atoms
+        :param region_names: names of the regions
         """
-        self.scroll_frame.add_parameter(parameter_entry)
+        self.scroll_frame.add_parameter(parameter_entry, atom_names,
+                                        region_names)
 
     def get_ivarrays(self):
         """

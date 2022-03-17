@@ -47,7 +47,7 @@ class ImsilInputParameterEditor:
     """
 
     def __init__(self, type_of_simulation, input_file_path, nr, natom,
-                 parameter_data, on_close):
+                 parameter_data, atom_names, region_names, on_close):
         """
         In the initialization of the IMSIL Input Parameter Editor a
         notebook is added to the window. For each table of the database
@@ -98,6 +98,8 @@ class ImsilInputParameterEditor:
         for tab_name in parameter_data:
             tab_frame = TabFrame(parent=self.nb,
                                  parameter_list=parameter_data[tab_name],
+                                 atom_names=atom_names,
+                                 region_names=region_names,
                                  type_of_simulation=type_of_simulation,
                                  nr=self.nr,
                                  natom=self.natom,
@@ -110,20 +112,20 @@ class ImsilInputParameterEditor:
 
         # TODO will be moved to main window
         # If the user has passed the name of an IMSIL input file
-        if input_file_path != "":
-            # Read IMSIL input file
-            input_file = read_existing_input_file(input_file_path)
-            if input_file is not None:
-                # Go through all params that are defined in the file
-                for record in input_file.nml.keys():
-                    for par_name in input_file.nml[record]:
-                        if not isinstance(par_name, OrderedDict):
-                            # Set parameter value in tab
-                            self.set_parameter_value(
-                                tab_name=record,
-                                parameter_name=par_name,
-                                parameter_value=input_file.nml[record][
-                                    par_name])
+        # if input_file_path != "":
+        #     # Read IMSIL input file
+        #     input_file = read_existing_input_file(input_file_path)
+        #     if input_file is not None:
+        #         # Go through all params that are defined in the file
+        #         for record in input_file.nml.keys():
+        #             for par_name in input_file.nml[record]:
+        #                 if not isinstance(par_name, OrderedDict):
+        #                     # Set parameter value in tab
+        #                     self.set_parameter_value(
+        #                         tab_name=record,
+        #                         parameter_name=par_name,
+        #                         parameter_value=input_file.nml[record][
+        #                             par_name])
 
         # Center the window again, since it has changed size, and show it
         center_window(self.root)
