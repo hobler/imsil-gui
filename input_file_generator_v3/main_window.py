@@ -120,10 +120,10 @@ class MainWindow(tk.Tk):
         self.frame_btn_file_load = tk.Frame(self.frame_file, width=200, height=32)
         self.frame_btn_file_load.propagate(False)
         self.frame_btn_file_load.grid(row=0, column=1, columnspan=1,
-                                     sticky="NESW", padx=2+9, pady=2)
+                                      sticky="NESW", padx=2+9, pady=2)
         self.btn_file_load = tk.Button(self.frame_btn_file_load,
-                                      text="Load Existing Input File...",
-                                      command=self.on_open_file)
+                                       text="Load Existing Input File...",
+                                       command=self.on_open_file)
         self.btn_file_load.pack(expand=True, fill="both")
         self.btn_file_load["state"] = "disabled"  # not implemented
 
@@ -131,7 +131,7 @@ class MainWindow(tk.Tk):
 
         self.frame_label_ion = tk.Frame(self.frame_ion, width=50, height=32)
         self.frame_label_ion.grid(row=0, column=0, sticky="NW",
-                              padx=0, pady=0)
+                                  padx=0, pady=0)
         self.frame_label_ion.propagate(False)
 
         self.label_ion = tk.Label(self.frame_label_ion,

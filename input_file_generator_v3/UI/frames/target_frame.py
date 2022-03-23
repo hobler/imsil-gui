@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import simpledialog, ttk
 
 from data_model.element import get_unique_atoms, get_all_elements
 
@@ -28,20 +28,57 @@ class TargetFrame(tk.LabelFrame):
 
         self.region_frames = []
         self.add_buttons = []
+        self.posif_entries = []
+        self.posif_values = []
+        self.posif_labels = []
 
         # update atoms function. must be called after adding,
         # removing or changing regions/atoms
         self.update_atoms = update_atoms
 
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+
+        # frame to contain the region frames
+        self.frame_mat_left_title = tk.Frame(self)
+        self.frame_mat_left_title.grid(row=0, column=0, padx=(15, 0),
+                                       pady=0, sticky="NS")
+
+        self.label_mat = tk.Label(self.frame_mat_left_title, text="Material")
+        self.label_mat.grid(row=0, column=0)
+
+        self.frame_geom_title = tk.Frame(self)
+        self.frame_geom_title.grid(row=0, column=2, padx=(15, 0),
+                                       pady=0, sticky="NS")
+
+        self.label_geom = tk.Label(self.frame_geom_title, text="Geometry")
+        self.label_geom.grid(row=0, column=0)
+
+        self.variable_cb_geom_sel = tk.StringVar()
+        self.variable_cb_geom_sel.set("1D")
+        self.cb_geom_sel = ttk.Combobox(self.frame_geom_title,
+                                          textvariable=
+                                          self.variable_cb_geom_sel,
+                                          width=18)
+        self.cb_geom_sel.grid(row=0, column=1, padx=3)
+        self.cb_geom_sel["state"] = "readonly"
+        self.cb_geom_sel["values"] = ["1D", "2D", "3D"]
+        self.cb_geom_sel.bind('<<ComboboxSelected>>', self.cb_change)
+
         # frame to contain the region frames
         self.frame_mat_left = tk.Frame(self)
-        self.frame_mat_left.grid(row=0, column=0, padx=(15, 0),
+        self.frame_mat_left.grid(row=1, column=0, padx=(15, 0),
                                  pady=20, sticky="NS")
 
         # frame to contain the add buttons
         self.frame_mat_add = tk.Frame(self)
-        self.frame_mat_add.grid(row=0, column=1,
+        self.frame_mat_add.grid(row=1, column=1,
                                 pady=10, sticky="NS")
+
+        # frame to contain the add buttons
+        self.frame_geom = tk.Frame(self)
+        self.frame_geom.grid(row=1, column=2,
+                             pady=10, sticky="NS")
 
         # load every currently stored material
         self.materials = self.parameter_data.get_materials()
@@ -54,7 +91,29 @@ class TargetFrame(tk.LabelFrame):
         if len(self.materials) == 0:
             self.add_region_frame(0, "", is_original=False)
 
+        # setup the posif value array.
+        # whenever the array gets updated,
+        # the posif entries should be updated too
+        posif = self.parameter_data.get_entry_value("geom", "POSIF")
+        if posif.startswith("-"):
+            posif = None
+        elif posif[0] == "'" and posif[-1] == "'":
+            posif = posif[1:-1]
+            posif = posif.split(",")
+            if len(posif) != len(self.region_frames) + 1:
+                posif = None
+        else:
+            posif = None
+
+        if posif is None:
+            posif = []
+            for i in range(len(self.region_frames)+1):
+                posif.append("")
+
+        self.posif_values = posif
+
         self.update_add_buttons()
+        self.load_posif()
 
     def add_region_frame(self, index, material, is_original):
         """
@@ -113,6 +172,10 @@ class TargetFrame(tk.LabelFrame):
         # remove region from parameter_data
         self.parameter_data.remove_region(index)
         self.update_atoms(change_region=True)
+
+        # update posif
+        del self.posif_values[index + 1]
+        self.update_posif_widgets()
 
     def swap_region(self, index1, index2):
         """
@@ -211,6 +274,10 @@ class TargetFrame(tk.LabelFrame):
 
         self.update_atoms(change_region=True)
 
+        # update posif
+        self.posif_values.insert(index + 1, "")
+        self.update_posif_widgets()
+
     def shift_region_frames(self, index):
         """
         Shift all RegionFrames above the index to the next position in the grid.
@@ -242,6 +309,140 @@ class TargetFrame(tk.LabelFrame):
         length = len(self.region_frames)
         for region_frame in self.region_frames:
             region_frame.update_swap_buttons(length)
+
+    def cb_change(self, value):
+        """
+        Geometry Combobox change event.
+        Changes Geometry frame to POSIF or geometry editor view.
+
+        :param value: VirtualEvent passed by the event handler.
+        """
+
+        if self.variable_cb_geom_sel.get() == "1D":
+            self.posif_entries.clear()
+            self.load_posif()
+        elif self.variable_cb_geom_sel.get() == "2D":
+            self.load_geometry_editor()
+        elif self.variable_cb_geom_sel.get() == "3D":
+            self.load_geometry_editor()
+
+    def load_posif(self):
+        """
+        Load the POSIF view for the Geometry
+        """
+        if self.frame_geom is not None:
+            self.frame_geom.destroy()
+        self.frame_geom = tk.Frame(self)
+        self.frame_geom.grid(row=1, column=2,
+                             pady=10, sticky="NS")
+
+        self.update_posif_widgets()
+
+    def load_geometry_editor(self):
+        """
+        Load the Geometry Editor view for the Geometry
+        """
+        if self.frame_geom is not None:
+            self.frame_geom.destroy()
+        self.frame_geom = tk.Frame(self)
+        self.frame_geom.grid(row=1, column=2,
+                             pady=10, sticky="NS")
+
+        self.frame_btn_geom = tk.Frame(self.frame_geom, width=150, height=32)
+        self.frame_btn_geom.propagate(False)
+        self.frame_btn_geom.grid(row=0, column=0, columnspan=1,
+                                     sticky="NESW", padx=(6, 2), pady=2)
+        self.btn_geom = tk.Button(self.frame_btn_geom,
+                                      text="Geometry Editor...",
+                                      command=None)
+        self.btn_geom.pack(expand=True, fill="both")
+        self.btn_geom["state"] = "normal"
+
+    def update_posif_widgets(self):
+        """
+        Updates the widgets accordingly to the posif_values list.
+        Also writes the posif values into parameter_data.
+        """
+        # too few entries -> add some
+        if len(self.posif_entries) < len(self.region_frames) + 1:
+            for i in range(len(self.posif_entries),
+                           len(self.region_frames) + 1):
+                self.add_posif_entry()
+        # too many entries -> delete excess ones
+        elif len(self.posif_entries) > len(self.region_frames) + 1:
+            for i in range(len(self.posif_entries) - 1,
+                           len(self.region_frames), -1):
+                self.posif_entries[i].destroy()
+                self.posif_labels[-1].destroy()
+                del self.posif_entries[i]
+                del self.posif_labels[-1]
+
+        if self.posif_values is not None:
+            for i, entry in enumerate(self.posif_entries):
+                entry["state"] = "normal"
+                entry.delete(0, "end")
+                entry.insert(0, self.posif_values[i])
+                entry["state"] = "readonly"
+
+            # write posif into parameter_data
+            posif = "\'" + ",".join(self.posif_values) + "\'"
+            self.parameter_data.set_entry_value("geom", "POSIF", posif)
+
+    def add_posif_entry(self):
+        """
+        Add a new "posif" entry
+        """
+        label_posif = tk.Label(self.frame_geom, text="POSIF:")
+        label_posif.grid(row=len(self.posif_entries), column=0)
+        entry_temp = tk.Entry(self.frame_geom)
+        entry_temp.bind("<1>", self.on_ent_posif_click)
+        entry_temp["state"] = "normal"
+        entry_temp.grid(row=len(self.posif_entries), column=1, ipady=3,
+                        pady=(0, 1))
+        entry_temp.delete(0, "end")
+        entry_temp.insert(0, "<click to change>")
+        entry_temp["state"] = "readonly"
+        self.posif_entries.append(entry_temp)
+        self.posif_labels.append(label_posif)
+
+    def on_ent_posif_click(self, event):
+        """
+        Callback for the on-click event of the Entry-box.
+        Changes Region name and calls update_atoms()
+
+        Opens a new simpledialog window that asks the user for the
+        new material name and checks for a valid molecule name.
+        """
+        # disable another instance of this method from opening
+        entry = event.widget
+        entry.unbind("<1>")
+
+        # initial value for the simpledialog
+        initial = "" if entry.get().startswith("<") else entry.get()
+        # new material name
+        new_name = simpledialog.askstring(title="Change POSIF",
+                                          prompt="New value:",
+                                          initialvalue=initial,
+                                          parent=self)
+        # result of the cancel button
+        if new_name is None:
+            # re-enable on-click event
+            entry.bind("<1>", self.on_ent_posif_click)
+            return
+
+        # set new name if user didn't cancel
+        if new_name is not None:
+            entry["state"] = "normal"
+            entry.delete(0, "end")
+            entry.insert(0, new_name)
+            entry["state"] = "readonly"
+
+            index = self.posif_entries.index(entry)
+            self.posif_values[index] = new_name
+            self.update_posif_widgets()
+
+        # re-enable on-click event
+        entry.bind("<1>", self.on_ent_posif_click)
 
 
 class RegionEditFrame(tk.Frame):
@@ -281,13 +482,13 @@ class RegionEditFrame(tk.Frame):
         self.on_swap = on_swap
         self.update_atoms = update_atoms
 
+        self.all_elements = all_elements
+        self.parameter_data = parameter_data
+
         self.is_original = is_original
         if is_original:
             self.orig_text = orig_text
             self.orig_index = orig_index
-
-        self.all_elements = all_elements
-        self.parameter_data = parameter_data
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
@@ -298,7 +499,7 @@ class RegionEditFrame(tk.Frame):
         self.lbl_name = tk.Label(self, text=text)
         self.lbl_name.grid(row=0, column=0)
 
-        self.ent_name = tk.Entry(self)
+        self.ent_name = tk.Entry(self, width=17)
         self.ent_name.grid(row=0, column=1)
         self.ent_name.delete(0, "end")
         self.ent_name.insert(0, material)
@@ -308,23 +509,23 @@ class RegionEditFrame(tk.Frame):
             self.ent_name.insert(0, "<click to change>")
         self.ent_name["state"] = "readonly"
 
-        self.btn_delete = tk.Button(self, text="delete",
-                                    width=20, height=20,
-                                    command=self.on_btn_delete)
-        self.set_button(self.btn_delete, os.path.join("pics", "minus.gif"),
-                        "delete")
-        self.btn_delete.grid(row=0, column=4)
-
         self.btn_up = tk.Button(self, text="up", width=20, height=20,
                                 command=self.on_btn_up)
         self.set_button(self.btn_up, os.path.join("pics", "arrow_u.gif"), "up")
-        self.btn_up.grid(row=0, column=2)
+        self.btn_up.grid(row=0, column=3)
 
         self.btn_down = tk.Button(self, text="down", width=20, height=20,
                                   command=self.on_btn_down)
         self.set_button(self.btn_down, os.path.join("pics", "arrow_d.gif"),
                         "down")
-        self.btn_down.grid(row=0, column=3)
+        self.btn_down.grid(row=0, column=4)
+
+        self.btn_delete = tk.Button(self, text="delete",
+                                    width=20, height=20,
+                                    command=self.on_btn_delete)
+        self.set_button(self.btn_delete, os.path.join("pics", "minus.gif"),
+                        "delete")
+        self.btn_delete.grid(row=0, column=5)
 
     def set_button(self, widget, file, text):
         """
