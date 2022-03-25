@@ -758,6 +758,7 @@ class MainWindow(tk.Tk):
         """
         if apply:
             self.parameter_data.readout_parameter_editor()
+            self.variable_cb_target_sel.set("Regions")
             self.load_region_frame()
             ions = self.parameter_data.get_entry_value("ions", "NAME")
             ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
