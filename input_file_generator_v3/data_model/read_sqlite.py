@@ -146,6 +146,8 @@ class DatabaseTable:
                 bool_list.append(table_row)
             elif table_row.is_index_var():
                 index_list.append(table_row)
+            elif table_row.is_logic_array():
+                bool_list.append(table_row)
             else:
                 entry_list.append(table_row)
         self.table_row_list = bool_list + entry_list + index_list
@@ -217,8 +219,12 @@ class DatabaseTableRow:
     def is_logical(self):
         """Check if the parameter is a boolean"""
         # TODO: change, because arrays of logical aren't represented as arrays
-        return "logical" in self.get_type()
+        return "logical" == self.get_type()
 
     def is_index_var(self):
         """Check if the parameter is an index variable array."""
         return "index variable" in self.get_type()
+
+    def is_logic_array(self):
+        """Check if the parameter is a simple array of logical."""
+        return "logical" in self.get_type() and "simple array" in self.get_type()

@@ -41,7 +41,8 @@ class ParameterData:
                                    basic=db_table_row.get_basic(),
                                    index_vars=db_table_row.get_index_vars(),
                                    is_logical=db_table_row.is_logical(),
-                                   is_index_var=db_table_row.is_index_var()))
+                                   is_index_var=db_table_row.is_index_var(),
+                                   is_logic_array=db_table_row.is_logic_array()))
 
     def __getitem__(self, key):
         """
@@ -289,7 +290,8 @@ class ParameterEntry:
 
     """
     def __init__(self, name, desc_short, desc_long, p_type, default_value,
-                 p_range, basic, index_vars, is_logical, is_index_var):
+                 p_range, basic, index_vars, is_logical, is_index_var,
+                 is_logic_array):
         """
         Init function of ParameterEntry.
 
@@ -304,6 +306,7 @@ class ParameterEntry:
 
         self.index_vars = index_vars
         self.is_logical = is_logical
+        self.is_logic_array = is_logic_array
         self.is_index_var = is_index_var
 
         # can be boolean (logical), string or similar (entry)
@@ -431,6 +434,10 @@ class ParameterEntry:
     def get_is_logical(self):
         """Check if the parameter is a boolean"""
         return self.is_logical
+
+    def get_is_logic_array(self):
+        """Check if the parameter is a boolean"""
+        return self.is_logic_array
 
     def get_is_index_var(self):
         """Check if the parameter is an index variable array."""

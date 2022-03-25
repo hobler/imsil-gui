@@ -4,6 +4,7 @@ import Pmw
 import tkinter as tk
 from tkinter import messagebox
 
+from UI.widgets.checkbutton_array import CheckbuttonArray
 from data_model.data_list import DataList
 from UI.canvas.blanc_canvas import BlancCanvas
 from UI.frames.blanc_frame import BlancFrame
@@ -126,6 +127,7 @@ class ScrollFrame(BlancFrame):
         short_desc = parameter_entry.get_short_desc()
         long_desc = create_info_button_text(parameter_entry)
         is_bool = parameter_entry.is_logical
+        is_bool_array = parameter_entry.is_logic_array
         is_index_var = parameter_entry.is_index_var
 
         value = parameter_entry.get_value()
@@ -143,7 +145,11 @@ class ScrollFrame(BlancFrame):
         elif is_bool:
             gui_object_ref = self.add_bool_parameter(par_name, default_value,
                                                      short_desc, long_desc,
-                                                     value)
+                                                     value, False)
+        elif is_bool_array:
+            gui_object_ref = self.add_bool_parameter(par_name, default_value,
+                                                     short_desc, long_desc,
+                                                     value, True)
         else:
             gui_object_ref = self.add_entry_parameter(par_name, default_value,
                                                       short_desc, long_desc,
@@ -200,7 +206,7 @@ class ScrollFrame(BlancFrame):
         return par_frame
 
     def add_bool_parameter(self, par_name, default_value,
-                           short_desc, long_desc, value):
+                           short_desc, long_desc, value, is_array):
         """
         Add an Entry parameter to its frame.
 
@@ -209,6 +215,7 @@ class ScrollFrame(BlancFrame):
         :param short_desc: the short description of the parameter
         :param long_desc: the long description of the parameter
         :param value: currently stored value
+        :param is_array: is the parameter is a bool array
 
         :returns: Reference to the now added GUI object
         """
@@ -221,15 +228,27 @@ class ScrollFrame(BlancFrame):
         self.bind_mouse_event(par_frame)
 
         # Add the Checkbutton for the parameter
-        checkbutton, cb_variable = self.add_checkbutton(
-                                                    parent=par_frame,
-                                                    par_name=par_name,
-                                                    cb_value=default_value,
-                                                    default_value=default_value,
-                                                    value=value)
-        checkbutton.grid(row=row_index,
-                         column=ELEMENTS_PER_PARAM * self.params_in_row,
-                         sticky="NESW")
+        if not is_array:
+            checkbutton, cb_variable = self.add_checkbutton(
+                                                        parent=par_frame,
+                                                        par_name=par_name,
+                                                        cb_value=default_value,
+                                                        default_value=default_value,
+                                                        value=value)
+            checkbutton.grid(row=row_index,
+                             column=ELEMENTS_PER_PARAM * self.params_in_row,
+                             sticky="NESW")
+        else:
+            checkbutton = CheckbuttonArray(par_frame, 2, default_value, value)
+            # checkbutton = tk.Checkbutton(par_frame)
+            checkbutton.grid(row=row_index,
+                             column=ELEMENTS_PER_PARAM * self.params_in_row,
+                             sticky="NESW")
+
+            self.bind_mouse_event(checkbutton)
+
+            cb_variable = checkbutton
+
         # Add the Label for the parameter
         label = self.add_label(parent=par_frame, label_text=par_name)
         label.grid(row=row_index,
