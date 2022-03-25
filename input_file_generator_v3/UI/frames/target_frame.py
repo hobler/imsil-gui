@@ -363,27 +363,29 @@ class TargetFrame(tk.LabelFrame):
         Updates the widgets accordingly to the posif_values list.
         Also writes the posif values into parameter_data.
         """
-        # too few entries -> add some
-        if len(self.posif_entries) < len(self.region_frames) + 1:
-            for i in range(len(self.posif_entries),
-                           len(self.region_frames) + 1):
-                self.add_posif_entry()
-        # too many entries -> delete excess ones
-        elif len(self.posif_entries) > len(self.region_frames) + 1:
-            for i in range(len(self.posif_entries) - 1,
-                           len(self.region_frames), -1):
-                self.posif_entries[i].destroy()
-                self.posif_labels[-1].destroy()
-                del self.posif_entries[i]
-                del self.posif_labels[-1]
+        if self.variable_cb_geom_sel.get() == "1D":
+            # too few entries -> add some
+            if len(self.posif_entries) < len(self.region_frames) + 1:
+                for i in range(len(self.posif_entries),
+                               len(self.region_frames) + 1):
+                    self.add_posif_entry()
+            # too many entries -> delete excess ones
+            elif len(self.posif_entries) > len(self.region_frames) + 1:
+                for i in range(len(self.posif_entries) - 1,
+                               len(self.region_frames), -1):
+                    self.posif_entries[i].destroy()
+                    self.posif_labels[-1].destroy()
+                    del self.posif_entries[i]
+                    del self.posif_labels[-1]
+
+            if self.posif_values is not None:
+                for i, entry in enumerate(self.posif_entries):
+                    entry["state"] = "normal"
+                    entry.delete(0, "end")
+                    entry.insert(0, self.posif_values[i])
+                    entry["state"] = "readonly"
 
         if self.posif_values is not None:
-            for i, entry in enumerate(self.posif_entries):
-                entry["state"] = "normal"
-                entry.delete(0, "end")
-                entry.insert(0, self.posif_values[i])
-                entry["state"] = "readonly"
-
             # write posif into parameter_data
             posif = "\'" + ",".join(self.posif_values) + "\'"
             self.parameter_data.set_entry_value("geom", "POSIF", posif)
