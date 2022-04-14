@@ -707,6 +707,9 @@ class MainWindow(tk.Tk):
                 print("update_atoms(): wrong length at region change")
 
         atoms = [x.name if x != "" else x for x in new_unique_atoms]
+        for i in range(len(atoms)):
+            if len(atoms[i]) == 2:
+                atoms[i] = atoms[i][0] + atoms[i][1].lower()
         # add the new atom names in their corresponding IVArray entries
         self.parameter_data.get_entry_value("atoms",
                                             "NAME").values[0] = atoms
@@ -778,17 +781,13 @@ class MainWindow(tk.Tk):
 
         # self.destroy()  # Close the current Window
         self.withdraw()
-        atom_names = self.parameter_data.get_atoms()
         region_names = self.parameter_data.get_materials()
 
         # Open the ImsilInputParameterEditor
         ImsilInputParameterEditor(
             type_of_simulation=None,
             input_file_path="",
-            nr=self.parameter_data.get_nr(),
-            natom=self.parameter_data.get_natom(),
             parameter_data=self.parameter_data,
-            atom_names=atom_names,
             region_names=region_names,
             on_close=self.on_close_parameter_editor)
 

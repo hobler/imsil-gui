@@ -46,8 +46,8 @@ class ImsilInputParameterEditor:
     where each tab corresponds to a database table.
     """
 
-    def __init__(self, type_of_simulation, input_file_path, nr, natom,
-                 parameter_data, atom_names, region_names, on_close):
+    def __init__(self, type_of_simulation, input_file_path,
+                 parameter_data, region_names, on_close):
         """
         In the initialization of the IMSIL Input Parameter Editor a
         notebook is added to the window. For each table of the database
@@ -85,6 +85,8 @@ class ImsilInputParameterEditor:
         # (1 region + 1 atom are nr=1 & natom=2)
         self.nr = 1
         self.natom = 2
+        nr = parameter_data.get_nr()
+        natom = parameter_data.get_natom()
         if type(nr) == int:
             self.nr = nr
         elif nr.isnumeric():
@@ -93,6 +95,11 @@ class ImsilInputParameterEditor:
             self.natom = natom
         elif natom.isnumeric():
             self.natom = int(natom)
+
+        atom_names = parameter_data.get_atoms()
+        for i in range(len(atom_names)):
+            if len(atom_names[i]) == 2:
+                atom_names[i] = atom_names[i][0] + atom_names[i][1].lower()
 
         # Add and populate the necessary tabs
         for tab_name in parameter_data:
