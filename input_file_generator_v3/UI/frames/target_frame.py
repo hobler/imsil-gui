@@ -356,7 +356,7 @@ class TargetFrame(tk.LabelFrame):
                                       text="Geometry Editor...",
                                       command=None)
         self.btn_geom.pack(expand=True, fill="both")
-        self.btn_geom["state"] = "normal"
+        self.btn_geom["state"] = "disabled"
 
     def update_posif_widgets(self):
         """

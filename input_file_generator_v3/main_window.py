@@ -129,6 +129,144 @@ class MainWindow(tk.Tk):
 
         # ions
 
+        # will be loaded in load_edit_frames()
+        self.frame_label_ion = None
+        self.label_ion = None
+        self.frame_label_ion_name = None
+        self.label_ion_name = None
+        self.variable_entry_ion_name = None
+        self.frame_entry_ion_name = None
+        self.entry_ion_name = None
+        self.frame_label_ion_energy = None
+        self.label_ion_energy = None
+        self.variable_entry_ion_energy = None
+        self.frame_entry_ion_energy = None
+        self.entry_ion_energy = None
+
+        # target select
+
+        self.frame_label_ion_name = None
+        self.label_ion_name = None
+        self.variable_cb_target_sel = None
+        self.frame_cb_target_sel = None
+        self.cb_target_sel = None
+
+        # region frame
+
+        self.frame_region = None
+
+        # self.frame_region.pack(expand=True, fill="both")
+        # self.frame_region.rowconfigure(0, weight=1)
+
+        # control frame
+
+        self.btn_open_param = None
+        self.btn_save = None
+        self.btn_save_as = None
+        self.btn_check = None
+        self.btn_run = None
+
+        # status bar
+
+        self.variable_entry_status = tk.StringVar()
+        self.variable_entry_status.set("No file selected.")
+        self.frame_entry_status = tk.Frame(self.frame_status,
+                                           width=self.window_width, height=32)
+        self.frame_entry_status.propagate(False)
+        self.frame_entry_status.grid(row=0, column=0,
+                                     sticky="NESW", padx=2, pady=2)
+        self.entry_load = tk.Entry(self.frame_entry_status,
+                                   textvariable=self.variable_entry_status)
+        self.entry_load.pack(expand=True, fill="both")
+        self.entry_load["state"] = "disabled"
+
+        # load structure, names and content of the tables
+        self.db_tables = []
+        self.load_database_tables()
+
+        # create ParameterData from database tables, this object contains
+        # every parameter value and its entries
+        self.parameter_data = ParameterData(self.db_tables)
+
+        # Center the window and show it
+        center_window(self)
+        self.mainloop()
+
+    def disable_editing(self):
+        """ Disables the editing entries and buttons """
+        self.btn_open_param["state"] = "disabled"
+        self.btn_save["state"] = "disabled"
+        self.btn_save_as["state"] = "disabled"
+        self.btn_check["state"] = "disabled"
+        self.btn_run["state"] = "disabled"
+
+        self.entry_ion_name["state"] = "disabled"
+        self.entry_ion_energy["state"] = "disabled"
+        self.variable_entry_ion_name.set("")
+        self.variable_entry_ion_energy.set("")
+
+        self.cb_target_sel["state"] = "disabled"
+
+    def enable_editing(self):
+        """ Enables the editing entries and buttons """
+        self.btn_open_param["state"] = "normal"
+        self.btn_save["state"] = "disabled"  # not implemented
+        self.btn_save_as["state"] = "disabled"  # not implemented
+        self.btn_check["state"] = "disabled"  # not implemented
+        self.btn_run["state"] = "disabled"  # not implemented
+
+        self.entry_ion_name["state"] = "readonly"
+        self.entry_ion_energy["state"] = "readonly"
+        self.entry_ion_name.bind("<1>", self.on_entry_ion_click)
+        self.entry_ion_energy.bind("<1>", self.on_entry_ion_energy_click)
+        self.variable_entry_ion_name.set("<click to change>")
+        self.variable_entry_ion_energy.set("<click to change>")
+
+        self.cb_target_sel["state"] = "readonly"
+
+    def on_new_file(self):
+        """
+        Opens a File Dialog to create a new file.
+        """
+        loaded_file = filedialog.asksaveasfile(
+                initialdir=self.variable_entry_status.get(),
+                title="Select IMSIL input file",
+                filetypes=[("Input File", ".inp"), ("any", ".*")])
+        if loaded_file:
+            self.variable_entry_status.set(loaded_file.name)
+            loaded_file.close()
+            self.entry_load["state"] = "readonly"
+
+            # reload default values
+            self.parameter_data = ParameterData(self.db_tables)
+
+            self.load_edit_frames()
+            self.load_region_frame()
+            self.enable_editing()
+
+    def on_open_file(self):
+        """
+        Opens a File Dialog to open an existing file.
+        """
+        loaded_file = filedialog.askopenfile(
+                initialdir=self.variable_entry_status.get(),
+                title="Select IMSIL input file")
+        if loaded_file:
+            self.variable_entry_status.set(loaded_file.name)
+            loaded_file.close()
+            self.entry_load["state"] = "readonly"
+
+            # TODO
+            # read input file
+            # load data into self.parameter_data
+
+            self.load_edit_frames()
+            self.load_region_frame()
+            self.enable_editing()
+
+    def load_edit_frames(self):
+        # ions
+
         self.frame_label_ion = tk.Frame(self.frame_ion, width=50, height=32)
         self.frame_label_ion.grid(row=0, column=0, sticky="NW",
                                   padx=0, pady=0)
@@ -213,13 +351,6 @@ class MainWindow(tk.Tk):
         self.cb_target_sel["values"] = ["Regions", "Cells"]
         self.cb_target_sel.bind('<<ComboboxSelected>>', self.cb_change)
 
-        # region frame
-
-        self.frame_region = None
-
-        # self.frame_region.pack(expand=True, fill="both")
-        # self.frame_region.rowconfigure(0, weight=1)
-
         # control frame
 
         self.btn_open_param = self.create_control_btn(
@@ -241,104 +372,6 @@ class MainWindow(tk.Tk):
         self.btn_run = self.create_control_btn(column=4, text="Run",
                                                width=80, padx=(2, 2),
                                                command=None, state="disabled")
-
-        # status bar
-
-        self.variable_entry_status = tk.StringVar()
-        self.variable_entry_status.set("No file selected.")
-        self.frame_entry_status = tk.Frame(self.frame_status,
-                                           width=self.window_width, height=32)
-        self.frame_entry_status.propagate(False)
-        self.frame_entry_status.grid(row=0, column=0,
-                                     sticky="NESW", padx=2, pady=2)
-        self.entry_load = tk.Entry(self.frame_entry_status,
-                                   textvariable=self.variable_entry_status)
-        self.entry_load.pack(expand=True, fill="both")
-        self.entry_load["state"] = "disabled"
-
-        self.disable_editing()
-
-        # load structure, names and content of the tables
-        self.db_tables = []
-        self.load_database_tables()
-
-        # create ParameterData from database tables, this object contains
-        # every parameter value and its entries
-        self.parameter_data = ParameterData(self.db_tables)
-
-        # Center the window and show it
-        center_window(self)
-        self.mainloop()
-
-    def disable_editing(self):
-        """ Disables the editing entries and buttons """
-        self.btn_open_param["state"] = "disabled"
-        self.btn_save["state"] = "disabled"
-        self.btn_save_as["state"] = "disabled"
-        self.btn_check["state"] = "disabled"
-        self.btn_run["state"] = "disabled"
-
-        self.entry_ion_name["state"] = "disabled"
-        self.entry_ion_energy["state"] = "disabled"
-        self.variable_entry_ion_name.set("")
-        self.variable_entry_ion_energy.set("")
-
-        self.cb_target_sel["state"] = "disabled"
-
-    def enable_editing(self):
-        """ Enables the editing entries and buttons """
-        self.btn_open_param["state"] = "normal"
-        self.btn_save["state"] = "disabled"  # not implemented
-        self.btn_save_as["state"] = "disabled"  # not implemented
-        self.btn_check["state"] = "disabled"  # not implemented
-        self.btn_run["state"] = "disabled"  # not implemented
-
-        self.entry_ion_name["state"] = "readonly"
-        self.entry_ion_energy["state"] = "readonly"
-        self.entry_ion_name.bind("<1>", self.on_entry_ion_click)
-        self.entry_ion_energy.bind("<1>", self.on_entry_ion_energy_click)
-        self.variable_entry_ion_name.set("<click to change>")
-        self.variable_entry_ion_energy.set("<click to change>")
-
-        self.cb_target_sel["state"] = "readonly"
-
-    def on_new_file(self):
-        """
-        Opens a File Dialog to create a new file.
-        """
-        loaded_file = filedialog.asksaveasfile(
-                initialdir=self.variable_entry_status.get(),
-                title="Select IMSIL input file",
-                filetypes=[("Input File", ".inp"), ("any", ".*")])
-        if loaded_file:
-            self.variable_entry_status.set(loaded_file.name)
-            loaded_file.close()
-            self.entry_load["state"] = "readonly"
-
-            # reload default values
-            self.parameter_data = ParameterData(self.db_tables)
-
-            self.load_region_frame()
-            self.enable_editing()
-
-    def on_open_file(self):
-        """
-        Opens a File Dialog to open an existing file.
-        """
-        loaded_file = filedialog.askopenfile(
-                initialdir=self.variable_entry_status.get(),
-                title="Select IMSIL input file")
-        if loaded_file:
-            self.variable_entry_status.set(loaded_file.name)
-            loaded_file.close()
-            self.entry_load["state"] = "readonly"
-
-            # TODO
-            # read input file
-            # load data into self.parameter_data
-
-            self.load_region_frame()
-            self.enable_editing()
 
     def load_region_frame(self):
         """
@@ -469,13 +502,22 @@ class MainWindow(tk.Tk):
             initial = new_name
 
             # check for correct spelling of the molecule
-            if new_name.isnumeric() and float(new_name) > 0:
+            try:
+                float(new_name)
                 # if name is valid, proceed
-                break
-            else:
+                if float(new_name) > 0:
+                    # if name is valid, proceed
+                    break
+                else:
+                    # info for wrong input
+                    tk.messagebox.showerror("Invalid Input",
+                                            "Invalid number. "
+                                            "Must be real number and >0.")
+            except ValueError:
                 # info for wrong input
                 tk.messagebox.showerror("Invalid Input",
-                                        "Invalid number. Must be >0.")
+                                        "Invalid number. "
+                                        "Must be real number and >0.")
 
         # set new name if user didn't cancel
         if new_name is not None:
