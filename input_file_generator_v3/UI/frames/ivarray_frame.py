@@ -1422,8 +1422,8 @@ class IndexVariableArrayFrame(BlancFrame):
         # settings to re-create the array
         array_settings = values[2]
         size = self.get_size(array_settings[0],
-                                array_settings[1],
-                                self.n_r, self.n_atom)
+                             array_settings[1],
+                             self.n_r, self.n_atom)
         m = size[0]  # number of rows in the iv_array
         n = size[1]  # number of columns
         if type(m) != int:

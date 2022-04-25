@@ -9,8 +9,6 @@ from tkinter import ttk, filedialog, simpledialog
 
 from UI.frames.target_frame import TargetFrame
 from data_model.element import get_unique_atoms, get_all_elements
-from data_model.iv_data import IVData
-from edit_window import EditWindow
 from utility import center_window
 from parameter_editor_window import ImsilInputParameterEditor
 from data_model.read_sqlite import get_database_table_names, DatabaseTable
