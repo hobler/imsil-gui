@@ -143,8 +143,8 @@ class MainWindow(tk.Tk):
 
         # target select
 
-        self.frame_label_ion_name = None
-        self.label_ion_name = None
+        self.frame_label_target = None
+        self.label_target = None
         self.variable_cb_target_sel = None
         self.frame_cb_target_sel = None
         self.cb_target_sel = None
@@ -152,6 +152,8 @@ class MainWindow(tk.Tk):
         # region frame
 
         self.frame_region = None
+        self.btn_load_cells = None
+        self.variable_cells = None
 
         # self.frame_region.pack(expand=True, fill="both")
         # self.frame_region.rowconfigure(0, weight=1)
@@ -323,16 +325,16 @@ class MainWindow(tk.Tk):
 
         # target select
 
-        self.frame_label_ion_name = tk.Frame(self.frame_target_sel, width=50, height=32)
-        self.frame_label_ion_name.grid(row=0, column=0, sticky="NW",
+        self.frame_label_target = tk.Frame(self.frame_target_sel, width=50, height=32)
+        self.frame_label_target.grid(row=0, column=0, sticky="NW",
                                        padx=0, pady=0)
-        self.frame_label_ion_name.propagate(False)
+        self.frame_label_target.propagate(False)
 
-        self.label_ion_name = tk.Label(self.frame_label_ion_name,
+        self.label_target = tk.Label(self.frame_label_target,
                                               anchor=tk.E,
                                               text="Target:",
                                               justify=tk.LEFT)
-        self.label_ion_name.pack(expand=True, fill="both")
+        self.label_target.pack(expand=True, fill="both")
 
         self.variable_cb_target_sel = tk.StringVar()
         self.variable_cb_target_sel.set("Regions")
@@ -393,6 +395,41 @@ class MainWindow(tk.Tk):
         self.frame_region.grid(row=0, column=0, sticky="NW",
                                padx=6, pady=(0, 3))
 
+        frame_btn = tk.Frame(self.frame_region,
+                             width=150, height=32)
+        frame_btn.propagate(False)
+        frame_btn.grid(row=0, column=0, columnspan=1,
+                       sticky="NESW", padx=(0, 2), pady=2)
+        btn = tk.Button(frame_btn, text="Load Cell File...",
+                        command=self.on_open_cells_file)
+        btn.pack(expand=True, fill="both")
+
+        self.variable_cells = tk.StringVar()
+        self.variable_cells.set("No file selected.")
+        frame_cells_file = tk.Frame(self.frame_region,
+                                           width=self.window_width - 160, height=32)
+        frame_cells_file.propagate(False)
+        frame_cells_file.grid(row=0, column=1,
+                                     sticky="NESW", padx=2, pady=2)
+        entry_load = tk.Entry(frame_cells_file,
+                              textvariable=self.variable_cells)
+        entry_load.pack(expand=True, fill="both")
+        entry_load["state"] = "readonly"
+
+    def on_open_cells_file(self):
+        """
+        Opens a File Dialog to open an existing file.
+        """
+        loaded_file = filedialog.askopenfile(
+            initialdir=self.variable_entry_status.get(),
+            title="Select Cells file")
+        if loaded_file:
+            self.variable_cells.set(loaded_file.name)
+            loaded_file.close()
+            self.entry_load["state"] = "readonly"
+
+            self.parameter_data.set_entry_value("setup", "FILCELL", loaded_file.name)
+
     def cb_change(self, value):
         """
         Target Combobox change event.
@@ -403,8 +440,10 @@ class MainWindow(tk.Tk):
 
         if self.variable_cb_target_sel.get() == "Regions":
             self.load_region_frame()
+            self.parameter_data.set_entry_value("setup", "USECELL", "F")
         elif self.variable_cb_target_sel.get() == "Cells":
             self.load_cells_frame()
+            self.parameter_data.set_entry_value("setup", "USECELL", "T")
 
     def on_entry_ion_click(self, event):
         """
@@ -797,8 +836,18 @@ class MainWindow(tk.Tk):
         """
         if apply:
             self.parameter_data.readout_parameter_editor()
-            self.variable_cb_target_sel.set("Regions")
-            self.load_region_frame()
+
+            usecell = self.parameter_data.get_entry_value("setup", "USECELL")
+            if usecell == "T":
+                self.load_cells_frame()
+                self.variable_cb_target_sel.set("Cells")
+                filename = self.parameter_data.get_entry_value("setup",
+                                                               "FILCELL")
+                self.variable_cells.set(filename)
+            else:
+                self.load_region_frame()
+                self.variable_cb_target_sel.set("Regions")
+
             ions = self.parameter_data.get_entry_value("ions", "NAME")
             ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
             self.variable_entry_ion_name.set(ions)
