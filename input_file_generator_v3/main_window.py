@@ -158,6 +158,10 @@ class MainWindow(tk.Tk):
         # self.frame_region.pack(expand=True, fill="both")
         # self.frame_region.rowconfigure(0, weight=1)
 
+        # cells
+        self.frame_label_cells = None
+        self.label_cells = None
+
         # control frame
 
         self.btn_open_param = None
@@ -395,28 +399,32 @@ class MainWindow(tk.Tk):
         self.frame_region.grid(row=0, column=0, sticky="NW",
                                padx=6, pady=(0, 3))
 
-        frame_btn = tk.Frame(self.frame_region,
-                             width=150, height=32)
-        frame_btn.propagate(False)
-        frame_btn.grid(row=0, column=0, columnspan=1,
-                       sticky="NESW", padx=(0, 2), pady=2)
-        btn = tk.Button(frame_btn, text="Load Cell File...",
-                        command=self.on_open_cells_file)
-        btn.pack(expand=True, fill="both")
+        self.frame_label_cells = tk.Frame(self.frame_region,
+                                          width=70, height=32)
+        self.frame_label_cells.grid(row=0, column=0, sticky="NESW",
+                                    padx=(0, 2), pady=2)
+        self.frame_label_cells.propagate(False)
+
+        self.label_cells = tk.Label(self.frame_label_cells,
+                                    anchor=tk.E,
+                                    text="Cell File:",
+                                    justify=tk.LEFT)
+        self.label_cells.pack(expand=True, fill="both")
 
         self.variable_cells = tk.StringVar()
         self.variable_cells.set("No file selected.")
         frame_cells_file = tk.Frame(self.frame_region,
-                                           width=self.window_width - 160, height=32)
+                                    width=self.window_width - 80, height=32)
         frame_cells_file.propagate(False)
         frame_cells_file.grid(row=0, column=1,
-                                     sticky="NESW", padx=2, pady=2)
+                              sticky="NESW", padx=2, pady=2)
         entry_load = tk.Entry(frame_cells_file,
                               textvariable=self.variable_cells)
         entry_load.pack(expand=True, fill="both")
         entry_load["state"] = "readonly"
+        entry_load.bind("<1>", self.on_open_cells_file)
 
-    def on_open_cells_file(self):
+    def on_open_cells_file(self, event):
         """
         Opens a File Dialog to open an existing file.
         """
