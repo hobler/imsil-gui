@@ -64,6 +64,9 @@ class TargetFrame(tk.LabelFrame):
         self.cb_geom_sel["state"] = "readonly"
         self.cb_geom_sel["values"] = ["1D", "2D", "3D"]
         self.cb_geom_sel.bind('<<ComboboxSelected>>', self.cb_change)
+        # force the Combobox to steal focus when scrolled
+        self.cb_geom_sel.bind("<MouseWheel>",
+                                lambda event: self.cb_geom_sel.focus_set())
 
         # frame to contain the region frames
         self.frame_mat_left = tk.Frame(self)
@@ -236,6 +239,8 @@ class TargetFrame(tk.LabelFrame):
         btn_temp.config(command=lambda button=btn_temp: self.on_btn_add(button))
         self.set_button(btn_temp, os.path.join("pics", "add.gif"), "add")
         btn_temp.grid(row=len(self.add_buttons), column=0)
+        # force the button to steal focus when clicked
+        btn_temp.bind("<1>", lambda event: btn_temp.focus_set())
         self.add_buttons.append(btn_temp)
 
     def set_button(self, widget, file, text):
@@ -383,7 +388,7 @@ class TargetFrame(tk.LabelFrame):
                     entry["state"] = "normal"
                     entry.delete(0, "end")
                     entry.insert(0, self.posif_values[i])
-                    entry["state"] = "readonly"
+                    entry["state"] = "normal"
 
         if self.posif_values is not None:
             # write posif into parameter_data
@@ -397,54 +402,28 @@ class TargetFrame(tk.LabelFrame):
         label_posif = tk.Label(self.frame_geom, text="POSIF:")
         label_posif.grid(row=len(self.posif_entries), column=0)
         entry_temp = tk.Entry(self.frame_geom)
-        entry_temp.bind("<1>", self.on_ent_posif_click)
+        entry_temp.bind("<FocusOut>", self.on_ent_posif_focus_out)
         entry_temp["state"] = "normal"
         entry_temp.grid(row=len(self.posif_entries), column=1, ipady=3,
                         pady=(0, 1))
         entry_temp.delete(0, "end")
         entry_temp.insert(0, "<click to change>")
-        entry_temp["state"] = "readonly"
+        entry_temp["state"] = "normal"
         self.posif_entries.append(entry_temp)
         self.posif_labels.append(label_posif)
 
-    def on_ent_posif_click(self, event):
+    def on_ent_posif_focus_out(self, event):
         """
-        Callback for the on-click event of the Entry-box.
-        Changes Region name and calls update_atoms()
+        Callback for the focus-out event of the Entry-box.
 
-        Opens a new simpledialog window that asks the user for the
-        new material name and checks for a valid molecule name.
         """
-        # disable another instance of this method from opening
+
         entry = event.widget
-        entry.unbind("<1>")
+        new_name = entry.get()
 
-        # initial value for the simpledialog
-        initial = "" if entry.get().startswith("<") else entry.get()
-        # new material name
-        new_name = simpledialog.askstring(title="Change POSIF",
-                                          prompt="New value:",
-                                          initialvalue=initial,
-                                          parent=self)
-        # result of the cancel button
-        if new_name is None:
-            # re-enable on-click event
-            entry.bind("<1>", self.on_ent_posif_click)
-            return
-
-        # set new name if user didn't cancel
-        if new_name is not None:
-            entry["state"] = "normal"
-            entry.delete(0, "end")
-            entry.insert(0, new_name)
-            entry["state"] = "readonly"
-
-            index = self.posif_entries.index(entry)
-            self.posif_values[index] = new_name
-            self.update_posif_widgets()
-
-        # re-enable on-click event
-        entry.bind("<1>", self.on_ent_posif_click)
+        index = self.posif_entries.index(entry)
+        self.posif_values[index] = new_name
+        self.update_posif_widgets()
 
 
 class RegionEditFrame(tk.Frame):
@@ -528,6 +507,12 @@ class RegionEditFrame(tk.Frame):
         self.set_button(self.btn_delete, os.path.join("pics", "minus.gif"),
                         "delete")
         self.btn_delete.grid(row=0, column=5)
+
+        # force the button to steal focus when clicked
+        # so that the focusout event gets called on the entries
+        self.btn_delete.bind("<1>", lambda event: self.btn_delete.focus_set())
+        self.btn_up.bind("<1>", lambda event: self.btn_up.focus_set())
+        self.btn_down.bind("<1>", lambda event: self.btn_down.focus_set())
 
     def set_button(self, widget, file, text):
         """

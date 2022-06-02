@@ -220,11 +220,12 @@ class MainWindow(tk.Tk):
         self.btn_run["state"] = "disabled"  # not implemented
 
         self.entry_ion_name["state"] = "readonly"
-        self.entry_ion_energy["state"] = "readonly"
+        self.entry_ion_energy["state"] = "normal"
         self.entry_ion_name.bind("<1>", self.on_entry_ion_click)
-        self.entry_ion_energy.bind("<1>", self.on_entry_ion_energy_click)
+        self.entry_ion_energy.bind("<FocusOut>",
+                                   self.on_entry_ion_energy_focus_out)
         self.variable_entry_ion_name.set("<click to change>")
-        self.variable_entry_ion_energy.set("<click to change>")
+        self.variable_entry_ion_energy.set("")
 
         self.cb_target_sel["state"] = "readonly"
 
@@ -354,6 +355,9 @@ class MainWindow(tk.Tk):
         self.cb_target_sel["state"] = "disabled"
         self.cb_target_sel["values"] = ["Regions", "Cells"]
         self.cb_target_sel.bind('<<ComboboxSelected>>', self.cb_change)
+        # force the Combobox to steal focus when scrolled
+        self.cb_target_sel.bind("<MouseWheel>",
+                                lambda event: self.cb_target_sel.focus_set())
 
         # control frame
 
@@ -516,61 +520,14 @@ class MainWindow(tk.Tk):
             # re-enable on-click event
         self.entry_ion_name.bind("<1>", self.on_entry_ion_click)
 
-    def on_entry_ion_energy_click(self, event):
+    def on_entry_ion_energy_focus_out(self, event):
         """
-        Callback for the on-click event of the Entry-box
+        Callback for the focus-out event of the Entry-box.
 
-        Opens a new simpledialog window that asks the user for the
-        new ion energy and checks for a valid number.
         """
-        # disable another instance of this method from opening
-        self.entry_ion_energy.unbind("<1>")
 
-        # initial value for the simpledialog
-        initial = "" if self.variable_entry_ion_energy.get().startswith(
-            "<") else self.variable_entry_ion_energy.get()
-        # new material name
-        new_name = None
-
-        # while no valid name is given
-        while True:
-            new_name = simpledialog.askstring(
-                title="Change Ion Energy",
-                prompt="New Ion Energy:",
-                initialvalue=initial,
-                parent=self)
-            # result of the cancel button
-            if new_name is None:
-                # re-enable on-click event
-                self.entry_ion_energy.bind("<1>", self.on_entry_ion_energy_click)
-                return
-            initial = new_name
-
-            # check for correct spelling of the molecule
-            try:
-                float(new_name)
-                # if name is valid, proceed
-                if float(new_name) > 0:
-                    # if name is valid, proceed
-                    break
-                else:
-                    # info for wrong input
-                    tk.messagebox.showerror("Invalid Input",
-                                            "Invalid number. "
-                                            "Must be real number and >0.")
-            except ValueError:
-                # info for wrong input
-                tk.messagebox.showerror("Invalid Input",
-                                        "Invalid number. "
-                                        "Must be real number and >0.")
-
-        # set new name if user didn't cancel
-        if new_name is not None:
-            self.variable_entry_ion_energy.set(new_name)
-            self.parameter_data.set_entry_value("ions", "ENERGY", new_name)
-
-        # re-enable on-click event
-        self.entry_ion_energy.bind("<1>", self.on_entry_ion_energy_click)
+        new_name = self.variable_entry_ion_energy.get()
+        self.parameter_data.set_entry_value("ions", "ENERGY", new_name)
 
     def update_atoms(self, change_ion=False, change_region=False):
         """
@@ -777,6 +734,8 @@ class MainWindow(tk.Tk):
         btn = tk.Button(frame_btn, text=text, command=command)
         btn.pack(expand=True, fill="both")
         btn["state"] = state
+        # force the button to steal focus when clicked
+        btn.bind("<1>", lambda event: btn.focus_set())
         return btn
 
     def create_row_frame(self, row, rows, columns):

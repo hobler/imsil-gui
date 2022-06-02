@@ -12,7 +12,7 @@ from UI.frames.ivarray_frame import IndexVariableArrayFrame
 from UI.frames.blanc_frame import MAIN as MAIN
 from UI.frames.blanc_frame import BOOLEAN as BOOLEAN
 from UI.frames.blanc_frame import ENTRY as ENTRY
-from utility import create_info_button_text
+from utility import create_info_button_text, create_tooltip
 
 OS = platform.system()
 
@@ -339,8 +339,7 @@ class ScrollFrame(BlancFrame):
         """Add a button to its parent frame and return it."""
         btn = tk.Button(parent, text=btn_text, width=w, height=h)
         if tool_tip_text is not None:
-            balloon = Pmw.Balloon(btn)
-            balloon.bind(btn, tool_tip_text)
+            create_tooltip(btn, btn, tool_tip_text)
         self.bind_mouse_event(btn)
         return btn
 
@@ -397,8 +396,7 @@ class ScrollFrame(BlancFrame):
                                   default_value=default_value)
             self.update_if_obligatory_entries()
         if tool_tip_text != "":
-            balloon = Pmw.Balloon(entry)
-            balloon.bind(entry, tool_tip_text)
+            create_tooltip(entry, entry, tool_tip_text)
 
         self.bind_mouse_event(entry)
         return entry

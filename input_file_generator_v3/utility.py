@@ -1,6 +1,7 @@
 """
     Utility module for often used static functions
 """
+import Pmw
 
 
 def center_window(tk_window):
@@ -89,3 +90,8 @@ def create_info_button_text(parameter_entry):
             + parameter_entry.get_default_value().rstrip()
             + "\n\n"
             + "Range: " + parameter_entry.get_range().rstrip())
+
+
+def create_tooltip(parent, widget, text):
+    balloon = Pmw.Balloon(parent)
+    balloon.bind(widget, text)
