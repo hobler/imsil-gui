@@ -466,6 +466,8 @@ class RegionEditFrame(tk.Frame):
         self.all_elements = all_elements
         self.parameter_data = parameter_data
 
+        self.prev_entry_val = ""
+
         self.is_original = is_original
         if is_original:
             self.orig_text = orig_text
@@ -484,11 +486,9 @@ class RegionEditFrame(tk.Frame):
         self.ent_name.grid(row=0, column=1)
         self.ent_name.delete(0, "end")
         self.ent_name.insert(0, material)
-        self.ent_name.bind("<1>", self.on_ent_click)
-        if material == "":
-            self.ent_name.delete(0, "end")
-            self.ent_name.insert(0, "<click to change>")
-        self.ent_name["state"] = "readonly"
+        self.ent_name.bind("<FocusIn>", self.on_ent_focus_in)
+        self.ent_name.bind("<FocusOut>", self.on_ent_focus_out)
+        self.ent_name["state"] = "normal"
 
         self.btn_up = tk.Button(self, text="up", width=20, height=20,
                                 command=self.on_btn_up)
@@ -598,7 +598,10 @@ class RegionEditFrame(tk.Frame):
         if self.index < length - 1:
             self.btn_down["state"] = "normal"
 
-    def on_ent_click(self, event):
+    def on_ent_focus_in(self, event):
+        self.prev_entry_val = self.get_name()
+
+    def on_ent_focus_out(self, event):
         """
         Callback for the on-click event of the Entry-box.
         Changes Region name and calls update_atoms()
@@ -607,23 +610,27 @@ class RegionEditFrame(tk.Frame):
         new material name and checks for a valid molecule name.
         """
         # disable another instance of this method from opening
-        self.ent_name.unbind("<1>")
+        self.ent_name.unbind("<FocusOut>")
 
         # initial value for the simpledialog
-        initial = "" if self.get_name().startswith("<") else self.get_name()
+        initial = self.get_name()
         # new material name
-        new_name = None
+        new_name = initial
+        first = True
 
         # while no valid name is given
         while True:
-            new_name = simpledialog.askstring(title="Change Material Name",
-                                              prompt="New Material name:",
-                                              initialvalue=initial,
-                                              parent=self)
+            if not first:
+                new_name = simpledialog.askstring(title="Change Material Name",
+                                                  prompt="New Material name:",
+                                                  initialvalue=initial,
+                                                  parent=self)
+            first = False
             # result of the cancel button
             if new_name is None:
                 # re-enable on-click event
-                self.ent_name.bind("<1>", self.on_ent_click)
+                self.set_name(self.prev_entry_val)
+                self.ent_name.bind("<FocusOut>", self.on_ent_focus_out)
                 return
             initial = new_name
 
@@ -641,7 +648,7 @@ class RegionEditFrame(tk.Frame):
                 error = True
 
             if new_name == "":
-                error = True
+                error = False
 
             if error:
                 # info for wrong input
@@ -658,4 +665,4 @@ class RegionEditFrame(tk.Frame):
             self.update_atoms(change_region=True)
 
         # re-enable on-click event
-        self.ent_name.bind("<1>", self.on_ent_click)
+        self.ent_name.bind("<FocusOut>", self.on_ent_focus_out)

@@ -43,6 +43,10 @@ class MainWindow(tk.Tk):
 
         self.all_elements = get_all_elements()
 
+        # temporary string variable that saves the entry value before
+        # it was edited, in case the editing gets cancelled
+        self.prev_entry_val = ""
+
         # create basic structure with frames
         # main frame
         self.frame = tk.Frame(self)
@@ -219,12 +223,15 @@ class MainWindow(tk.Tk):
         self.btn_check["state"] = "disabled"  # not implemented
         self.btn_run["state"] = "disabled"  # not implemented
 
-        self.entry_ion_name["state"] = "readonly"
+        self.entry_ion_name["state"] = "normal"
         self.entry_ion_energy["state"] = "normal"
-        self.entry_ion_name.bind("<1>", self.on_entry_ion_click)
+        self.entry_ion_name.bind("<FocusOut>",
+                                 self.on_entry_ion_focus_out)
+        self.entry_ion_name.bind("<FocusIn>",
+                                 self.on_entry_ion_focus_in)
         self.entry_ion_energy.bind("<FocusOut>",
                                    self.on_entry_ion_energy_focus_out)
-        self.variable_entry_ion_name.set("<click to change>")
+        self.variable_entry_ion_name.set("")
         self.variable_entry_ion_energy.set("")
 
         self.cb_target_sel["state"] = "readonly"
@@ -457,7 +464,10 @@ class MainWindow(tk.Tk):
             self.load_cells_frame()
             self.parameter_data.set_entry_value("setup", "USECELL", "T")
 
-    def on_entry_ion_click(self, event):
+    def on_entry_ion_focus_in(self, event):
+        self.prev_entry_val = self.variable_entry_ion_name.get()
+
+    def on_entry_ion_focus_out(self, event):
         """
         Callback for the on-click event of the Entry-box
 
@@ -465,25 +475,29 @@ class MainWindow(tk.Tk):
         new ion name and checks for a valid molecule name.
         """
         # disable another instance of this method from opening
-        self.entry_ion_name.unbind("<1>")
+        self.entry_ion_name.unbind("<FocusOut>")
 
         # initial value for the simpledialog
-        initial = "" if self.variable_entry_ion_name.get().startswith(
-            "<") else self.variable_entry_ion_name.get()
+        initial = self.variable_entry_ion_name.get()
 
-        new_name = None
+        new_name = initial
+        first = True
 
         # while no valid name is given
         while True:
-            new_name = simpledialog.askstring(
-                title="Change Ion Name",
-                prompt="New Ion name:",
-                initialvalue=initial,
-                parent=self)
+            if not first:
+                new_name = simpledialog.askstring(
+                    title="Change Ion Name",
+                    prompt="New Ion name:",
+                    initialvalue=initial,
+                    parent=self)
+            first = False
             # result of the cancel button
             if new_name is None:
                 # re-enable on-click event
-                self.entry_ion_name.bind("<1>", self.on_entry_ion_click)
+                self.variable_entry_ion_name.set(self.prev_entry_val)
+                self.entry_ion_name.bind("<FocusOut>",
+                                         self.on_entry_ion_focus_out)
                 return
             initial = new_name
 
@@ -501,7 +515,7 @@ class MainWindow(tk.Tk):
                 error = True
 
             if new_name == "":
-                error = True
+                error = False
 
             if error:
                 # info for wrong input
@@ -518,7 +532,7 @@ class MainWindow(tk.Tk):
             self.update_atoms(change_ion=True)
 
             # re-enable on-click event
-        self.entry_ion_name.bind("<1>", self.on_entry_ion_click)
+        self.entry_ion_name.bind("<FocusOut>", self.on_entry_ion_focus_out)
 
     def on_entry_ion_energy_focus_out(self, event):
         """
