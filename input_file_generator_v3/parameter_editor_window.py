@@ -68,6 +68,7 @@ class ImsilInputParameterEditor:
         center_window(self.root)
 
         self.on_close = on_close
+        self.quit = False
 
         # Add a loading message (becomes visible after the user presses the
         # button to open the IMSIL Input Parameter Editor in the Welcome Window)
@@ -166,10 +167,15 @@ class ImsilInputParameterEditor:
         Callback for the Cancel Button. Asks if the cancellation was intended.
         Closes the Window if the user selects "yes".
         """
-        mb_result = tk.messagebox.askyesnocancel(
-            "Exit Parameter Editor",
-            "Apply changes?")
+        if self.quit:
+            return
 
+        self.quit = True
+        mb_result = tk.messagebox.askyesnocancel(
+            title="Exit Parameter Editor",
+            message="Apply changes?")
+
+        self.quit = False
         # cancel button
         if mb_result is None:
             return
