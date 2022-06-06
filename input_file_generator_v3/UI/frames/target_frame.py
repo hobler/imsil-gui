@@ -572,7 +572,7 @@ class RegionEditFrame(tk.Frame):
         self.ent_name["state"] = "normal"
         self.ent_name.delete(0, "end")
         self.ent_name.insert(0, name)
-        self.ent_name["state"] = "readonly"
+        self.ent_name["state"] = "normal"
 
     def set_index(self, index):
         """
