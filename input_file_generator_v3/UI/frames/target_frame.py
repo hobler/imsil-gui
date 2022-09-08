@@ -1,8 +1,10 @@
 import os
 import tkinter as tk
-from tkinter import simpledialog, ttk
+from tkinter import simpledialog, ttk, messagebox
 
+from UI.frames.scroll_frame import INFO_WIDTH, INFO_HEIGHT
 from data_model.element import get_unique_atoms, get_all_elements
+from utility import create_info_button_text, create_tooltip
 
 
 class TargetFrame(tk.LabelFrame):
@@ -46,6 +48,10 @@ class TargetFrame(tk.LabelFrame):
 
         self.label_mat = tk.Label(self.frame_mat_left_title, text="Material")
         self.label_mat.grid(row=0, column=0)
+        self.btn_mat_info = self.create_tooltip_btn(self.frame_mat_left_title,
+                                 self.parameter_data.get_entry("material", "NAME"))
+        self.btn_mat_info.grid(row=0, column=1, sticky="NW",
+                                       padx=(0, 0), pady=(2, 0))
 
         self.frame_geom_title = tk.Frame(self)
         self.frame_geom_title.grid(row=0, column=2, padx=(15, 0),
@@ -59,7 +65,7 @@ class TargetFrame(tk.LabelFrame):
         self.cb_geom_sel = ttk.Combobox(self.frame_geom_title,
                                           textvariable=
                                           self.variable_cb_geom_sel,
-                                          width=18)
+                                          width=13)
         self.cb_geom_sel.grid(row=0, column=1, padx=3)
         self.cb_geom_sel["state"] = "readonly"
         self.cb_geom_sel["values"] = ["1D", "2D", "3D"]
@@ -67,6 +73,14 @@ class TargetFrame(tk.LabelFrame):
         # force the Combobox to steal focus when scrolled
         self.cb_geom_sel.bind("<MouseWheel>",
                                 lambda event: self.cb_geom_sel.focus_set())
+
+        self.frame_btn_posif_info = tk.Frame(self.frame_geom_title, width=20, height=10)
+        self.frame_btn_posif_info.grid(row=0, column=2, sticky="NW",
+                             padx=(0, 0), pady=(0, 0))
+        self.btn_posif_info = self.create_tooltip_btn(self.frame_btn_posif_info,
+                              self.parameter_data.get_entry("geom", "POSIF"))
+        self.btn_posif_info.grid(row=0, column=2, sticky="NW",
+                                       padx=(0, 14), pady=(2, 0))
 
         # frame to contain the region frames
         self.frame_mat_left = tk.Frame(self)
@@ -343,6 +357,9 @@ class TargetFrame(tk.LabelFrame):
 
         self.update_posif_widgets()
 
+        self.btn_posif_info.grid(row=0, column=2, sticky="NW",
+                                       padx=(0, 14), pady=(2, 0))
+
     def load_geometry_editor(self):
         """
         Load the Geometry Editor view for the Geometry
@@ -362,6 +379,8 @@ class TargetFrame(tk.LabelFrame):
                                       command=None)
         self.btn_geom.pack(expand=True, fill="both")
         self.btn_geom["state"] = "disabled"
+
+        self.btn_posif_info.grid_remove()
 
     def update_posif_widgets(self):
         """
@@ -424,6 +443,25 @@ class TargetFrame(tk.LabelFrame):
         index = self.posif_entries.index(entry)
         self.posif_values[index] = new_name
         self.update_posif_widgets()
+
+    def create_tooltip_btn(self, parent, parameter_entry):
+
+        short_desc = parameter_entry.get_short_desc()
+        par_name = parameter_entry.get_name()
+        long_desc = create_info_button_text(parameter_entry)
+
+        btn_info = tk.Button(parent, text="Button",
+                             width=INFO_WIDTH, height=INFO_HEIGHT)
+        if short_desc is not None:
+            create_tooltip(btn_info, btn_info, short_desc)
+        photo = tk.PhotoImage(file=os.path.join("pics", "info_sign_1.gif"))
+        btn_info.config(image=photo)
+        btn_info.image = photo
+        btn_info.config(takefocus=False)
+        btn_info.config(
+            command=lambda: messagebox.showinfo(par_name, long_desc))
+
+        return btn_info
 
 
 class RegionEditFrame(tk.Frame):

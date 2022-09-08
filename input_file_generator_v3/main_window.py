@@ -5,11 +5,12 @@ Classes:
 """
 import os, sys
 import tkinter as tk
-from tkinter import ttk, filedialog, simpledialog
+from tkinter import ttk, filedialog, simpledialog, messagebox
 
+from UI.frames.scroll_frame import INFO_WIDTH, INFO_HEIGHT
 from UI.frames.target_frame import TargetFrame
 from data_model.element import get_unique_atoms, get_all_elements
-from utility import center_window
+from utility import center_window, create_tooltip, create_info_button_text
 from parameter_editor_window import ImsilInputParameterEditor
 from data_model.read_sqlite import get_database_table_names, DatabaseTable
 from data_model.parameter_data import ParameterData
@@ -62,12 +63,12 @@ class MainWindow(tk.Tk):
         # self.frame.columnconfigure(1, weight=1)
 
         self.frame_top = self.create_row_frame(row=0, rows=1, columns=2)
-        self.frame_file = self.create_row_frame(row=1, rows=1, columns=1)
-        self.frame_ion = self.create_row_frame(row=2, rows=1, columns=1)
-        self.frame_target_sel = self.create_row_frame(row=3, rows=1, columns=1)
-        self.frame_target = self.create_row_frame(row=4, rows=1, columns=1)
-        self.frame_controls = self.create_row_frame(row=5, rows=1, columns=1)
-        self.frame_status = self.create_row_frame(row=6, rows=1, columns=1)
+        # self.frame_file = self.create_row_frame(row=1, rows=1, columns=1)
+        self.frame_ion = self.create_row_frame(row=1, rows=1, columns=1)
+        self.frame_target_sel = self.create_row_frame(row=2, rows=1, columns=1)
+        self.frame_target = self.create_row_frame(row=3, rows=1, columns=1)
+        self.frame_controls = self.create_row_frame(row=4, rows=1, columns=1)
+        self.frame_status = self.create_row_frame(row=5, rows=1, columns=1)
 
         # top
 
@@ -105,29 +106,29 @@ class MainWindow(tk.Tk):
                                               justify=tk.LEFT)
         self.welcome_message_label.pack(expand=True, fill="both")
 
-        # file
-
-        # new file button
-        self.frame_btn_file_new = tk.Frame(self.frame_file, width=150, height=32)
-        self.frame_btn_file_new.propagate(False)
-        self.frame_btn_file_new.grid(row=0, column=0, columnspan=1,
-                                     sticky="NESW", padx=(6, 2), pady=2)
-        self.btn_file_new = tk.Button(self.frame_btn_file_new,
-                                      text="New Input File...",
-                                      command=self.on_new_file)
-        self.btn_file_new.pack(expand=True, fill="both")
-        self.btn_file_new["state"] = "normal"
-
-        # load file button
-        self.frame_btn_file_load = tk.Frame(self.frame_file, width=200, height=32)
-        self.frame_btn_file_load.propagate(False)
-        self.frame_btn_file_load.grid(row=0, column=1, columnspan=1,
-                                      sticky="NESW", padx=2+9, pady=2)
-        self.btn_file_load = tk.Button(self.frame_btn_file_load,
-                                       text="Load Existing Input File...",
-                                       command=self.on_open_file)
-        self.btn_file_load.pack(expand=True, fill="both")
-        self.btn_file_load["state"] = "disabled"  # not implemented
+        # # file
+        #
+        # # new file button
+        # self.frame_btn_file_new = tk.Frame(self.frame_file, width=150, height=32)
+        # self.frame_btn_file_new.propagate(False)
+        # self.frame_btn_file_new.grid(row=0, column=0, columnspan=1,
+        #                              sticky="NESW", padx=(6, 2), pady=2)
+        # self.btn_file_new = tk.Button(self.frame_btn_file_new,
+        #                               text="New Input File...",
+        #                               command=self.on_new_file)
+        # self.btn_file_new.pack(expand=True, fill="both")
+        # self.btn_file_new["state"] = "normal"
+        #
+        # # load file button
+        # self.frame_btn_file_load = tk.Frame(self.frame_file, width=200, height=32)
+        # self.frame_btn_file_load.propagate(False)
+        # self.frame_btn_file_load.grid(row=0, column=1, columnspan=1,
+        #                               sticky="NESW", padx=2+9, pady=2)
+        # self.btn_file_load = tk.Button(self.frame_btn_file_load,
+        #                                text="Load Existing Input File...",
+        #                                command=self.on_open_file)
+        # self.btn_file_load.pack(expand=True, fill="both")
+        # self.btn_file_load["state"] = "disabled"  # not implemented
 
         # ions
 
@@ -139,11 +140,13 @@ class MainWindow(tk.Tk):
         self.variable_entry_ion_name = None
         self.frame_entry_ion_name = None
         self.entry_ion_name = None
+        self.btn_ion_name_info = None
         self.frame_label_ion_energy = None
         self.label_ion_energy = None
         self.variable_entry_ion_energy = None
         self.frame_entry_ion_energy = None
         self.entry_ion_energy = None
+        self.btn_ion_energy_info = None
 
         # target select
 
@@ -196,6 +199,11 @@ class MainWindow(tk.Tk):
         # every parameter value and its entries
         self.parameter_data = ParameterData(self.db_tables)
 
+        # load everything at startup
+        self.load_edit_frames()
+        self.load_region_frame()
+        self.enable_editing()
+
         # Center the window and show it
         center_window(self)
         self.mainloop()
@@ -246,15 +254,28 @@ class MainWindow(tk.Tk):
                 filetypes=[("Input File", ".inp"), ("any", ".*")])
         if loaded_file:
             self.variable_entry_status.set(loaded_file.name)
+
+            self.on_save()
+
             loaded_file.close()
             self.entry_load["state"] = "readonly"
 
             # reload default values
-            self.parameter_data = ParameterData(self.db_tables)
+            # self.parameter_data = ParameterData(self.db_tables)
 
             self.load_edit_frames()
             self.load_region_frame()
             self.enable_editing()
+
+    def on_save(self):
+        filename =  self.variable_entry_status.get()
+        # if no file is selected, try creating a new one
+        if filename == "No file selected.":
+            self.on_new_file()
+
+        print(filename)
+        # TODO save current parameterdata to file
+        pass
 
     def on_open_file(self):
         """
@@ -275,6 +296,25 @@ class MainWindow(tk.Tk):
             self.load_edit_frames()
             self.load_region_frame()
             self.enable_editing()
+
+    def create_tooltip_btn(self, parent, parameter_entry):
+
+        short_desc = parameter_entry.get_short_desc()
+        par_name = parameter_entry.get_name()
+        long_desc = create_info_button_text(parameter_entry)
+
+        btn_info = tk.Button(parent, text="Button",
+                             width=INFO_WIDTH, height=INFO_HEIGHT)
+        if short_desc is not None:
+            create_tooltip(btn_info, btn_info, short_desc)
+        photo = tk.PhotoImage(file=os.path.join("pics", "info_sign_1.gif"))
+        btn_info.config(image=photo)
+        btn_info.image = photo
+        btn_info.config(takefocus=False)
+        btn_info.config(
+            command=lambda: messagebox.showinfo(par_name, long_desc))
+
+        return btn_info
 
     def load_edit_frames(self):
         # ions
@@ -303,17 +343,21 @@ class MainWindow(tk.Tk):
 
         self.variable_entry_ion_name = tk.StringVar()
         self.variable_entry_ion_name.set("<click to change>")
-        self.frame_entry_ion_name = tk.Frame(self.frame_ion, width=120, height=24)
-        self.frame_entry_ion_name.grid(row=0, column=2, sticky="NW",
+        self.frame_entry_ion_name = tk.Frame(self.frame_ion, width=110, height=24)
+        self.frame_entry_ion_name.grid(row=0, column=3, sticky="NW",
                                        padx=(4, 0), pady=(4, 0))
         self.frame_entry_ion_name.propagate(False)
         self.entry_ion_name = tk.Entry(self.frame_entry_ion_name,
                                        textvariable=self.variable_entry_ion_name)
         self.entry_ion_name.pack(expand=True, fill="both")
         self.entry_ion_name["state"] = "disabled"
+        self.btn_ion_name_info = self.create_tooltip_btn(self.frame_ion,
+                                 self.parameter_data.get_entry("ions", "NAME"))
+        self.btn_ion_name_info.grid(row=0, column=2, sticky="NW",
+                                       padx=(0, 0), pady=(7, 0))
 
         self.frame_label_ion_energy = tk.Frame(self.frame_ion, width=80, height=32)
-        self.frame_label_ion_energy.grid(row=0, column=3, sticky="NW",
+        self.frame_label_ion_energy.grid(row=0, column=4, sticky="NW",
                                          padx=0, pady=0)
         self.frame_label_ion_energy.propagate(False)
 
@@ -325,8 +369,8 @@ class MainWindow(tk.Tk):
 
         self.variable_entry_ion_energy = tk.StringVar()
         self.variable_entry_ion_energy.set("<click to change>")
-        self.frame_entry_ion_energy = tk.Frame(self.frame_ion, width=120, height=24)
-        self.frame_entry_ion_energy.grid(row=0, column=4, sticky="NW",
+        self.frame_entry_ion_energy = tk.Frame(self.frame_ion, width=110, height=24)
+        self.frame_entry_ion_energy.grid(row=0, column=6, sticky="NW",
                                          padx=(4, 0), pady=(4, 0))
         self.frame_entry_ion_energy.propagate(False)
         self.entry_ion_energy = tk.Entry(self.frame_entry_ion_energy,
@@ -334,6 +378,10 @@ class MainWindow(tk.Tk):
                                          self.variable_entry_ion_energy)
         self.entry_ion_energy.pack(expand=True, fill="both")
         self.entry_ion_energy["state"] = "disabled"
+        self.btn_ion_energy_info = self.create_tooltip_btn(self.frame_ion,
+                                self.parameter_data.get_entry("ions", "ENERGY"))
+        self.btn_ion_energy_info.grid(row=0, column=5, sticky="NW",
+                                       padx=(0, 0), pady=(7, 0))
 
         # target select
 
@@ -374,17 +422,22 @@ class MainWindow(tk.Tk):
                             width=150, padx=(6, 2),
                             command=self.open_imsil_input_parameter_editor,
                             state="disabled")
-        self.btn_save = self.create_control_btn(column=1, text="Save",
-                                                width=80, padx=(11, 2),
-                                                command=None, state="disabled")
-        self.btn_save_as = self.create_control_btn(column=2, text="Save As...",
-                                                   width=80, padx=(2, 2),
-                                                   command=None,
+        self.btn_save = self.create_control_btn(column=1, text="Load...",
+                                                width=53, padx=(11, 2),
+                                                command=self.on_open_file,
+                                                state="disabled")
+        self.btn_save = self.create_control_btn(column=2, text="Save",
+                                                width=53, padx=(2, 2),
+                                                command=self.on_save,
+                                                state="disabled")
+        self.btn_save_as = self.create_control_btn(column=3, text="Save As...",
+                                                   width=70, padx=(2, 2),
+                                                   command=self.on_new_file,
                                                    state="disabled")
-        self.btn_check = self.create_control_btn(column=3, text="Check",
-                                                 width=80, padx=(2, 2),
+        self.btn_check = self.create_control_btn(column=4, text="Check",
+                                                 width=60, padx=(2, 2),
                                                  command=None, state="disabled")
-        self.btn_run = self.create_control_btn(column=4, text="Run",
+        self.btn_run = self.create_control_btn(column=5, text="Run",
                                                width=80, padx=(2, 2),
                                                command=None, state="disabled")
 
