@@ -269,19 +269,17 @@ class MainWindow(tk.Tk):
             self.enable_editing()
 
     def on_save(self):
-        filename =  self.variable_entry_status.get()
+        filename = self.variable_entry_status.get()
         # if no file is selected, try creating a new one
         if filename == "No file selected.":
             self.on_save_as()
+        else:
+            print(filename)
 
-        print(filename)
+            nml = create_nml(self.parameter_data)
+            print(nml)
 
-        nml = create_nml(self.parameter_data)
-        print(nml)
-
-        save_nml(nml, filename)
-
-        pass
+            save_nml(nml, filename)
 
     def on_open_file(self):
         """
