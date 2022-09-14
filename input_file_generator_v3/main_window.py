@@ -10,6 +10,7 @@ from tkinter import ttk, filedialog, simpledialog, messagebox
 from UI.frames.scroll_frame import INFO_WIDTH, INFO_HEIGHT
 from UI.frames.target_frame import TargetFrame
 from data_model.element import get_unique_atoms, get_all_elements
+from data_model.nml_manager import create_nml, save_nml
 from utility import center_window, create_tooltip, create_info_button_text
 from parameter_editor_window import ImsilInputParameterEditor
 from data_model.read_sqlite import get_database_table_names, DatabaseTable
@@ -226,8 +227,8 @@ class MainWindow(tk.Tk):
     def enable_editing(self):
         """ Enables the editing entries and buttons """
         self.btn_open_param["state"] = "normal"
-        self.btn_save["state"] = "disabled"  # not implemented
-        self.btn_save_as["state"] = "disabled"  # not implemented
+        self.btn_save["state"] = "normal"  # not implemented
+        self.btn_save_as["state"] = "normal"  # not implemented
         self.btn_check["state"] = "disabled"  # not implemented
         self.btn_run["state"] = "disabled"  # not implemented
 
@@ -244,7 +245,7 @@ class MainWindow(tk.Tk):
 
         self.cb_target_sel["state"] = "readonly"
 
-    def on_new_file(self):
+    def on_save_as(self):
         """
         Opens a File Dialog to create a new file.
         """
@@ -271,10 +272,15 @@ class MainWindow(tk.Tk):
         filename =  self.variable_entry_status.get()
         # if no file is selected, try creating a new one
         if filename == "No file selected.":
-            self.on_new_file()
+            self.on_save_as()
 
         print(filename)
-        # TODO save current parameterdata to file
+
+        nml = create_nml(self.parameter_data)
+        print(nml)
+
+        save_nml(nml, filename)
+
         pass
 
     def on_open_file(self):
@@ -432,7 +438,7 @@ class MainWindow(tk.Tk):
                                                 state="disabled")
         self.btn_save_as = self.create_control_btn(column=3, text="Save As...",
                                                    width=70, padx=(2, 2),
-                                                   command=self.on_new_file,
+                                                   command=self.on_save_as,
                                                    state="disabled")
         self.btn_check = self.create_control_btn(column=4, text="Check",
                                                  width=60, padx=(2, 2),
