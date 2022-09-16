@@ -1447,7 +1447,7 @@ class IndexVariableArrayFrame(BlancFrame):
         data = IVData(
                 get_size_string(array_settings[0], array_settings[1]),
                 natom, nr, values[1], values[2])
-        # points doesn't get changed, so it's just saved as it is
+        # POS doesn't get changed, so it's just saved as it is
         if "POINT" in array_settings[1]:
             data.values = values[0]
         else:

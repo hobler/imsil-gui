@@ -264,10 +264,6 @@ class MainWindow(tk.Tk):
             # reload default values
             # self.parameter_data = ParameterData(self.db_tables)
 
-            self.load_edit_frames()
-            self.load_region_frame()
-            self.enable_editing()
-
     def on_save(self):
         filename = self.variable_entry_status.get()
         # if no file is selected, try creating a new one

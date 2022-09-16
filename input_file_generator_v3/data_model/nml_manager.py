@@ -3,12 +3,17 @@
 """
 import f90nml
 
+from utility import get_size_string
+
 
 def create_nml(parameter_data):
 
     nml = f90nml.namelist.Namelist()
 
+    iva_nml_dict = dict()
+
     for tab_name in parameter_data:
+        nml[tab_name] = []
         tab_nml = f90nml.namelist.Namelist()
         for p_entry in parameter_data[tab_name]:
             p_name = p_entry.get_name()
@@ -20,7 +25,90 @@ def create_nml(parameter_data):
                 continue
 
             if p_entry.get_is_index_var():
-                continue # TODO index variable stuff
+
+                index_vars = p_entry.get_index_vars()
+                size_string = str(get_size_string(p_name, index_vars))
+
+                if tab_name not in iva_nml_dict:
+                    iva_nml_dict[tab_name] = dict()
+                    nml[tab_name] = []
+
+                array_size = p_value.get_size()
+                if size_string not in iva_nml_dict[tab_name]:
+                    nml_list = []
+
+                    if len(array_size) == 1:
+                        rang = array_size[0]
+                        if p_name == "POS":
+                            rang = rang - 1
+                        for i in range(rang):
+                            temp = f90nml.namelist.Namelist()
+                            temp[index_vars[0]] = i+1
+                            nml_list.append(temp)
+                            nml[tab_name].append(temp)
+                    elif len(array_size) == 2:
+                        for m in range(array_size[0]):
+                            nml_sub_list = []
+                            for n in range(array_size[1]):
+                                temp = f90nml.namelist.Namelist()
+
+                                if len(index_vars) == 2:
+                                    temp[index_vars[0]] = m+1
+                                    temp[index_vars[1]] = n+1
+                                else:
+                                    if array_size[0] > 1:
+                                        temp[index_vars[0]] = m+1
+                                    if array_size[1] > 1:
+                                        temp[index_vars[0]] = n+1
+                                nml_sub_list.append(temp)
+                                nml[tab_name].append(temp)
+                            nml_list.append(nml_sub_list)
+
+                    iva_nml_dict[tab_name][size_string] = nml_list
+                    # print(array_size)
+
+                if len(array_size) == 1:
+                    rang = array_size[0]
+                    if p_name == "POS":
+                        rang = rang - 1
+                    for i in range(rang):
+                        index = i
+                        if p_name == "POS":
+                            index = i + 1
+                        value = p_value.get_value(index, None)
+                        if value != "":
+                            if p_type.endswith("logical"):
+                                value = (value == "T")
+                            elif p_type.endswith("simple array (2) of real"):
+                                values = value
+                                value = []
+                                for v in values.split(","):
+                                    value.append(float(v.strip()))
+                            elif p_type.endswith("real"):
+                                value = float(value)
+                            elif p_type.endswith("integer"):
+                                value = int(value)
+                            iva_nml_dict[tab_name][size_string][i][p_name] = value
+                elif len(array_size) == 2:
+                    for m in range(array_size[0]):
+                        for n in range(array_size[1]):
+                            value = p_value.get_value(m, n)
+                            if value != "":
+                                if p_type.endswith("logical"):
+                                    value = (value == "T")
+                                elif p_type.endswith("simple array (2) of real"):
+                                    values = value
+                                    value = []
+                                    for v in values.split(","):
+                                        value.append(float(v.strip()))
+                                elif p_type.endswith("real"):
+                                    value = float(value)
+                                elif p_type.endswith("integer"):
+                                    value = int(value)
+                                iva_nml_dict[tab_name][size_string][m][n][p_name] = value
+
+                continue  # ivarrays are already written into the nml list
+
             elif p_type == "logical":
                 p_value = (p_value == "T")
             elif p_type == "real":
@@ -59,10 +147,30 @@ def create_nml(parameter_data):
                     print("String too short.")
                     continue
             else:
-                print(p_type)
+                print(p_type, "missing")
 
             tab_nml[p_name] = p_value
-        nml[tab_name] = tab_nml
+        if tab_nml:
+            nml[tab_name].append(tab_nml)
+
+    # delete empty namelists
+    for tab_name in parameter_data:
+        for nl in reversed(nml[tab_name]):
+            if not nl:
+                del nml[tab_name][nml[tab_name].index(nl)]
+            else:
+                # if namelist only contains indexes of
+                # region/atom it can be deleted
+                hasother = False
+                ind_vars = ["atom", "atom1", "atom2", "region", "point"]
+
+                for key in nl.keys():
+                    if key not in ind_vars:
+                        hasother = True
+                        break
+
+                if not hasother:
+                    del nml[tab_name][nml[tab_name].index(nl)]
 
     return nml
 

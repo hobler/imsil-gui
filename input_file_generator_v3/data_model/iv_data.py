@@ -325,6 +325,17 @@ class IVData:
                 for n in range(self.get_n()):
                     print(self.values[m][n])
 
+    def get_value(self, m, n):
+        if self.size_string[0] == "0":
+            return self.values[m]
+        return self.values[m][n]
+
+    def get_size(self):
+        if self.size_string[0] == "0":
+            return [len(self.values)]
+        else:
+            return [len(self.values), len(self.values[0])]
+
     def to_list(self):
         """
         return the values as a list.
