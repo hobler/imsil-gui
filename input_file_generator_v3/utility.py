@@ -38,6 +38,8 @@ def get_size_string(par_name, index_var_list):
     ATOM as index variable returns ["1", "a"].
     Whereas a dimension of 2 containing an atom and a region returns ["r", "a"].
 
+    For the parameter POS this function returns ["0", "0"]
+
     :param par_name: Parameter Name.
     :param index_var_list: Index Variable List.
 

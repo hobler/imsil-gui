@@ -326,11 +326,24 @@ class IVData:
                     print(self.values[m][n])
 
     def get_value(self, m, n):
+        """
+        Returns the value that's hold on the index m, n in this iv array.
+
+        :param m: m index
+        :param n: n index
+
+        :return: Value on specified index
+        """
         if self.size_string[0] == "0":
             return self.values[m]
         return self.values[m][n]
 
     def get_size(self):
+        """
+        Returns the size of the iv array.
+
+        :return: size of the iv array
+        """
         if self.size_string[0] == "0":
             return [len(self.values)]
         else:

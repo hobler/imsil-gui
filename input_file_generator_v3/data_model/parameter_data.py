@@ -428,7 +428,10 @@ class ParameterEntry:
         return self.basic
 
     def get_index_vars(self):
-        """Return a list of index variables for the parameter."""
+        """
+        Return a list of index variables for the parameter.
+        For example: ["ATOM1", "ATOM2"]
+        """
         return self.index_vars
 
     def get_is_logical(self):
