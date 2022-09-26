@@ -105,6 +105,8 @@ def create_nml(parameter_data):
                                         temp[index_vars[0]] = m+1
                                     if array_size[1] > 1:
                                         temp[index_vars[0]] = n+1
+                                    else:
+                                        temp[index_vars[0]] = 1
                                 nml_sub_list.append(temp)
                                 nml[tab_name].append(temp)
                             nml_list.append(nml_sub_list)
