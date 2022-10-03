@@ -44,6 +44,10 @@ class ParameterData:
                                    is_index_var=db_table_row.is_index_var(),
                                    is_logic_array=db_table_row.is_logic_array()))
 
+        # set minimum values for natom and nr
+        self.set_entry_value("setup", "NATOM", "2")
+        self.set_entry_value("setup", "NR", "1")
+
     def __getitem__(self, key):
         """
         Allows to access each tab_dict entry directly with the [] operator
@@ -101,6 +105,19 @@ class ParameterData:
         """
         entry = self.get_entry(tab_name, param_name)
         return entry.set_value(value)
+
+    def reset(self):
+        """
+        Resets all ParameterEntries.
+
+        """
+
+        for tab_name in self:
+            for entry in self[tab_name]:
+                entry.reset()
+
+        self.set_entry_value("setup", "NATOM", "2")
+        self.set_entry_value("setup", "NR", "1")
 
     def get_nr(self):
         """
@@ -311,32 +328,8 @@ class ParameterEntry:
 
         # can be boolean (logical), string or similar (entry)
         # or IVData (Index Variable Array)
-        self.current_value = default_value
-
-        # insert new, empty IVData with minimum size
-        if self.get_is_index_var():
-            self.current_value = IVData(size_string=
-                                        get_size_string(self.name,
-                                                        self.index_vars),
-                                        natom=2, nr=1,
-                                        array_state=(False, False),
-                                        array_settings=(self.name,
-                                                        self.index_vars,
-                                                        self.default_value,
-                                                        self.desc_short,
-                                                        self.desc_long))
-            # fill empty values
-            if "POINT" in self.index_vars:
-                self.current_value.values = ['', '']
-            else:
-                # save the values in a 2D grid
-                # to re-add them easier later
-                m = self.current_value.get_m()
-                n = self.current_value.get_n()
-                for i in range(m * n):
-                    if i % n == 0:
-                        self.current_value.values.append([])
-                    self.current_value.values[i // n].append("")
+        self.current_value = None
+        self.reset()
 
         # stores a reference to the gui entry object in the parameter editor
         # that represents this parameter. Used to get the current value easier
@@ -363,6 +356,41 @@ class ParameterEntry:
 
         """
         self.current_value = value
+
+    def reset(self):
+        """
+        Resets the parameter to it's default value
+
+        """
+
+        self.current_value = self.default_value
+
+        # insert new, empty IVData with minimum size
+        if self.get_is_index_var():
+            self.current_value = IVData(size_string=
+                                        get_size_string(self.name,
+                                                        self.index_vars),
+                                        natom=2, nr=1,
+                                        array_state=(False, False),
+                                        array_settings=(self.name,
+                                                        self.index_vars,
+                                                        self.default_value,
+                                                        self.desc_short,
+                                                        self.desc_long))
+            # fill empty values
+            if "POINT" in self.index_vars:
+                self.current_value.values = ['', '']
+            else:
+                # save the values in a 2D grid
+                # to re-add them easier later
+                m = self.current_value.get_m()
+                n = self.current_value.get_n()
+                for i in range(m * n):
+                    if i % n == 0:
+                        self.current_value.values.append([])
+                    self.current_value.values[i // n].append("")
+        else:
+            self.current_value = self.default_value
 
     def set_gui_object(self, gui_object):
         """

@@ -379,7 +379,7 @@ class ScrollFrame(BlancFrame):
 
         # Disable the fields NR, NATOM, and NAME in the GUI
         if par_name == 'NR' or par_name == 'NATOM':
-            entry.config(state='disabled')
+            entry.config(state='readonly')
 
         if par_name == "NAME":
             entry.config(state='readonly')
@@ -435,11 +435,15 @@ class ScrollFrame(BlancFrame):
                 if isinstance(def_value, str) and obligatory_if in def_value:
                     widgets = self.ui_data_list.get_widgets(item_name)
                     for widget in widgets:
-                        widget.config(state='normal')
+                        # NR is always calculated by counting the regions and
+                        # should never be directly edited.
+                        if item_name != "NR":
+                            widget.config(state='normal')
                 elif isinstance(def_value, str) and par_name in def_value:
                     widgets = self.ui_data_list.get_widgets(item_name)
                     for widget in widgets:
-                        widget.config(state='disabled')
+                        if item_name != "NR":
+                            widget.config(state='disabled')
 
     def update_if_obligatory_entries(self):
         """

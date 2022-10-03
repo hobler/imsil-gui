@@ -338,6 +338,19 @@ class IVData:
             return self.values[m]
         return self.values[m][n]
 
+    def set_value(self, value, m, n):
+        """
+        Sets the value on the index m, n in this iv array.
+
+        :param m: m index
+        :param n: n index
+        :param value: value
+        """
+        if self.size_string[0] == "0":
+            self.values[m] = value
+        else:
+            self.values[m][n] = value
+
     def get_size(self):
         """
         Returns the size of the iv array.

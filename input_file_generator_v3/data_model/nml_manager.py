@@ -102,10 +102,13 @@ def create_nml(parameter_data):
                                     temp[index_vars[1]] = n+1
                                 else:
                                     if array_size[0] > 1:
+                                        # points is 0 indexed
+                                        if p_name == "POINTS":
+                                            m -= 1
                                         temp[index_vars[0]] = m+1
                                     if array_size[1] > 1:
                                         temp[index_vars[0]] = n+1
-                                    else:
+                                    if array_size[0] == 1 and array_size[1] == 1:
                                         temp[index_vars[0]] = 1
                                 nml_sub_list.append(temp)
                                 nml[tab_name].append(temp)
@@ -230,8 +233,220 @@ def create_nml(parameter_data):
     return nml
 
 
-def create_parameter_data(nml, parameter_data):
-    pass
+def load_nml_to_parameter_data(parameter_data, nml):
+    """
+    Writes the parameters from the loaded Namelist file into the ParameterData
+    object of the application.
+
+    :param parameter_data: ParameterData object to load the data into
+    :param nml: Loaded Namelist file
+    """
+
+    # reset all values in the ParameterData
+    parameter_data.reset()
+
+    # get the default nr and natom
+    natom = int(parameter_data.get_natom())
+    nr = int(parameter_data.get_nr())
+
+    # read the correct NR and NATOM from the Namelist file and correct the
+    # values in the ParameterData object
+    if "setup" in nml:
+        if "natom" in nml["setup"]:
+            # add the remaining atoms
+            natom = nml["setup"]["natom"] - natom
+            for a in range(natom):
+                parameter_data.add_atom()
+        if "nr" in nml["setup"]:
+            # add the remaining regions
+            nr = nml["setup"]["nr"] - nr
+            for r in range(nr):
+                parameter_data.add_region()
+
+    # preallocate the array for POS
+    # 1 extra value for the hidden entry field
+    # because the POS array is stored "as-is" in the IVData
+    n_points = 1
+    if "geom" in nml:
+        for sub_nml in nml["geom"]:
+            if "pos" in sub_nml:
+                n_points += 1
+        # add the extra POS entries
+        p_entry = parameter_data.get_entry("geom", "POS")
+        ivdata = p_entry.get_value()
+        ivdata.values = []
+        for i in range(n_points):
+            ivdata.values.append('')
+        # This has to be written so that the values are correctly written into
+        # the entry fields when expanding the array
+        ivdata.values[0] = 'Multiple values'
+
+    # for every namelist or list of namelists add the contained
+    # parameters to ParameterData
+    for tab_name in parameter_data:
+        if tab_name in nml:
+            # list of namelists
+            if type(nml[tab_name]) == list:
+                for sub_nml in nml[tab_name]:
+                    load_tab_nml_to_parameter_data(parameter_data,
+                                                   sub_nml,
+                                                   tab_name)
+            # normal namelist
+            else:
+                load_tab_nml_to_parameter_data(parameter_data,
+                                               nml[tab_name],
+                                               tab_name)
+
+
+def load_tab_nml_to_parameter_data(parameter_data, sub_nml, tab_name):
+    """
+    Writes the parameters from the loaded Namelist file tab into the ParameterData
+    object of the application.
+
+    :param parameter_data: ParameterData object to load the data into
+    :param sub_nml: Sub Namelist in the loaded Namelist file
+    :param tab_name: Tab name of the tab that contains the
+        parameters of this Namelist
+    """
+    # if any key in the nml is one of the ones in the string list,
+    # it's an IVArray.
+    index_variables = [i for i in ["atom", "atom1",
+                                   "atom2", "region", "point"] if i in sub_nml]
+    if index_variables:
+        # 2D arrays
+        if len(index_variables) == 2:
+            # every key in the sub_nml that is not in the
+            # index_variables is a parameter name
+            for p_name in [i for i in sub_nml if i not in index_variables]:
+                # get the corresponding ParameterEntry
+                p_entry = parameter_data.get_entry(tab_name, p_name.upper())
+                p_type = p_entry.get_type()
+                # get the original index_variables, because
+                # index_variables is unordered
+                # (probably alphabetically instead of the
+                # real order of keys from the database)
+                index_vars_orig = p_entry.get_index_vars()
+
+                # get the indexes for the value
+                m = sub_nml[index_vars_orig[0]] - 1
+                n = sub_nml[index_vars_orig[1]] - 1
+
+                # get the IVData object that holds the data of this parameter
+                ivdata = p_entry.get_value()
+
+                # convert to string according to correct datatype
+                string = convert_nml_value_to_string(p_type, sub_nml[p_name])
+
+                # set the value on the given index
+                ivdata.set_value(string, m, n)
+
+        # 1D arrays
+        elif len(index_variables) == 1:
+            # same as 2D
+            for p_name in [i for i in sub_nml if i not in index_variables]:
+
+                p_entry = parameter_data.get_entry(tab_name, p_name.upper())
+                p_type = p_entry.get_type()
+                index_vars_orig = p_entry.get_index_vars()
+
+                string = convert_nml_value_to_string(p_type, sub_nml[p_name])
+
+                ivdata = p_entry.get_value()
+                array_size = ivdata.get_size()
+
+                # 1D arrays can be opened in x or y direction
+                # depending on the array_size
+                if len(array_size) == 2:
+                    if array_size[0] > 1:
+
+                        m = sub_nml[index_vars_orig[0]] - 1
+                        if p_name == "points":
+                            m += 1
+                        ivdata.set_value(string, m, 0)
+                    elif array_size[1] > 1:
+                        n = sub_nml[index_vars_orig[0]] - 1
+                        ivdata.set_value(string, 0, n)
+                    # 1x1 array
+                    else:
+                        ivdata.set_value(string, 0, 0)
+                # POS array
+                else:
+                    i = sub_nml[index_vars_orig[0]]
+                    ivdata.set_value(string, i, None)
+    # all the other types
+    else:
+        for p_name in sub_nml:
+            p_entry = parameter_data.get_entry(tab_name, p_name.upper())
+            p_type = p_entry.get_type()
+
+            # other types. Parse the values according to the p_type
+            string = convert_nml_value_to_string(p_type, sub_nml[p_name])
+            p_entry.set_value(string)
+
+
+def convert_nml_value_to_string(p_type, value):
+    """
+    Converts a "simple array" value to a string representation
+
+    :param p_type: Parameter type
+    :param value: value array
+    """
+    string = ""
+
+    if p_type == "logical":
+        string = "T" if value else "F"
+    elif p_type == "real":
+        string = str(value)
+    elif p_type == "integer":
+        string = str(value)
+    elif p_type == "character string":
+        string = str(value)
+    elif p_type.startswith("character("):  # TODO maybe check here
+        string = str(value)
+    elif p_type.startswith("simple array"):
+        string = array_to_string(p_type, value)
+    elif p_type.startswith("character array"):
+        string = str(value)
+    elif p_type.startswith("index variable"):
+        if "simple array" in p_type:
+            values = value
+            string = ", ".join([str(value) for value in values])
+        elif p_type.endswith("logical"):
+            string = ("T" if value else "F")
+        elif p_type.endswith("real"):
+            string = str(value)
+        elif p_type.endswith("integer"):
+            string = str(value)
+        else:
+            string = str(value)
+    else:
+        print(p_type, "missing")
+
+    return string
+
+
+def array_to_string(p_type, value):
+    """
+    Converts a "simple array" value to a string representation
+
+    :param p_type: Parameter type
+    :param value: value array
+    """
+    string = ""
+    if p_type.endswith("integer") or p_type.endswith("real"):
+        values = value
+        string = ", ".join([str(value) for value in values])
+    elif p_type.endswith("logical"):
+        values = value
+        if len(values) == 2:
+            string = "("
+            string += ",".join(["T" if value else "F"
+                                for value in values])
+            string += ")"
+        else:
+            print("Logic array of 2 has wrong "
+                  "string representation.")
+    return string
 
 
 def save_nml(nml, path):
@@ -255,4 +470,6 @@ def load_nml(path):
     """
     with open(path) as nml_file:
         nml = f90nml.read(nml_file)
+        nml.false_repr = 'f'
+        nml.true_repr = 't'
         return nml

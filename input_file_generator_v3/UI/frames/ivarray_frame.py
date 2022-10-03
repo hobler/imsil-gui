@@ -1491,7 +1491,7 @@ class IndexVariableArrayFrame(BlancFrame):
                     # if there aren't enough values to fill all textboxes
                     # (shouldn't happen in the Point array)
                     if entry_nr < len(ivdata.values):
-                        self.set_entry(entry, ivdata.values[entry_nr])
+                        self.set_entry(entry, str(ivdata.values[entry_nr]))
                     else:
                         self.set_entry(entry, "")
                     entry_nr += 1

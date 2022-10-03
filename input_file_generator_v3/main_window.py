@@ -10,7 +10,8 @@ from tkinter import ttk, filedialog, simpledialog, messagebox
 from UI.frames.scroll_frame import INFO_WIDTH, INFO_HEIGHT
 from UI.frames.target_frame import TargetFrame
 from data_model.element import get_unique_atoms, get_all_elements
-from data_model.nml_manager import create_nml, save_nml
+from data_model.nml_manager import create_nml, save_nml, load_nml, \
+    load_nml_to_parameter_data
 from utility import center_window, create_tooltip, create_info_button_text
 from parameter_editor_window import ImsilInputParameterEditor
 from data_model.read_sqlite import get_database_table_names, DatabaseTable
@@ -107,29 +108,7 @@ class MainWindow(tk.Tk):
                                               justify=tk.LEFT)
         self.welcome_message_label.pack(expand=True, fill="both")
 
-        # # file
-        #
-        # # new file button
-        # self.frame_btn_file_new = tk.Frame(self.frame_file, width=150, height=32)
-        # self.frame_btn_file_new.propagate(False)
-        # self.frame_btn_file_new.grid(row=0, column=0, columnspan=1,
-        #                              sticky="NESW", padx=(6, 2), pady=2)
-        # self.btn_file_new = tk.Button(self.frame_btn_file_new,
-        #                               text="New Input File...",
-        #                               command=self.on_new_file)
-        # self.btn_file_new.pack(expand=True, fill="both")
-        # self.btn_file_new["state"] = "normal"
-        #
-        # # load file button
-        # self.frame_btn_file_load = tk.Frame(self.frame_file, width=200, height=32)
-        # self.frame_btn_file_load.propagate(False)
-        # self.frame_btn_file_load.grid(row=0, column=1, columnspan=1,
-        #                               sticky="NESW", padx=2+9, pady=2)
-        # self.btn_file_load = tk.Button(self.frame_btn_file_load,
-        #                                text="Load Existing Input File...",
-        #                                command=self.on_open_file)
-        # self.btn_file_load.pack(expand=True, fill="both")
-        # self.btn_file_load["state"] = "disabled"  # not implemented
+        # file
 
         # ions
 
@@ -173,6 +152,7 @@ class MainWindow(tk.Tk):
         # control frame
 
         self.btn_open_param = None
+        self.btn_load = None
         self.btn_save = None
         self.btn_save_as = None
         self.btn_check = None
@@ -212,6 +192,7 @@ class MainWindow(tk.Tk):
     def disable_editing(self):
         """ Disables the editing entries and buttons """
         self.btn_open_param["state"] = "disabled"
+        self.btn_load["state"] = "disabled"
         self.btn_save["state"] = "disabled"
         self.btn_save_as["state"] = "disabled"
         self.btn_check["state"] = "disabled"
@@ -227,8 +208,9 @@ class MainWindow(tk.Tk):
     def enable_editing(self):
         """ Enables the editing entries and buttons """
         self.btn_open_param["state"] = "normal"
-        self.btn_save["state"] = "normal"  # not implemented
-        self.btn_save_as["state"] = "normal"  # not implemented
+        self.btn_save["state"] = "normal"
+        self.btn_load["state"] = "normal"
+        self.btn_save_as["state"] = "normal"
         self.btn_check["state"] = "disabled"  # not implemented
         self.btn_run["state"] = "disabled"  # not implemented
 
@@ -240,8 +222,12 @@ class MainWindow(tk.Tk):
                                  self.on_entry_ion_focus_in)
         self.entry_ion_energy.bind("<FocusOut>",
                                    self.on_entry_ion_energy_focus_out)
-        self.variable_entry_ion_name.set("")
-        self.variable_entry_ion_energy.set("")
+
+        # load the current ion parameters
+        ions = self.parameter_data.get_entry_value("ions", "NAME")
+        ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
+        self.variable_entry_ion_name.set(ions)
+        self.variable_entry_ion_energy.set(ion_energy)
 
         self.cb_target_sel["state"] = "readonly"
 
@@ -261,20 +247,14 @@ class MainWindow(tk.Tk):
             loaded_file.close()
             self.entry_load["state"] = "readonly"
 
-            # reload default values
-            # self.parameter_data = ParameterData(self.db_tables)
-
     def on_save(self):
         filename = self.variable_entry_status.get()
         # if no file is selected, try creating a new one
         if filename == "No file selected.":
             self.on_save_as()
         else:
-            print(filename)
-
+            # create the Namelist and save it
             nml = create_nml(self.parameter_data)
-            print(nml)
-
             save_nml(nml, filename)
 
     def on_open_file(self):
@@ -285,17 +265,25 @@ class MainWindow(tk.Tk):
                 initialdir=self.variable_entry_status.get(),
                 title="Select IMSIL input file")
         if loaded_file:
+            # set filename in main window
             self.variable_entry_status.set(loaded_file.name)
             loaded_file.close()
             self.entry_load["state"] = "readonly"
 
-            # TODO
-            # read input file
-            # load data into self.parameter_data
+            # load Namelist and write values to ParameterData
+            nml = load_nml(loaded_file.name)
+            load_nml_to_parameter_data(self.parameter_data, nml)
 
+            # reload the UI to display everything correctly
             self.load_edit_frames()
             self.load_region_frame()
             self.enable_editing()
+
+            # reload the ion parameters, because load_edit_frames clears them
+            ions = self.parameter_data.get_entry_value("ions", "NAME")
+            ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
+            self.variable_entry_ion_name.set(ions)
+            self.variable_entry_ion_energy.set(ion_energy)
 
     def create_tooltip_btn(self, parent, parameter_entry):
 
@@ -422,7 +410,7 @@ class MainWindow(tk.Tk):
                             width=150, padx=(6, 2),
                             command=self.open_imsil_input_parameter_editor,
                             state="disabled")
-        self.btn_save = self.create_control_btn(column=1, text="Load...",
+        self.btn_load = self.create_control_btn(column=1, text="Load...",
                                                 width=53, padx=(11, 2),
                                                 command=self.on_open_file,
                                                 state="disabled")
