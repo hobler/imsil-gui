@@ -33,6 +33,7 @@ class TargetFrame(tk.LabelFrame):
         self.posif_entries = []
         self.posif_values = []
         self.posif_labels = []
+        self.posif_info = []
 
         # update atoms function. must be called after adding,
         # removing or changing regions/atoms
@@ -65,7 +66,7 @@ class TargetFrame(tk.LabelFrame):
         self.cb_geom_sel = ttk.Combobox(self.frame_geom_title,
                                           textvariable=
                                           self.variable_cb_geom_sel,
-                                          width=13)
+                                          width=18)
         self.cb_geom_sel.grid(row=0, column=1, padx=3)
         self.cb_geom_sel["state"] = "readonly"
         self.cb_geom_sel["values"] = ["1D", "2D", "3D"]
@@ -73,14 +74,6 @@ class TargetFrame(tk.LabelFrame):
         # force the Combobox to steal focus when scrolled
         self.cb_geom_sel.bind("<MouseWheel>",
                                 lambda event: self.cb_geom_sel.focus_set())
-
-        self.frame_btn_posif_info = tk.Frame(self.frame_geom_title, width=20, height=10)
-        self.frame_btn_posif_info.grid(row=0, column=2, sticky="NW",
-                             padx=(0, 0), pady=(0, 0))
-        self.btn_posif_info = self.create_tooltip_btn(self.frame_btn_posif_info,
-                              self.parameter_data.get_entry("geom", "POSIF"))
-        self.btn_posif_info.grid(row=0, column=2, sticky="NW",
-                                       padx=(0, 14), pady=(2, 0))
 
         # frame to contain the region frames
         self.frame_mat_left = tk.Frame(self)
@@ -357,9 +350,6 @@ class TargetFrame(tk.LabelFrame):
 
         self.update_posif_widgets()
 
-        self.btn_posif_info.grid(row=0, column=2, sticky="NW",
-                                       padx=(0, 14), pady=(2, 0))
-
     def load_geometry_editor(self):
         """
         Load the Geometry Editor view for the Geometry
@@ -380,8 +370,6 @@ class TargetFrame(tk.LabelFrame):
         self.btn_geom.pack(expand=True, fill="both")
         self.btn_geom["state"] = "disabled"
 
-        self.btn_posif_info.grid_remove()
-
     def update_posif_widgets(self):
         """
         Updates the widgets accordingly to the posif_values list.
@@ -399,8 +387,10 @@ class TargetFrame(tk.LabelFrame):
                                len(self.region_frames), -1):
                     self.posif_entries[i].destroy()
                     self.posif_labels[-1].destroy()
+                    self.posif_info[-1].destroy()
                     del self.posif_entries[i]
                     del self.posif_labels[-1]
+                    del self.posif_info[-1]
 
             if self.posif_values is not None:
                 for i, entry in enumerate(self.posif_entries):
@@ -420,16 +410,23 @@ class TargetFrame(tk.LabelFrame):
         """
         label_posif = tk.Label(self.frame_geom, text="POSIF:")
         label_posif.grid(row=len(self.posif_entries), column=0)
+
+        btn_posif_info = self.create_tooltip_btn(self.frame_geom,
+                              self.parameter_data.get_entry("geom", "POSIF"))
+        btn_posif_info.grid(row=len(self.posif_entries), column=1,
+                                 sticky="NW",  padx=(0, 14), pady=(2, 0))
+
         entry_temp = tk.Entry(self.frame_geom)
         entry_temp.bind("<FocusOut>", self.on_ent_posif_focus_out)
         entry_temp["state"] = "normal"
-        entry_temp.grid(row=len(self.posif_entries), column=1, ipady=3,
+        entry_temp.grid(row=len(self.posif_entries), column=2, ipady=3,
                         pady=(0, 1))
         entry_temp.delete(0, "end")
         entry_temp.insert(0, "<click to change>")
         entry_temp["state"] = "normal"
         self.posif_entries.append(entry_temp)
         self.posif_labels.append(label_posif)
+        self.posif_info.append(btn_posif_info)
 
     def on_ent_posif_focus_out(self, event):
         """
