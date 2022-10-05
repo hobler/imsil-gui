@@ -463,12 +463,17 @@ class MainWindow(tk.Tk):
                                     justify=tk.LEFT)
         self.label_cells.pack(expand=True, fill="both")
 
+        btn_cells_info = self.create_tooltip_btn(self.frame_region,
+                            self.parameter_data.get_entry("setup", "FILCELL"))
+        btn_cells_info.grid(row=0, column=1, sticky="NW",
+                                       padx=(0, 0), pady=(9, 0))
+
         self.variable_cells = tk.StringVar()
         self.variable_cells.set("No file selected.")
         frame_cells_file = tk.Frame(self.frame_region,
-                                    width=self.window_width - 80, height=32)
+                                    width=self.window_width - 92, height=32)
         frame_cells_file.propagate(False)
-        frame_cells_file.grid(row=0, column=1,
+        frame_cells_file.grid(row=0, column=2,
                               sticky="NESW", padx=2, pady=2)
         entry_load = tk.Entry(frame_cells_file,
                               textvariable=self.variable_cells)
