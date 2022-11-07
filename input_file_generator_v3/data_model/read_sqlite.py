@@ -188,6 +188,13 @@ class DatabaseTableRow:
 
     def get_default_value(self):
         """Return the default value of the parameter"""
+        # characters are stored with single quotes in the database default
+        # values of character types which shouldn't be shown in the
+        # parameter editor o be saved in the namelist file.
+        type_value = self.get_type()
+        if type_value.startswith("character"):
+            # strip quotes from default value
+            return self._get_cell_text(DATABASE_DEFAULT_VALUE_COL).strip("\'")
         return self._get_cell_text(DATABASE_DEFAULT_VALUE_COL)
 
     def get_range(self):

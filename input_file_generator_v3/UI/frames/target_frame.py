@@ -107,13 +107,10 @@ class TargetFrame(tk.LabelFrame):
         posif = self.parameter_data.get_entry_value("geom", "POSIF")
         if posif.startswith("-"):
             posif = None
-        elif posif[0] == "'" and posif[-1] == "'":
-            posif = posif[1:-1]
+        else:
             posif = posif.split(",")
             if len(posif) != len(self.region_frames) + 1:
                 posif = None
-        else:
-            posif = None
 
         if posif is None:
             posif = []
@@ -401,7 +398,7 @@ class TargetFrame(tk.LabelFrame):
 
         if self.posif_values is not None:
             # write posif into parameter_data
-            posif = "\'" + ",".join(self.posif_values) + "\'"
+            posif = ",".join(self.posif_values)
             self.parameter_data.set_entry_value("geom", "POSIF", posif)
 
     def add_posif_entry(self):

@@ -174,7 +174,8 @@ def create_nml(parameter_data):
                 p_value = int(p_value)
             elif p_type == "character string":
                 pass
-            elif p_type.startswith("character("):  # TODO maybe check here
+            elif p_type.startswith("character("):
+                # TODO maybe check length here
                 pass
             elif p_type.startswith("simple array"):
                 if p_type.endswith("integer"):
@@ -198,11 +199,7 @@ def create_nml(parameter_data):
                               "string representation.")
                         continue
             elif p_type.startswith("character array"):
-                if len(p_value) >= 2:
-                    p_value = p_value[1:-1]
-                else:
-                    print("String too short.")
-                    continue
+                pass
             else:
                 print(p_type, "missing")
 
