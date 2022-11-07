@@ -5,7 +5,7 @@ Classes:
 """
 import os, sys
 import tkinter as tk
-from tkinter import ttk, filedialog, simpledialog, messagebox
+from tkinter import ttk, filedialog, simpledialog, messagebox, font
 
 from UI.frames.scroll_frame import INFO_WIDTH, INFO_HEIGHT
 from UI.frames.target_frame import TargetFrame
@@ -40,9 +40,9 @@ class MainWindow(tk.Tk):
         super().__init__()
         self.title("IMSIL GUI")
         self.resizable(False, False)
-        # self.minsize(900, 500)
-
         self.window_width = 500
+
+        font.Font(name="TkCaptionFont", exists=True).config(weight="normal")
 
         self.all_elements = get_all_elements()
 
