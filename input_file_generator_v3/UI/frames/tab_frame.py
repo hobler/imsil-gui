@@ -12,14 +12,14 @@ class TabFrame(BlancFrame):
     list in case the window does not provide enough space for all of them.
     """
     def __init__(self, parent, parameter_list, atom_names, region_names,
-                 type_of_simulation, nr, natom, *args, **kwargs):
+                 type_of_simulation, nr, natom, tab_name, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
         # Get the database table and regroup the parameters
         self.parameter_list = parameter_list
 
         # Create a ScrollFrame specifically developed for this project
-        self.scroll_frame = ScrollFrame(self, nr, natom)
+        self.scroll_frame = ScrollFrame(self, nr, natom, tab_name)
 
         # Add parameters to the ScrollFrame
         for parameter in self.parameter_list:

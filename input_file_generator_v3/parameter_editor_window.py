@@ -108,6 +108,7 @@ class ImsilInputParameterEditor:
                                  type_of_simulation=type_of_simulation,
                                  nr=self.nr,
                                  natom=self.natom,
+                                 tab_name=tab_name,
                                  name=tab_name)
             self.nb.add(tab_frame, text=tab_name)
 
