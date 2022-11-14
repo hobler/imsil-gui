@@ -70,11 +70,9 @@ class TargetFrame(tk.LabelFrame):
         else:
             posif = posif.split(",")
 
-        surface_pos = 0
-
         if posif is not None and len(posif) > 1:
-            thick = 0
             surface_pos = posif[0]
+            self.region_table.set_surface_pos(surface_pos)
             for i in range(len(posif) - 1):
                 try:
                     value0 = float(posif[i])
