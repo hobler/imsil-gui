@@ -6,7 +6,7 @@ from UI.frames.region_table_frame import RegionTableFrame
 
 class TargetFrame(tk.LabelFrame):
     """
-    Frame to edit the Material names. Inherits from tk.Frame.
+    Frame to edit the Material names. Inherits from tk.LabelFrame.
     """
     def __init__(self, parent, text, parameter_data, update_atoms,
                  *args, **kwargs):
@@ -15,8 +15,8 @@ class TargetFrame(tk.LabelFrame):
 
         :param parent: parent frame
         :param text: Title of the frame
-        :param parameter_data: contains all information
-            about the imsil parameters.
+        :param parameter_data: contains all information about the imsil
+            parameters.
         :param update_atoms: update atoms function. must be called after adding,
             removing or changing regions/atoms
         """
@@ -35,29 +35,29 @@ class TargetFrame(tk.LabelFrame):
         self.rowconfigure(1, weight=1)
 
         self.frame_geom_title = tk.Frame(self)
-        self.frame_geom_title.grid(row=0, column=0, padx=(15, 0),
-                                       pady=0, sticky="NSW")
+        self.frame_geom_title.grid(row=0, column=0, padx=(9, 0),
+                                       pady=9, sticky="NSW")
 
         self.label_geom = tk.Label(self.frame_geom_title, text="Geometry")
         self.label_geom.grid(row=0, column=0)
 
         self.variable_cb_geom_sel = tk.StringVar()
         self.variable_cb_geom_sel.set("1D")
-        self.cb_geom_sel = ttk.Combobox(self.frame_geom_title,
-                                          textvariable=
-                                          self.variable_cb_geom_sel,
-                                          width=3)
+        self.cb_geom_sel = ttk.Combobox(
+            self.frame_geom_title,
+            textvariable=self.variable_cb_geom_sel,
+            width=3)
         self.cb_geom_sel.grid(row=0, column=1, padx=3)
         self.cb_geom_sel["state"] = "readonly"
         self.cb_geom_sel["values"] = ["1D", "2D", "3D"]
         self.cb_geom_sel.bind('<<ComboboxSelected>>', self.cb_change)
         # force the Combobox to steal focus when scrolled
         self.cb_geom_sel.bind("<MouseWheel>",
-                                lambda event: self.cb_geom_sel.focus_set())
+                              lambda event: self.cb_geom_sel.focus_set())
 
         self.region_table = RegionTableFrame(self, self.update_atoms,
                                              self.parameter_data)
-        self.region_table.grid(row=2, column=0, padx=(30, 90),
+        self.region_table.grid(row=2, column=0, padx=(9, 29),
                                pady=(0, 10), sticky="NS")
 
         # load every currently stored material

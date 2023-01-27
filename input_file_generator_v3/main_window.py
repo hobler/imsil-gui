@@ -44,6 +44,7 @@ class MainWindow(tk.Tk):
 
         font.Font(name="TkCaptionFont", exists=True).config(weight="normal")
 
+        # list of all chemical elements
         self.all_elements = get_all_elements()
 
         # temporary string variable that saves the entry value before
@@ -52,125 +53,128 @@ class MainWindow(tk.Tk):
 
         # create basic structure with frames
         # main frame
-        self.frame = tk.Frame(self)
-        self.frame.grid(row=0, column=0, sticky="NESW")
-        self.frame.rowconfigure(0, weight=1)  # top
-        self.frame.rowconfigure(1, weight=1)  # file
-        self.frame.rowconfigure(2, weight=1)  # ion
-        self.frame.rowconfigure(3, weight=1)  # target_sel
-        self.frame.rowconfigure(4, weight=1)  # target
-        self.frame.rowconfigure(5, weight=1)  # controls
-        self.frame.rowconfigure(6, weight=1)  # status
+        self.main_frame = tk.Frame(self)
+        self.main_frame.grid(row=0, column=0, padx=4, pady=4, sticky="NESW")
+        self.main_frame.rowconfigure(0, weight=1)  # header
+        self.main_frame.rowconfigure(1, weight=1)  # ion
+        self.main_frame.rowconfigure(2, weight=1)  # target_sel
+        self.main_frame.rowconfigure(3, weight=1)  # target
+        self.main_frame.rowconfigure(4, weight=1)  # controls
+        self.main_frame.rowconfigure(5, weight=1)  # status
         # self.frame.columnconfigure(0, weight=1)
         # self.frame.columnconfigure(1, weight=1)
 
-        self.frame_top = self.create_row_frame(row=0, rows=1, columns=2)
-        # self.frame_file = self.create_row_frame(row=1, rows=1, columns=1)
-        self.frame_ion = self.create_row_frame(row=1, rows=1, columns=1)
-        self.frame_target_sel = self.create_row_frame(row=2, rows=1, columns=1)
-        self.frame_target = self.create_row_frame(row=3, rows=1, columns=1)
-        self.frame_controls = self.create_row_frame(row=4, rows=1, columns=1)
-        self.frame_status = self.create_row_frame(row=5, rows=1, columns=1)
+        self.header_frame = self.create_row_frame(row=0, rows=1, columns=2)
+        self.ions_frame = self.create_row_frame(row=1, rows=1, columns=1)
+        self.target_select_frame = self.create_row_frame(row=2,
+                                                         rows=1, columns=1)
+        self.target_frame = self.create_row_frame(row=3, rows=1, columns=1)
+        self.button_frame = self.create_row_frame(row=4, rows=1, columns=1)
+        self.status_frame = self.create_row_frame(row=5, rows=1, columns=1)
 
-        # top
+        # header
 
         # logo frame
-        self.frame_logo = tk.Frame(self.frame_top, width=150, height=100)
-        self.frame_logo.grid(row=0, column=0, sticky="NW",
-                             padx=(6, 0), pady=(9, 3))
-        self.frame_logo.propagate(False)
+        self.logo_frame = tk.Frame(self.header_frame, width=150, height=80)
+        self.logo_frame.grid(row=0, column=0, sticky="NS")
+        self.logo_frame.propagate(False)
 
         # title text frame
-        self.frame_title = tk.Frame(self.frame_top, width=350, height=100)
-        self.frame_title.grid(row=0, column=1, sticky="NW",
-                              padx=(6, 0), pady=(9, 3))
-        self.frame_title.propagate(False)
+        self.title_frame = tk.Frame(self.header_frame, width=350, height=80)
+        self.title_frame.grid(row=0, column=1, sticky="NS", padx=(6, 0))
+        self.title_frame.propagate(False)
 
-        # Add a logo (title for now)
-        self.header_label = tk.Label(self.frame_logo,
-                                     font="Helvetica 30 bold",
-                                     text="IMSIL",
-                                     bg="#ffffff")
-        self.header_label.pack(expand=True, fill="both")
+        # Add logo
+        logo = ttk.Label(self.logo_frame,
+                             text="IMSIL",
+                             font="Helvetica 30 bold",
+                             anchor="center",
+                             padding=(0, 8, 0, 0),
+                             background="#ffffff")
+        logo.pack(expand=True, fill="both")
 
         # Set the welcome message text
-        welcome_text = ("Welcome to the IMSIL Input File Generator v3!\n"
-                        "With this tool you can load, edit and save input "
-                        "files for IMSIL.\n"
-                        "Start by  loading an existing file or create an input "
-                        "file from scratch.")
+        welcome_text1 = "Welcome to the IMSIL Input File Generator v3!"
+        welcome_text2 = ("With this tool you can load, edit and save input "
+                         "files for IMSIL. Start by  loading an existing file "
+                         "or create an input file from scratch.")
         # Add the welcome message
-        self.welcome_message_label = tk.Label(self.frame_title,
-                                              font="Helvetica 9",
-                                              wraplength=350,
-                                              anchor=tk.W,
-                                              text=welcome_text,
-                                              justify=tk.LEFT)
-        self.welcome_message_label.pack(expand=True, fill="both")
-
-        # file
+        label = tk.Label(self.title_frame,
+                          font="Helvetica 10 bold",
+                          wraplength=350,
+                          #anchor='center',
+                          text=welcome_text1,
+                          justify='center')
+        label.grid(row=0, sticky='ns')
+        label = ttk.Label(self.title_frame,
+                          font="Helvetica 10",
+                          wraplength=350,
+                          #anchor='center',
+                          text=welcome_text2,
+                          justify='left')
+        label.grid(row=1, sticky='ns')
+        self.title_frame.grid_rowconfigure(0, weight=1)
+        self.title_frame.grid_rowconfigure(1, weight=1)
 
         # ions
 
         # will be loaded in load_edit_frames()
-        self.frame_label_ion = None
-        self.label_ion = None
-        self.frame_label_ion_name = None
-        self.label_ion_name = None
-        self.variable_entry_ion_name = None
-        self.frame_entry_ion_name = None
-        self.entry_ion_name = None
-        self.btn_ion_name_info = None
-        self.frame_label_ion_energy = None
-        self.label_ion_energy = None
-        self.variable_entry_ion_energy = None
-        self.frame_entry_ion_energy = None
-        self.entry_ion_energy = None
-        self.btn_ion_energy_info = None
+        self.ions_label_frame = None
+        self.ions_label = None
+        self.ion_name_label_frame = None
+        self.ion_name_label = None
+        self.ion_name_entry_var = None
+        self.ion_name_entry_frame = None
+        self.ion_name_entry = None
+        self.ion_name_info_btn = None
+        self.ion_energy_label_frame = None
+        self.ion_energy_label = None
+        self.ion_energy_entry_var = None
+        self.ion_energy_entry_frame = None
+        self.ion_energy_entry = None
+        self.ion_energy_info_btn = None
 
         # target select
-
-        self.frame_label_target = None
-        self.label_target = None
-        self.variable_cb_target_sel = None
-        self.frame_cb_target_sel = None
-        self.cb_target_sel = None
+        self.label_target_frame = None
+        self.target_label = None
+        self.target_select_cb_var = None
+        self.target_select_cb_frame = None
+        self.target_select_cb = None
 
         # region frame
-
-        self.frame_region = None
-        self.btn_load_cells = None
-        self.variable_cells = None
+        self.region_frame = None
+        self.load_cells_btn = None
+        self.cells_entry_var = None
 
         # self.frame_region.pack(expand=True, fill="both")
         # self.frame_region.rowconfigure(0, weight=1)
 
         # cells
-        self.frame_label_cells = None
-        self.label_cells = None
+        self.label_cells_frame = None
+        self.cells_label = None
 
         # control frame
-
-        self.btn_open_param = None
-        self.btn_load = None
-        self.btn_save = None
-        self.btn_save_as = None
-        self.btn_check = None
-        self.btn_run = None
+        self.open_param_editor_btn = None
+        self.load_btn = None
+        self.save_btn = None
+        self.save_as_btn = None
+        self.check_btn = None
+        self.run_btn = None
 
         # status bar
+        self.statusbar_entry_var = tk.StringVar()
+        self.statusbar_entry_var.set("No file selected.")
 
-        self.variable_entry_status = tk.StringVar()
-        self.variable_entry_status.set("No file selected.")
-        self.frame_entry_status = tk.Frame(self.frame_status,
-                                           width=self.window_width, height=32)
-        self.frame_entry_status.propagate(False)
-        self.frame_entry_status.grid(row=0, column=0,
-                                     sticky="NESW", padx=2, pady=2)
-        self.entry_load = tk.Entry(self.frame_entry_status,
-                                   textvariable=self.variable_entry_status)
-        self.entry_load.pack(expand=True, fill="both")
-        self.entry_load["state"] = "disabled"
+        self.statusbar_frame = tk.Frame(self.status_frame,
+                                        width=self.window_width-8,
+                                        height=32)
+        self.statusbar_frame.propagate(False)
+        self.statusbar_frame.grid(row=0, column=0,
+                                  sticky="NESW", padx=6, pady=2)
+        self.statusbar_entry = tk.Entry(self.statusbar_frame,
+                                        textvariable=self.statusbar_entry_var)
+        self.statusbar_entry.pack(expand=True, fill="both")
+        self.statusbar_entry["state"] = "disabled"
 
         # load structure, names and content of the tables
         self.db_tables = []
@@ -191,64 +195,64 @@ class MainWindow(tk.Tk):
 
     def disable_editing(self):
         """ Disables the editing entries and buttons """
-        self.btn_open_param["state"] = "disabled"
-        self.btn_load["state"] = "disabled"
-        self.btn_save["state"] = "disabled"
-        self.btn_save_as["state"] = "disabled"
-        self.btn_check["state"] = "disabled"
-        self.btn_run["state"] = "disabled"
+        self.open_param_editor_btn["state"] = "disabled"
+        self.load_btn["state"] = "disabled"
+        self.save_btn["state"] = "disabled"
+        self.save_as_btn["state"] = "disabled"
+        self.check_btn["state"] = "disabled"
+        self.run_btn["state"] = "disabled"
 
-        self.entry_ion_name["state"] = "disabled"
-        self.entry_ion_energy["state"] = "disabled"
-        self.variable_entry_ion_name.set("")
-        self.variable_entry_ion_energy.set("")
+        self.ion_name_entry["state"] = "disabled"
+        self.ion_energy_entry["state"] = "disabled"
+        self.ion_name_entry_var.set("")
+        self.ion_energy_entry_var.set("")
 
-        self.cb_target_sel["state"] = "disabled"
+        self.target_select_cb["state"] = "disabled"
 
     def enable_editing(self):
         """ Enables the editing entries and buttons """
-        self.btn_open_param["state"] = "normal"
-        self.btn_save["state"] = "normal"
-        self.btn_load["state"] = "normal"
-        self.btn_save_as["state"] = "normal"
-        self.btn_check["state"] = "disabled"  # not implemented
-        self.btn_run["state"] = "disabled"  # not implemented
+        self.open_param_editor_btn["state"] = "normal"
+        self.save_btn["state"] = "normal"
+        self.load_btn["state"] = "normal"
+        self.save_as_btn["state"] = "normal"
+        self.check_btn["state"] = "disabled"  # not implemented
+        self.run_btn["state"] = "disabled"  # not implemented
 
-        self.entry_ion_name["state"] = "normal"
-        self.entry_ion_energy["state"] = "normal"
-        self.entry_ion_name.bind("<FocusOut>",
+        self.ion_name_entry["state"] = "normal"
+        self.ion_energy_entry["state"] = "normal"
+        self.ion_name_entry.bind("<FocusOut>",
                                  self.on_entry_ion_focus_out)
-        self.entry_ion_name.bind("<FocusIn>",
+        self.ion_name_entry.bind("<FocusIn>",
                                  self.on_entry_ion_focus_in)
-        self.entry_ion_energy.bind("<FocusOut>",
+        self.ion_energy_entry.bind("<FocusOut>",
                                    self.on_entry_ion_energy_focus_out)
 
         # load the current ion parameters
         ions = self.parameter_data.get_entry_value("ions", "NAME")
         ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
-        self.variable_entry_ion_name.set(ions)
-        self.variable_entry_ion_energy.set(ion_energy)
+        self.ion_name_entry_var.set(ions)
+        self.ion_energy_entry_var.set(ion_energy)
 
-        self.cb_target_sel["state"] = "readonly"
+        self.target_select_cb["state"] = "readonly"
 
     def on_save_as(self):
         """
         Opens a File Dialog to create a new file.
         """
         loaded_file = filedialog.asksaveasfile(
-                initialdir=self.variable_entry_status.get(),
+                initialdir=self.statusbar_entry_var.get(),
                 title="Select IMSIL input file",
                 filetypes=[("Input File", ".inp"), ("any", ".*")])
         if loaded_file:
-            self.variable_entry_status.set(loaded_file.name)
+            self.statusbar_entry_var.set(loaded_file.name)
 
             self.on_save()
 
             loaded_file.close()
-            self.entry_load["state"] = "readonly"
+            self.statusbar_entry["state"] = "readonly"
 
     def on_save(self):
-        filename = self.variable_entry_status.get()
+        filename = self.statusbar_entry_var.get()
         # if no file is selected, try creating a new one
         if filename == "No file selected.":
             self.on_save_as()
@@ -262,13 +266,13 @@ class MainWindow(tk.Tk):
         Opens a File Dialog to open an existing file.
         """
         loaded_file = filedialog.askopenfile(
-                initialdir=self.variable_entry_status.get(),
+                initialdir=self.statusbar_entry_var.get(),
                 title="Select IMSIL input file")
         if loaded_file:
             # set filename in main window
-            self.variable_entry_status.set(loaded_file.name)
+            self.statusbar_entry_var.set(loaded_file.name)
             loaded_file.close()
-            self.entry_load["state"] = "readonly"
+            self.statusbar_entry["state"] = "readonly"
 
             # load Namelist and write values to ParameterData
             nml = load_nml(loaded_file.name)
@@ -282,8 +286,8 @@ class MainWindow(tk.Tk):
             # reload the ion parameters, because load_edit_frames clears them
             ions = self.parameter_data.get_entry_value("ions", "NAME")
             ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
-            self.variable_entry_ion_name.set(ions)
-            self.variable_entry_ion_energy.set(ion_energy)
+            self.ion_name_entry_var.set(ions)
+            self.ion_energy_entry_var.set(ion_energy)
 
     def create_tooltip_btn(self, parent, parameter_entry):
 
@@ -291,141 +295,144 @@ class MainWindow(tk.Tk):
         par_name = parameter_entry.get_name()
         long_desc = create_info_button_text(parameter_entry)
 
-        btn_info = tk.Button(parent, text="Button",
+        info_btn = tk.Button(parent, text="Button",
                              width=INFO_WIDTH, height=INFO_HEIGHT)
         if short_desc is not None:
-            create_tooltip(btn_info, btn_info, short_desc)
+            create_tooltip(info_btn, info_btn, short_desc)
         photo = tk.PhotoImage(file=os.path.join("pics", "info_sign_1.gif"))
-        btn_info.config(image=photo)
-        btn_info.image = photo
-        btn_info.config(takefocus=False)
-        btn_info.config(
+        info_btn.config(image=photo)
+        info_btn.image = photo
+        info_btn.config(takefocus=False)
+        info_btn.config(
             command=lambda: messagebox.showinfo(par_name, long_desc))
 
-        return btn_info
+        return info_btn
 
     def load_edit_frames(self):
+
         # ions
 
-        self.frame_label_ion = tk.Frame(self.frame_ion, width=50, height=32)
-        self.frame_label_ion.grid(row=0, column=0, sticky="NW",
-                                  padx=0, pady=0)
-        self.frame_label_ion.propagate(False)
+        self.ions_label_frame = tk.Frame(self.ions_frame, width=30, height=32)
+        self.ions_label_frame.grid(row=0, column=0,
+                                   sticky="NW", padx=(9, 6), pady=0)
+        self.ions_label_frame.propagate(False)
 
-        self.label_ion = tk.Label(self.frame_label_ion,
-                                              anchor=tk.E,
-                                              text="Ions:",
-                                              justify=tk.LEFT)
-        self.label_ion.pack(expand=True, fill="both")
+        self.ions_label = tk.Label(self.ions_label_frame, text="Ions:")
+        self.ions_label.pack(expand=True, fill="both")
 
-        self.frame_label_ion_name = tk.Frame(self.frame_ion, width=115, height=32)
-        self.frame_label_ion_name.grid(row=0, column=1, sticky="NW",
+        self.ion_name_label_frame = tk.Frame(self.ions_frame,
+                                             width=115, height=32)
+        self.ion_name_label_frame.grid(row=0, column=1, sticky="NW",
                                        padx=0, pady=0)
-        self.frame_label_ion_name.propagate(False)
+        self.ion_name_label_frame.propagate(False)
 
-        self.label_ion_name = tk.Label(self.frame_label_ion_name,
-                                              anchor=tk.E,
-                                              text="Chem. Name:",
-                                              justify=tk.LEFT)
-        self.label_ion_name.pack(expand=True, fill="both")
+        self.ion_name_label = tk.Label(self.ion_name_label_frame,
+                                       anchor=tk.E, text="Chem. Name:")
+        self.ion_name_label.pack(expand=True, fill="both")
 
-        self.variable_entry_ion_name = tk.StringVar()
-        self.variable_entry_ion_name.set("<click to change>")
-        self.frame_entry_ion_name = tk.Frame(self.frame_ion, width=110, height=24)
-        self.frame_entry_ion_name.grid(row=0, column=3, sticky="NW",
+        self.ion_name_entry_var = tk.StringVar()
+        self.ion_name_entry_var.set("<click to change>")
+        self.ion_name_entry_frame = tk.Frame(self.ions_frame,
+                                             width=110, height=24)
+        self.ion_name_entry_frame.grid(row=0, column=3, sticky="NW",
                                        padx=(4, 0), pady=(4, 0))
-        self.frame_entry_ion_name.propagate(False)
-        self.entry_ion_name = tk.Entry(self.frame_entry_ion_name,
-                                       textvariable=self.variable_entry_ion_name)
-        self.entry_ion_name.pack(expand=True, fill="both")
-        self.entry_ion_name["state"] = "disabled"
-        self.btn_ion_name_info = self.create_tooltip_btn(self.frame_ion,
-                                 self.parameter_data.get_entry("ions", "NAME"))
-        self.btn_ion_name_info.grid(row=0, column=2, sticky="NW",
-                                       padx=(0, 0), pady=(7, 0))
+        self.ion_name_entry_frame.propagate(False)
+        self.ion_name_entry = tk.Entry(self.ion_name_entry_frame,
+                                       textvariable=self.ion_name_entry_var)
+        self.ion_name_entry.pack(expand=True, fill="both")
+        self.ion_name_entry["state"] = "disabled"
+        self.ion_name_info_btn = self.create_tooltip_btn(
+            self.ions_frame,
+            self.parameter_data.get_entry("ions", "NAME"))
+        self.ion_name_info_btn.grid(row=0, column=2, sticky="NW",
+                                    padx=(0, 0), pady=(7, 0))
 
-        self.frame_label_ion_energy = tk.Frame(self.frame_ion, width=80, height=32)
-        self.frame_label_ion_energy.grid(row=0, column=4, sticky="NW",
+        self.ion_energy_label_frame = tk.Frame(self.ions_frame,
+                                               width=80, height=32)
+        self.ion_energy_label_frame.grid(row=0, column=4, sticky="NW",
                                          padx=0, pady=0)
-        self.frame_label_ion_energy.propagate(False)
+        self.ion_energy_label_frame.propagate(False)
 
-        self.label_ion_energy = tk.Label(self.frame_label_ion_energy,
-                                              anchor=tk.E,
-                                              text="Energy:",
-                                              justify=tk.LEFT)
-        self.label_ion_energy.pack(expand=True, fill="both")
+        self.ion_energy_label = tk.Label(self.ion_energy_label_frame,
+                                         anchor=tk.E,
+                                         text="Energy:",
+                                         justify=tk.LEFT)
+        self.ion_energy_label.pack(expand=True, fill="both")
 
-        self.variable_entry_ion_energy = tk.StringVar()
-        self.variable_entry_ion_energy.set("<click to change>")
-        self.frame_entry_ion_energy = tk.Frame(self.frame_ion, width=110, height=24)
-        self.frame_entry_ion_energy.grid(row=0, column=6, sticky="NW",
+        self.ion_energy_entry_var = tk.StringVar()
+        self.ion_energy_entry_var.set("<click to change>")
+        self.ion_energy_entry_frame = tk.Frame(self.ions_frame,
+                                               width=110, height=24)
+        self.ion_energy_entry_frame.grid(row=0, column=6, sticky="NW",
                                          padx=(4, 0), pady=(4, 0))
-        self.frame_entry_ion_energy.propagate(False)
-        self.entry_ion_energy = tk.Entry(self.frame_entry_ion_energy,
-                                         textvariable=
-                                         self.variable_entry_ion_energy)
-        self.entry_ion_energy.pack(expand=True, fill="both")
-        self.entry_ion_energy["state"] = "disabled"
-        self.btn_ion_energy_info = self.create_tooltip_btn(self.frame_ion,
-                                self.parameter_data.get_entry("ions", "ENERGY"))
-        self.btn_ion_energy_info.grid(row=0, column=5, sticky="NW",
-                                       padx=(0, 0), pady=(7, 0))
+        self.ion_energy_entry_frame.propagate(False)
+        self.ion_energy_entry = tk.Entry(
+            self.ion_energy_entry_frame,
+            textvariable=self.ion_energy_entry_var)
+        self.ion_energy_entry.pack(expand=True, fill="both")
+        self.ion_energy_entry["state"] = "disabled"
+        self.ion_energy_info_btn = self.create_tooltip_btn(
+            self.ions_frame,
+            self.parameter_data.get_entry("ions", "ENERGY"))
+        self.ion_energy_info_btn.grid(row=0, column=5, sticky="NW",
+                                      padx=(0, 0), pady=(7, 0))
 
         # target select
 
-        self.frame_label_target = tk.Frame(self.frame_target_sel, width=50, height=32)
-        self.frame_label_target.grid(row=0, column=0, sticky="NW",
-                                       padx=0, pady=0)
-        self.frame_label_target.propagate(False)
+        self.label_target_frame = tk.Frame(self.target_select_frame,
+                                           width=50, height=32)
+        self.label_target_frame.grid(row=0, column=0, sticky="NW",
+                                     padx=9, pady=0)
+        self.label_target_frame.propagate(False)
 
-        self.label_target = tk.Label(self.frame_label_target,
-                                              anchor=tk.E,
-                                              text="Target:",
-                                              justify=tk.LEFT)
-        self.label_target.pack(expand=True, fill="both")
+        self.target_label = tk.Label(self.label_target_frame,
+                                     anchor=tk.E,
+                                     text="Target:",
+                                     justify=tk.LEFT)
+        self.target_label.pack(expand=True, fill="both")
 
-        self.variable_cb_target_sel = tk.StringVar()
-        self.variable_cb_target_sel.set("Regions")
-        self.frame_cb_target_sel = tk.Frame(self.frame_target_sel,
-                                            width=100, height=24)
-        self.frame_cb_target_sel.grid(row=0, column=1, sticky="NW",
-                                       padx=(4, 0), pady=(4, 0))
-        self.frame_cb_target_sel.propagate(False)
-        self.cb_target_sel = ttk.Combobox(self.frame_cb_target_sel,
-                                          textvariable=
-                                          self.variable_cb_target_sel)
-        self.cb_target_sel.pack(expand=True, fill="both")
-        self.cb_target_sel["state"] = "disabled"
-        self.cb_target_sel["values"] = ["Regions", "Cells"]
-        self.cb_target_sel.bind('<<ComboboxSelected>>', self.cb_change)
+        self.target_select_cb_var = tk.StringVar()
+        self.target_select_cb_var.set("Regions")
+        self.target_select_cb_frame = tk.Frame(self.target_select_frame,
+                                               width=100, height=24)
+        self.target_select_cb_frame.grid(row=0, column=1, sticky="NW",
+                                         padx=(4, 0), pady=(4, 0))
+        self.target_select_cb_frame.propagate(False)
+        self.target_select_cb = ttk.Combobox(
+            self.target_select_cb_frame,
+            textvariable=self.target_select_cb_var)
+        self.target_select_cb.pack(expand=True, fill="both")
+        self.target_select_cb["state"] = "disabled"
+        self.target_select_cb["values"] = ["Regions", "Cells"]
+        self.target_select_cb.bind('<<ComboboxSelected>>', self.cb_change)
         # force the Combobox to steal focus when scrolled
-        self.cb_target_sel.bind("<MouseWheel>",
-                                lambda event: self.cb_target_sel.focus_set())
+        self.target_select_cb.bind("<MouseWheel>",
+                                   lambda event: self.target_select_cb.focus_set())
 
         # control frame
 
-        self.btn_open_param = self.create_control_btn(
-                            column=0,
-                            text="Parameter Editor...",
-                            width=150, padx=(6, 2),
-                            command=self.open_imsil_input_parameter_editor,
-                            state="disabled")
-        self.btn_load = self.create_control_btn(column=1, text="Load...",
+        self.open_param_editor_btn = self.create_control_btn(
+            column=0,
+            text="Parameter Editor...",
+            width=150, padx=(6, 2),
+            command=self.open_imsil_input_parameter_editor,
+            state="disabled")
+        self.load_btn = self.create_control_btn(column=1, text="Load...",
                                                 width=53, padx=(11, 2),
                                                 command=self.on_open_file,
                                                 state="disabled")
-        self.btn_save = self.create_control_btn(column=2, text="Save",
+        self.save_btn = self.create_control_btn(column=2, text="Save",
                                                 width=53, padx=(2, 2),
                                                 command=self.on_save,
                                                 state="disabled")
-        self.btn_save_as = self.create_control_btn(column=3, text="Save As...",
+        self.save_as_btn = self.create_control_btn(column=3, text="Save As...",
                                                    width=70, padx=(2, 2),
                                                    command=self.on_save_as,
                                                    state="disabled")
-        self.btn_check = self.create_control_btn(column=4, text="Check",
+        self.check_btn = self.create_control_btn(column=4, text="Check",
                                                  width=60, padx=(2, 2),
                                                  command=None, state="disabled")
-        self.btn_run = self.create_control_btn(column=5, text="Run",
+        self.run_btn = self.create_control_btn(column=5, text="Run",
                                                width=80, padx=(2, 2),
                                                command=None, state="disabled")
 
@@ -433,67 +440,69 @@ class MainWindow(tk.Tk):
         """
         Load the Region view for the Target
         """
-        if self.frame_region is not None:
-            self.frame_region.destroy()
-        self.frame_region = TargetFrame(self.frame_target, text="Regions",
+        if self.region_frame is not None:
+            self.region_frame.destroy()
+        self.region_frame = TargetFrame(self.target_frame, text="Regions",
                                         parameter_data=self.parameter_data,
                                         update_atoms=self.update_atoms)
-        self.frame_region.grid(row=0, column=0, sticky="NW",
+        self.region_frame.grid(row=0, column=0, sticky="NW",
                                padx=6, pady=(0, 3))
 
     def load_cells_frame(self):
         """
         Load the Cells view for the Target
         """
-        if self.frame_region is not None:
-            self.frame_region.destroy()
-        self.frame_region = tk.Frame(self.frame_target)
-        self.frame_region.grid(row=0, column=0, sticky="NW",
+        if self.region_frame is not None:
+            self.region_frame.destroy()
+        self.region_frame = tk.Frame(self.target_frame)
+        self.region_frame.grid(row=0, column=0, sticky="NW",
                                padx=6, pady=(0, 3))
 
-        self.frame_label_cells = tk.Frame(self.frame_region,
+        self.label_cells_frame = tk.Frame(self.region_frame,
                                           width=70, height=32)
-        self.frame_label_cells.grid(row=0, column=0, sticky="NESW",
+        self.label_cells_frame.grid(row=0, column=0, sticky="NESW",
                                     padx=(0, 2), pady=2)
-        self.frame_label_cells.propagate(False)
+        self.label_cells_frame.propagate(False)
 
-        self.label_cells = tk.Label(self.frame_label_cells,
+        self.cells_label = tk.Label(self.label_cells_frame,
                                     anchor=tk.E,
                                     text="Cell File:",
                                     justify=tk.LEFT)
-        self.label_cells.pack(expand=True, fill="both")
+        self.cells_label.pack(expand=True, fill="both")
 
-        btn_cells_info = self.create_tooltip_btn(self.frame_region,
-                            self.parameter_data.get_entry("setup", "FILCELL"))
-        btn_cells_info.grid(row=0, column=1, sticky="NW",
-                                       padx=(0, 0), pady=(9, 0))
+        cells_info_btn = self.create_tooltip_btn(
+            self.region_frame,
+            self.parameter_data.get_entry("setup", "FILCELL"))
+        cells_info_btn.grid(row=0, column=1, sticky="NW",
+                            padx=(0, 0), pady=(9, 0))
 
-        self.variable_cells = tk.StringVar()
-        self.variable_cells.set("No file selected.")
-        frame_cells_file = tk.Frame(self.frame_region,
-                                    width=self.window_width - 92, height=32)
-        frame_cells_file.propagate(False)
-        frame_cells_file.grid(row=0, column=2,
-                              sticky="NESW", padx=2, pady=2)
-        entry_load = tk.Entry(frame_cells_file,
-                              textvariable=self.variable_cells)
-        entry_load.pack(expand=True, fill="both")
-        entry_load["state"] = "readonly"
-        entry_load.bind("<1>", self.on_open_cells_file)
+        self.cells_entry_var = tk.StringVar()
+        self.cells_entry_var.set("No file selected.")
+        cells_entry_frame = tk.Frame(self.region_frame,
+                                     width=self.window_width-92, height=32)
+        cells_entry_frame.propagate(False)
+        cells_entry_frame.grid(row=0, column=2,
+                               sticky="NESW", padx=2, pady=2)
+        cells_entry = tk.Entry(cells_entry_frame,
+                               textvariable=self.cells_entry_var)
+        cells_entry.pack(expand=True, fill="both")
+        cells_entry["state"] = "readonly"
+        cells_entry.bind("<1>", self.on_open_cells_file)
 
     def on_open_cells_file(self, event):
         """
         Opens a File Dialog to open an existing file.
         """
         loaded_file = filedialog.askopenfile(
-            initialdir=self.variable_entry_status.get(),
+            initialdir=self.statusbar_entry_var.get(),
             title="Select Cells file")
         if loaded_file:
-            self.variable_cells.set(loaded_file.name)
+            self.cells_entry_var.set(loaded_file.name)
             loaded_file.close()
-            self.entry_load["state"] = "readonly"
+            self.statusbar_entry["state"] = "readonly"
 
-            self.parameter_data.set_entry_value("setup", "FILCELL", loaded_file.name)
+            self.parameter_data.set_entry_value("setup", "FILCELL",
+                                                loaded_file.name)
 
     def cb_change(self, value):
         """
@@ -503,15 +512,15 @@ class MainWindow(tk.Tk):
         :param value: VirtualEvent passed by the event handler.
         """
 
-        if self.variable_cb_target_sel.get() == "Regions":
+        if self.target_select_cb_var.get() == "Regions":
             self.load_region_frame()
             self.parameter_data.set_entry_value("setup", "USECELL", "F")
-        elif self.variable_cb_target_sel.get() == "Cells":
+        elif self.target_select_cb_var.get() == "Cells":
             self.load_cells_frame()
             self.parameter_data.set_entry_value("setup", "USECELL", "T")
 
     def on_entry_ion_focus_in(self, event):
-        self.prev_entry_val = self.variable_entry_ion_name.get()
+        self.prev_entry_val = self.ion_name_entry_var.get()
 
     def on_entry_ion_focus_out(self, event):
         """
@@ -521,10 +530,10 @@ class MainWindow(tk.Tk):
         new ion name and checks for a valid molecule name.
         """
         # disable another instance of this method from opening
-        self.entry_ion_name.unbind("<FocusOut>")
+        self.ion_name_entry.unbind("<FocusOut>")
 
         # initial value for the simpledialog
-        initial = self.variable_entry_ion_name.get()
+        initial = self.ion_name_entry_var.get()
 
         new_name = initial
         first = True
@@ -541,8 +550,8 @@ class MainWindow(tk.Tk):
             # result of the cancel button
             if new_name is None:
                 # re-enable on-click event
-                self.variable_entry_ion_name.set(self.prev_entry_val)
-                self.entry_ion_name.bind("<FocusOut>",
+                self.ion_name_entry_var.set(self.prev_entry_val)
+                self.ion_name_entry.bind("<FocusOut>",
                                          self.on_entry_ion_focus_out)
                 return
             initial = new_name
@@ -573,20 +582,19 @@ class MainWindow(tk.Tk):
 
         # set new name if user didn't cancel
         if new_name is not None:
-            self.variable_entry_ion_name.set(new_name)
+            self.ion_name_entry_var.set(new_name)
             self.parameter_data.set_entry_value("ions", "NAME", new_name)
             self.update_atoms(change_ion=True)
 
             # re-enable on-click event
-        self.entry_ion_name.bind("<FocusOut>", self.on_entry_ion_focus_out)
+        self.ion_name_entry.bind("<FocusOut>", self.on_entry_ion_focus_out)
 
     def on_entry_ion_energy_focus_out(self, event):
         """
         Callback for the focus-out event of the Entry-box.
-
         """
 
-        new_name = self.variable_entry_ion_energy.get()
+        new_name = self.ion_energy_entry_var.get()
         self.parameter_data.set_entry_value("ions", "ENERGY", new_name)
 
     def update_atoms(self, change_ion=False, change_region=False):
@@ -616,7 +624,6 @@ class MainWindow(tk.Tk):
         try:
             new_unique_ion_atoms = get_unique_atoms([ions],
                                                     self.all_elements)
-
             new_unique_material_atoms = get_unique_atoms(materials,
                                                          self.all_elements)
 
@@ -758,12 +765,16 @@ class MainWindow(tk.Tk):
                         # search the right atom to swap
                         for j in range(i, len(new_unique_material_atoms)):
                             # if the right atom index is found
-                            if material_atoms_swap[j] == new_unique_material_atoms[i]:
+                            if (material_atoms_swap[j]
+                                    == new_unique_material_atoms[i]):
                                 # swap atoms
-                                material_atoms_swap[i], material_atoms_swap[j] = \
-                                    material_atoms_swap[j], material_atoms_swap[i]
-                                self.parameter_data.swap_atom(len(ion_atoms_swap) + i,
-                                                       len(ion_atoms_swap) + j)
+                                (material_atoms_swap[i],
+                                 material_atoms_swap[j]) = \
+                                    (material_atoms_swap[j],
+                                     material_atoms_swap[i])
+                                self.parameter_data.swap_atom(
+                                    len(ion_atoms_swap) + i,
+                                    len(ion_atoms_swap) + j)
                                 break
             else:
                 print("update_atoms(): wrong length at region change")
@@ -786,7 +797,7 @@ class MainWindow(tk.Tk):
         """
         Create a new button in the control frame.
         """
-        frame_btn = tk.Frame(self.frame_controls,
+        frame_btn = tk.Frame(self.button_frame,
                              width=width, height=32)
         frame_btn.propagate(False)
         frame_btn.grid(row=0, column=column, columnspan=1,
@@ -798,19 +809,19 @@ class MainWindow(tk.Tk):
         btn.bind("<1>", lambda event: btn.focus_set())
         return btn
 
-    def create_row_frame(self, row, rows, columns):
+    def create_row_frame(self, row, rows, columns, padx=4, pady=4):
         """
         Create a new row within this Window with
         a given number of rows and columns.
         """
-        frame = tk.Frame(self.frame)
-        frame.grid(row=row, column=0, sticky="NW",
-                             padx=0, pady=0)
+        row_frame = tk.Frame(self.main_frame,
+                             width=self.main_frame.winfo_width())
+        row_frame.grid(row=row, column=0, sticky="NW")#, padx=4, pady=0)
         for r in range(rows):
-            frame.rowconfigure(r, weight=1)
+            row_frame.rowconfigure(r, weight=1, pad=pady)
         for c in range(columns):
-            frame.rowconfigure(c, weight=1)
-        return frame
+            row_frame.columnconfigure(c, weight=1, pad=padx)
+        return row_frame
 
     def load_database_tables(self):
         """
@@ -837,14 +848,9 @@ class MainWindow(tk.Tk):
     def open_imsil_input_parameter_editor(self):
         """
         Open the Imsil Input Parameter Editor.
-
-        Close the Welcome Window and open the IMSIL Input Parameter Editor
-        with the parameters (type of simulation, the path of an existing
-        input file and nr and natom) specified by the user.
         """
 
-        # self.destroy()  # Close the current Window
-        self.withdraw()
+        self.withdraw()     # Hide the current window
         region_names = self.parameter_data.get_materials()
 
         # Open the ImsilInputParameterEditor
@@ -867,17 +873,17 @@ class MainWindow(tk.Tk):
             usecell = self.parameter_data.get_entry_value("setup", "USECELL")
             if usecell == "T":
                 self.load_cells_frame()
-                self.variable_cb_target_sel.set("Cells")
+                self.target_select_cb_var.set("Cells")
                 filename = self.parameter_data.get_entry_value("setup",
                                                                "FILCELL")
-                self.variable_cells.set(filename)
+                self.cells_entry_var.set(filename)
             else:
                 self.load_region_frame()
-                self.variable_cb_target_sel.set("Regions")
+                self.target_select_cb_var.set("Regions")
 
             ions = self.parameter_data.get_entry_value("ions", "NAME")
             ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
-            self.variable_entry_ion_name.set(ions)
-            self.variable_entry_ion_energy.set(ion_energy)
+            self.ion_name_entry_var.set(ions)
+            self.ion_energy_entry_var.set(ion_energy)
 
         self.deiconify()

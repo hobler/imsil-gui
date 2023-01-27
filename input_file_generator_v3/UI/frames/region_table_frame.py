@@ -28,13 +28,18 @@ class RegionTableFrame(tk.Frame):
         self.region_list = []
         self.add_buttons = []
 
+        #self.frame_surface = tk.Frame(self)
+        #self.frame_surface.grid(row=0, column=0, columnspan=3, rowspan=2,
+        #                        pady=(10,0), sticky="W")
+
         self.frame_surface_lbl = tk.Frame(self)
         self.frame_surface_lbl.grid(row=0, column=1, rowspan=2, pady=(10, 0))
         self.frame_surface_entry = tk.Frame(self)
         self.frame_surface_entry.grid(row=0, column=2, rowspan=2, pady=(10, 0))
 
         self.label_surface = tk.Label(self.frame_surface_lbl,
-                                      text="Surface pos.:")
+        #self.label_surface = tk.Label(self.frame_surface,
+                                      text="Surface position:")
         self.label_surface.grid(row=0, column=0,
                                 padx=(0, 0), pady=(0, 0), sticky="SW")
 
@@ -47,16 +52,18 @@ class RegionTableFrame(tk.Frame):
                          create_info_button_text(
                              self.parameter_data.get_entry("geom",
                                                            "POSIF"))
-        self.btn_surface_info = create_custom_tooltip_btn(self.frame_surface_lbl,
-                                                        "Surface Position",
-                                                        "Surface Position (POSIF)",
-                                                        thickness_text)
+        self.btn_surface_info = create_custom_tooltip_btn(
+            self.frame_surface_lbl, "Surface Position",
+            #self.frame_surface, "Surface Position",
+            "Surface Position (POSIF)", thickness_text)
         self.btn_surface_info.grid(row=0, column=1, sticky="SW",
-                                       padx=(0, 0), pady=(0, 2))
+                                   padx=(0, 0), pady=(0, 2))
 
         self.prev_entry_surface_pos = None
         self.ent_surface = tk.Entry(self.frame_surface_entry, width=17)
+        #self.ent_surface = tk.Entry(self.frame_surface, width=17)
         self.ent_surface.grid(row=0, column=0)
+        #self.ent_surface.grid(row=0, column=2)
         self.ent_surface.delete(0, "end")
         self.ent_surface.insert(0, "")
         self.ent_surface.bind("<FocusIn>", self.on_ent_surface_focus_in)
@@ -71,12 +78,11 @@ class RegionTableFrame(tk.Frame):
         self.label_mat = tk.Label(self.frame_title_mat, text="Material")
         self.label_mat.grid(row=0, column=0,
                             padx=(0, 0), pady=(10, 0), sticky="SW")
-        self.btn_mat_info = \
-            create_tooltip_btn(self.frame_title_mat,
-                               self.parameter_data.get_entry("material",
-                                                             "NAME"))
+        self.btn_mat_info = create_tooltip_btn(
+            self.frame_title_mat,
+            self.parameter_data.get_entry("material", "NAME"))
         self.btn_mat_info.grid(row=0, column=1, sticky="SW",
-                                       padx=0, pady=(0, 2))
+                               padx=0, pady=(0, 2))
         self.label_thick = tk.Label(self.frame_title_thick,
                                     text="Thickness")
         self.label_thick.grid(row=0, column=2,
@@ -347,12 +353,14 @@ class RegionTableFrame(tk.Frame):
             self.frame_title_thick.grid(row=2, column=2, rowspan=2, pady=(0, 5))
             self.frame_surface_lbl.grid(row=0, column=1, rowspan=2, pady=(10, 0))
             self.frame_surface_entry.grid(row=0, column=2, rowspan=2, pady=(10, 0))
+            #self.frame_surface.grid(row=0, column=1, rowspan=2, pady=(10, 0))
             self.btn_geom.destroy()
             self.btn_geom = None
         elif geometry == "2D" or geometry == "3D":
             self.frame_title_thick.grid_forget()
             self.frame_surface_lbl.grid_forget()
             self.frame_surface_entry.grid_forget()
+            #self.frame_surface.grid_forget()
             if self.btn_geom is None:
                 self.btn_geom = tk.Button(self,
                                           text="Geometry Editor...",

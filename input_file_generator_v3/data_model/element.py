@@ -23,23 +23,19 @@ import os
 
 def get_all_elements():
     """
-    Extracts all of the Elements of the element.f90 file and returns them
-    as a List of Element Objects
+    Extract all chemical elements from the element.f90 file.
 
+    Returns the element properties as a list of Element objects.
     """
     f90_fname = os.path.join(os.path.dirname(__file__), 'element.f90')
-    f = open(f90_fname, "r")
-    data = f.readlines()
+    with open(f90_fname, "r") as f:
+        data = f.readlines()
     elements = []
     for line in data:
         if "Elem_type( '" in line:
-            elem_str = line.split('(')[1].split(')')[0].split(',')
-            for i in range(len(elem_str)):
-                elem_str[i] = elem_str[i].replace('\'', '').strip()
-            element = Element(elem_str[0], elem_str[1],
-                              elem_str[2], elem_str[3],
-                              elem_str[4], elem_str[5],
-                              elem_str[6], elem_str[7])
+            items = line.split('(')[1].split(')')[0].split(',')
+            items = [item.replace('\'', '').strip() for item in items]
+            element = Element(*items)
             elements.append(element)
     return elements
 

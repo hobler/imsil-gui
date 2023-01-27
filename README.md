@@ -85,8 +85,8 @@ described.
 #### `input_file_generator_v3`:
 -	`parameters.db`: the SQLite database
 -	`main.py`: contains the main function, which opens the Welcome Window
--	`welcome_window.py`: The `WelcomeWindow` class
--	`mein_window.py`: The MainWindow class. replacing the WelcomeWindow
+-	`welcome_window.py`: The `WelcomeWindow` class (obsolete)
+-	`main_window.py`: The MainWindow class. replacing the WelcomeWindow
 -	`parameter_editor_window.py`: contains the `ImsilInputParameterEditor` class.
 -	`edit_window.py`: contains the `EditWindow` and `RegionFrame` classes.
 -	`utility.py`: contains the `center_window` function
