@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+from tkinter import ttk
 from tkinter import simpledialog, messagebox
 
 from typing import List, Callable, Tuple
@@ -10,13 +11,15 @@ from utility import create_info_button_text
 from UI.widgets.tooltip import create_tooltip_btn, create_custom_tooltip_btn
 
 
-class RegionTableFrame(tk.Frame):
+class RegionTableFrame(ttk.Frame):
     """
-    Frame to edit the Material names. Inherits from tk.Frame.
+    Frame to edit the Material names. Inherits from ttk.Frame.
     """
 
-    def __init__(self, parent, update_atoms: Callable,
-                 parameter_data: ParameterData, geometry: str = "1D",
+    def __init__(self, parent,
+                 update_atoms: Callable,
+                 parameter_data: ParameterData,
+                 geometry: str = "1D",
                  *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
@@ -28,85 +31,131 @@ class RegionTableFrame(tk.Frame):
         self.region_list = []
         self.add_buttons = []
 
-        #self.frame_surface = tk.Frame(self)
-        #self.frame_surface.grid(row=0, column=0, columnspan=3, rowspan=2,
-        #                        pady=(10,0), sticky="W")
+        # surface position
+        if self.geometry == '1D':
+            self.surface_frame = ttk.Frame(self)
+            self.surface_frame.grid(row=0, column=0, columnspan=7,
+                                    sticky='we', pady=(8, 0))
 
-        self.frame_surface_lbl = tk.Frame(self)
-        self.frame_surface_lbl.grid(row=0, column=1, rowspan=2, pady=(10, 0))
-        self.frame_surface_entry = tk.Frame(self)
-        self.frame_surface_entry.grid(row=0, column=2, rowspan=2, pady=(10, 0))
+            self.surface_label = ttk.Label(self.surface_frame,
+                                           text="Surface position:")
+            self.surface_label.grid(row=0, column=0, padx=4)
 
-        self.label_surface = tk.Label(self.frame_surface_lbl,
-        #self.label_surface = tk.Label(self.frame_surface,
-                                      text="Surface position:")
-        self.label_surface.grid(row=0, column=0,
-                                padx=(0, 0), pady=(0, 0), sticky="SW")
+            thickness_text = (
+                    "Surface Position:\n"
+                    "Defines the first entry in the POSIF array. All "
+                    "succeeding values are calculated by adding the "
+                    "thickness value of each region to the previous "
+                    "value.\n\n"
+                    "POSIF:\n" +
+                    create_info_button_text(
+                             self.parameter_data.get_entry("geom", "POSIF")))
+            self.surface_info_btn = create_custom_tooltip_btn(
+                self.surface_frame, "Surface Position",
+                "Surface Position (POSIF)", thickness_text)
+            self.surface_info_btn.grid(row=0, column=1)
 
-        thickness_text = "Surface Position:\n" \
-                         "Defines the first entry in the POSIF array. All " \
-                         "succeeding values are calculated by adding the " \
-                         "thickness value of each region to the previous " \
-                         "value.\n\n" \
-                         "POSIF:\n" + \
-                         create_info_button_text(
-                             self.parameter_data.get_entry("geom",
-                                                           "POSIF"))
-        self.btn_surface_info = create_custom_tooltip_btn(
-            self.frame_surface_lbl, "Surface Position",
-            #self.frame_surface, "Surface Position",
-            "Surface Position (POSIF)", thickness_text)
-        self.btn_surface_info.grid(row=0, column=1, sticky="SW",
-                                   padx=(0, 0), pady=(0, 2))
+            self.surface_entry = ttk.Entry(self.surface_frame, width=17)
+            self.surface_entry.grid(row=0, column=2, sticky='w', padx=4)
+            self.surface_frame.columnconfigure(2, weight=1)
+            self.surface_entry.delete(0, "end")
+            self.surface_entry.insert(0, "")
+            self.surface_entry.bind("<FocusIn>", self.on_ent_surface_focus_in)
+            self.surface_entry.bind("<FocusOut>", self.on_ent_surface_focus_out)
+            self.surface_entry["state"] = "normal"
 
-        self.prev_entry_surface_pos = None
-        self.ent_surface = tk.Entry(self.frame_surface_entry, width=17)
-        #self.ent_surface = tk.Entry(self.frame_surface, width=17)
-        self.ent_surface.grid(row=0, column=0)
-        #self.ent_surface.grid(row=0, column=2)
-        self.ent_surface.delete(0, "end")
-        self.ent_surface.insert(0, "")
-        self.ent_surface.bind("<FocusIn>", self.on_ent_surface_focus_in)
-        self.ent_surface.bind("<FocusOut>", self.on_ent_surface_focus_out)
-        self.ent_surface["state"] = "normal"
+            self.prev_entry_surface_pos = None
 
-        self.frame_title_mat = tk.Frame(self)
-        self.frame_title_mat.grid(row=2, column=1, rowspan=2, pady=(0, 5))
-        self.frame_title_thick = tk.Frame(self)
-        self.frame_title_thick.grid(row=2, column=2, rowspan=2, pady=(0, 5))
+        # header of regions table
+        self.material_title_frame = ttk.Frame(self)
+        self.material_title_frame.grid(row=2, column=1, rowspan=2)
+        self.material_label = tk.Label(self.material_title_frame,
+                                       text="Material")
+        self.material_label.grid(row=0, column=0, pady=(12, 0))
 
-        self.label_mat = tk.Label(self.frame_title_mat, text="Material")
-        self.label_mat.grid(row=0, column=0,
-                            padx=(0, 0), pady=(10, 0), sticky="SW")
-        self.btn_mat_info = create_tooltip_btn(
-            self.frame_title_mat,
+        self.material_info_btn = create_tooltip_btn(
+            self.material_title_frame,
             self.parameter_data.get_entry("material", "NAME"))
-        self.btn_mat_info.grid(row=0, column=1, sticky="SW",
-                               padx=0, pady=(0, 2))
-        self.label_thick = tk.Label(self.frame_title_thick,
-                                    text="Thickness")
-        self.label_thick.grid(row=0, column=2,
-                              padx=(0, 0), pady=(10, 0), sticky="SW")
-        thickness_text = "Region Thickness:\n" \
-                         "This parameter is directly converted into POSIF " \
-                         "values. POSIF starts with the \"Surface position\" " \
-                         "value and is incremented with each region by the " \
-                         "Thickness value assigned to that region.\n" \
-                         "Alternatively you can change POSIF directly in the " \
-                         "Parameter Editor under the tab \"geom\".\n\n" \
-                         "POSIF:\n" + \
-                         create_info_button_text(
-                             self.parameter_data.get_entry("geom",
-                                                           "POSIF"))
-        self.btn_thick_info = create_custom_tooltip_btn(self.frame_title_thick,
-                                                        "Layer thickness",
-                                                        "Region Thickness (POSIF)",
-                                                        thickness_text)
-        self.btn_thick_info.grid(row=0, column=3, sticky="SW",
-                                       padx=(0, 0), pady=(0, 2))
+        self.material_info_btn.grid(row=0, column=1, sticky="SW", pady=(0, 2))
 
-        self.btn_geom = None
-        self.prev_geom = "1D"
+        if self.geometry == '1D':
+            self.thickness_title_frame = tk.Frame(self)
+            self.thickness_title_frame.grid(row=2, column=2, rowspan=2) #, pady=(0, 5))
+            self.thickness_label = tk.Label(self.thickness_title_frame,
+                                            text="Thickness")
+            self.thickness_label.grid(row=0, column=2, pady=(12, 0))
+            thickness_text = (
+                    "Region Thickness:\n"
+                    "This parameter is directly converted into POSIF "
+                    "values. POSIF starts with the \"Surface position\" "
+                    "value and is incremented with each region by the "
+                    "Thickness value assigned to that region.\n"
+                    "Alternatively you can change POSIF directly in the "
+                    "Parameter Editor under the tab \"geom\".\n\n"
+                    "POSIF:\n" +
+                    create_info_button_text(
+                            self.parameter_data.get_entry("geom", "POSIF")))
+            self.thickness_info_button = create_custom_tooltip_btn(
+                    self.thickness_title_frame,
+                    "Layer thickness", "Region Thickness (POSIF)",
+                    thickness_text)
+            self.thickness_info_button.grid(row=0, column=3,
+                                            sticky="SW", pady=(0, 2))
+            self.geometry_editor_btn = None
+        else:
+            self.geometry_editor_btn = tk.Button(self,
+                                                 text="Geometry Editor...",
+                                                 command=None)
+            self.geometry_editor_btn.grid(row=4, column=2,
+                                          rowspan=2,#len(self.region_list) * 2,
+                                          sticky="NESW")
+            self.geometry_editor_btn["state"] = "disabled"
+
+        self.prev_geometry = self.geometry
+
+        self.add_initial_regions()
+
+    def add_initial_regions(self):
+        # load every currently stored material
+        self.materials = self.parameter_data.get_materials()
+
+        thickness = []
+        posif = self.parameter_data.get_entry_value("geom", "POSIF")
+        if posif.startswith("-"):
+            posif = None
+        else:
+            posif = posif.split(",")
+
+        if posif is not None and len(posif) > 1:
+            surface_pos = posif[0]
+            self.set_surface_pos(surface_pos)
+            for i in range(len(posif) - 1):
+                try:
+                    value0 = float(posif[i])
+                except:
+                    value0 = 0
+                try:
+                    value1 = float(posif[i+1])
+                except:
+                    value1 = 0
+
+                if value1 <= value0:
+                    thick = 0
+                else:
+                    thick = value1 - value0
+
+                thickness.append(thick)
+
+        # create a frame for every material.
+        for i, material in enumerate(self.materials):
+            if i < len(thickness):
+                self.add_region_bar(i, material, thickness[i])
+            else:
+                self.add_region_bar(i, material, "")
+
+        # add an empty frame when no materials are found
+        if len(self.materials) == 0:
+            self.add_region_bar(0, "", "")
 
     def add_region_bar(self, index, material, thickness):
         """
@@ -132,10 +181,13 @@ class RegionTableFrame(tk.Frame):
         self.update_add_buttons()
         self.update_region_indexes()
         self.update_all_swap_buttons()
-        self.update_posif()
+        if self.geometry == '1D':
+            self.update_posif()
 
-        if self.geometry != "1D" and self.btn_geom is not None:
-            self.btn_geom.grid(row=4, column=2, rowspan=len(self.region_list)*2, sticky="NESW")
+        if self.geometry != "1D" and self.geometry_editor_btn is not None:
+            self.geometry_editor_btn.grid(row=4, column=2,
+                                          rowspan=len(self.region_list) * 2,
+                                          sticky="NESW")
 
     def set_widgets(self, region_bar, index):
         """
@@ -335,44 +387,44 @@ class RegionTableFrame(tk.Frame):
         for region_bar in self.region_list:
             region_bar.update_swap_buttons(length)
 
-    def switch_geometry(self, geometry):
-        """
-        Switches between the different modes [1D, 2D, 3D].
-        Shows thickness at 1D and Geometry editor at 2D and 3D.
+    #def switch_geometry(self, geometry):
+    #    """
+    #    Switches between the different modes [1D, 2D, 3D].
+    #    Shows thickness at 1D and Geometry editor at 2D and 3D.
 
-        :param geometry: string that represents the mode [1D, 2D, 3D].
-        """
+     #   :param geometry: string that represents the mode [1D, 2D, 3D].
+     #   """
 
-        if geometry == self.prev_geom:
-            return
+     #   if geometry == self.prev_geometry:
+     #       return
 
-        self.geometry = geometry
-        for i, region_bar in enumerate(self.region_list):
-            self.set_widgets(region_bar, i)
-        if geometry == "1D":
-            self.frame_title_thick.grid(row=2, column=2, rowspan=2, pady=(0, 5))
-            self.frame_surface_lbl.grid(row=0, column=1, rowspan=2, pady=(10, 0))
-            self.frame_surface_entry.grid(row=0, column=2, rowspan=2, pady=(10, 0))
-            #self.frame_surface.grid(row=0, column=1, rowspan=2, pady=(10, 0))
-            self.btn_geom.destroy()
-            self.btn_geom = None
-        elif geometry == "2D" or geometry == "3D":
-            self.frame_title_thick.grid_forget()
-            self.frame_surface_lbl.grid_forget()
-            self.frame_surface_entry.grid_forget()
-            #self.frame_surface.grid_forget()
-            if self.btn_geom is None:
-                self.btn_geom = tk.Button(self,
-                                          text="Geometry Editor...",
-                                          command=None)
-                self.btn_geom.grid(row=4, column=2,
-                                   rowspan=len(self.region_list)*2,
-                                   sticky="NESW")
-                self.btn_geom["state"] = "disabled"
-        else:
-            pass
+     #   self.geometry = geometry
+     #   for i, region_bar in enumerate(self.region_list):
+     #       self.set_widgets(region_bar, i)
+     #   if geometry == "1D":
+     #       self.thickness_title_frame.grid(row=2, column=2, rowspan=2, pady=(0, 5))
+     #       self.frame_surface_lbl.grid(row=0, column=1, rowspan=2, pady=(10, 0))
+     #       self.frame_surface_entry.grid(row=0, column=2, rowspan=2, pady=(10, 0))
+     #       #self.surface_frame.grid(row=0, column=1, rowspan=2, pady=(10, 0))
+     #       self.geometry_editor_btn.destroy()
+     #       self.geometry_editor_btn = None
+     #   elif geometry == "2D" or geometry == "3D":
+     #       self.thickness_title_frame.grid_forget()
+     #       self.frame_surface_lbl.grid_forget()
+     #       self.frame_surface_entry.grid_forget()
+     #       #self.surface_frame.grid_forget()
+     #       if self.geometry_editor_btn is None:
+     #           self.geometry_editor_btn = tk.Button(self,
+     #                                                text="Geometry Editor...",
+     #                                                command=None)
+     #           self.geometry_editor_btn.grid(row=4, column=2,
+     #                                         rowspan=len(self.region_list)*2,
+     #                                         sticky="NESW")
+     #           self.geometry_editor_btn["state"] = "disabled"
+     #   else:
+     #       pass
 
-        self.prev_geom = geometry
+     #   self.prev_geometry = geometry
 
     def get_posif(self):
         """
@@ -411,14 +463,15 @@ class RegionTableFrame(tk.Frame):
         """
         Returns the surface position.
         """
-        return self.ent_surface.get()
+        return self.surface_entry.get()
 
     def set_surface_pos(self, surface_pos):
         """
         Sets the text in the thickness box.
         """
-        self.ent_surface.delete(0, "end")
-        self.ent_surface.insert(0, surface_pos)
+        if self.geometry == '1D':
+            self.surface_entry.delete(0, "end")
+            self.surface_entry.insert(0, surface_pos)
 
     def on_ent_surface_focus_in(self, event):
         """
@@ -433,7 +486,7 @@ class RegionTableFrame(tk.Frame):
         Updates POSIF values accordingly if value is a number.
         """
         # disable another instance of this method from opening
-        self.ent_surface.unbind("<FocusOut>")
+        self.surface_entry.unbind("<FocusOut>")
 
         # initial value for the simpledialog
         initial = self.get_surface_pos()
@@ -453,7 +506,7 @@ class RegionTableFrame(tk.Frame):
             if new_surface_pos is None:
                 # re-enable on-click event
                 self.set_surface_pos(self.prev_entry_surface_pos)
-                self.ent_surface.bind("<FocusOut>", self.on_ent_surface_focus_out)
+                self.surface_entry.bind("<FocusOut>", self.on_ent_surface_focus_out)
                 return
             initial = new_surface_pos
 
@@ -484,7 +537,7 @@ class RegionTableFrame(tk.Frame):
             self.update_posif()
 
         # re-enable on-click event
-        self.ent_surface.bind("<FocusOut>", self.on_ent_surface_focus_out)
+        self.surface_entry.bind("<FocusOut>", self.on_ent_surface_focus_out)
 
 
 class RegionTableBar:
@@ -493,10 +546,15 @@ class RegionTableBar:
     Region in the RegionTableFrame.
     """
 
-    def __init__(self, parent: RegionTableFrame, material: str, thickness: str,
-                 index: int, parameter_data: ParameterData,
-                 all_elements: List[Element], update_atoms: Callable,
-                 on_delete: Callable, on_swap: Callable):
+    def __init__(self, parent: RegionTableFrame,
+                 material: str,
+                 thickness: str,
+                 index: int,
+                 parameter_data: ParameterData,
+                 all_elements: List[Element],
+                 update_atoms: Callable,
+                 on_delete: Callable,
+                 on_swap: Callable):
 
         self.parent = parent
         self.parameter_data = parameter_data
@@ -511,8 +569,8 @@ class RegionTableBar:
         self.prev_entry_thick_val = ""
 
         # create widgets
-        self.lbl_region = tk.Label(parent, text="Region "+str(index+1))
-        self.lbl_region.grid(row=0, column=0)
+        self.lbl_region = ttk.Label(parent, text="Region "+str(index+1))
+        self.lbl_region.grid(row=0, column=0, padx=4)
 
         self.ent_name = tk.Entry(parent, width=17)
         self.ent_name.grid(row=0, column=1)
