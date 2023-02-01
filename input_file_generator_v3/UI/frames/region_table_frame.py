@@ -28,7 +28,7 @@ class RegionTableFrame(ttk.Frame):
         self.geometry = geometry
 
         self.update_atoms = update_atoms
-        self.region_list = []
+        self.region_bar_list = []
         self.add_buttons = []
 
         # surface position
@@ -51,8 +51,8 @@ class RegionTableFrame(ttk.Frame):
                     create_info_button_text(
                              self.parameter_data.get_entry("geom", "POSIF")))
             self.surface_info_btn = create_custom_tooltip_btn(
-                self.surface_frame, "Surface Position",
-                "Surface Position (POSIF)", thickness_text)
+                    self.surface_frame, "Surface Position",
+                    "Surface Position (POSIF)", thickness_text)
             self.surface_info_btn.grid(row=0, column=1)
 
             self.surface_entry = ttk.Entry(self.surface_frame, width=17)
@@ -60,8 +60,9 @@ class RegionTableFrame(ttk.Frame):
             self.surface_frame.columnconfigure(2, weight=1)
             self.surface_entry.delete(0, "end")
             self.surface_entry.insert(0, "")
-            self.surface_entry.bind("<FocusIn>", self.on_ent_surface_focus_in)
-            self.surface_entry.bind("<FocusOut>", self.on_ent_surface_focus_out)
+            self.surface_entry.bind("<FocusIn>", self.on_surface_entry_focus_in)
+            self.surface_entry.bind("<FocusOut>",
+                                    self.on_surface_entry_focus_out)
             self.surface_entry["state"] = "normal"
 
             self.prev_entry_surface_pos = None
@@ -69,20 +70,20 @@ class RegionTableFrame(ttk.Frame):
         # header of regions table
         self.material_title_frame = ttk.Frame(self)
         self.material_title_frame.grid(row=2, column=1, rowspan=2)
-        self.material_label = tk.Label(self.material_title_frame,
-                                       text="Material")
+        self.material_label = ttk.Label(self.material_title_frame,
+                                        text="Material")
         self.material_label.grid(row=0, column=0, pady=(12, 0))
 
         self.material_info_btn = create_tooltip_btn(
-            self.material_title_frame,
-            self.parameter_data.get_entry("material", "NAME"))
+                self.material_title_frame,
+                self.parameter_data.get_entry("material", "NAME"))
         self.material_info_btn.grid(row=0, column=1, sticky="SW", pady=(0, 2))
 
         if self.geometry == '1D':
-            self.thickness_title_frame = tk.Frame(self)
-            self.thickness_title_frame.grid(row=2, column=2, rowspan=2) #, pady=(0, 5))
-            self.thickness_label = tk.Label(self.thickness_title_frame,
-                                            text="Thickness")
+            self.thickness_title_frame = ttk.Frame(self)
+            self.thickness_title_frame.grid(row=2, column=2, rowspan=2)
+            self.thickness_label = ttk.Label(self.thickness_title_frame,
+                                             text="Thickness")
             self.thickness_label.grid(row=0, column=2, pady=(12, 0))
             thickness_text = (
                     "Region Thickness:\n"
@@ -103,11 +104,11 @@ class RegionTableFrame(ttk.Frame):
                                             sticky="SW", pady=(0, 2))
             self.geometry_editor_btn = None
         else:
-            self.geometry_editor_btn = tk.Button(self,
-                                                 text="Geometry Editor...",
-                                                 command=None)
+            self.geometry_editor_btn = ttk.Button(self,
+                                                  text="Geometry Editor...",
+                                                  command=None)
             self.geometry_editor_btn.grid(row=4, column=2,
-                                          rowspan=2,#len(self.region_list) * 2,
+                                          rowspan=2,
                                           sticky="NESW")
             self.geometry_editor_btn["state"] = "disabled"
 
@@ -117,44 +118,36 @@ class RegionTableFrame(ttk.Frame):
 
     def add_initial_regions(self):
         # load every currently stored material
-        self.materials = self.parameter_data.get_materials()
+        materials = self.parameter_data.get_materials()
 
-        thickness = []
         posif = self.parameter_data.get_entry_value("geom", "POSIF")
         if posif.startswith("-"):
-            posif = None
-        else:
-            posif = posif.split(",")
+            posif = '0,'
+        posif = posif.split(",")
+        surface_pos = posif[0]
+        self.set_surface_pos(surface_pos)
 
-        if posif is not None and len(posif) > 1:
-            surface_pos = posif[0]
-            self.set_surface_pos(surface_pos)
-            for i in range(len(posif) - 1):
-                try:
-                    value0 = float(posif[i])
-                except:
-                    value0 = 0
-                try:
-                    value1 = float(posif[i+1])
-                except:
-                    value1 = 0
+        thicknesses = []
+        for i in range(len(posif) - 1):
+            try:
+                value0 = float(posif[i])
+                value1 = float(posif[i+1])
+            except:
+                thickness = 0
+            else:
+                thickness = value1 - value0
 
-                if value1 <= value0:
-                    thick = 0
-                else:
-                    thick = value1 - value0
-
-                thickness.append(thick)
+            thicknesses.append(thickness)
 
         # create a frame for every material.
-        for i, material in enumerate(self.materials):
-            if i < len(thickness):
-                self.add_region_bar(i, material, thickness[i])
+        for i, material in enumerate(materials):
+            if i < len(thicknesses) and thicknesses[i] > 0:
+                self.add_region_bar(i, material, thicknesses[i])
             else:
                 self.add_region_bar(i, material, "")
 
         # add an empty frame when no materials are found
-        if len(self.materials) == 0:
+        if len(materials) == 0:
             self.add_region_bar(0, "", "")
 
     def add_region_bar(self, index, material, thickness):
@@ -175,7 +168,7 @@ class RegionTableFrame(ttk.Frame):
                                     on_delete=self.remove_region_bar,
                                     on_swap=self.swap_regions)
 
-        self.region_list.insert(index, region_bar)
+        self.region_bar_list.insert(index, region_bar)
         self.set_widgets(region_bar, index)
 
         self.update_add_buttons()
@@ -183,11 +176,12 @@ class RegionTableFrame(ttk.Frame):
         self.update_all_swap_buttons()
         if self.geometry == '1D':
             self.update_posif()
-
-        if self.geometry != "1D" and self.geometry_editor_btn is not None:
-            self.geometry_editor_btn.grid(row=4, column=2,
-                                          rowspan=len(self.region_list) * 2,
-                                          sticky="NESW")
+        else:
+            if self.geometry_editor_btn is not None:
+                self.geometry_editor_btn.grid(
+                        row=4, column=2,
+                        rowspan=len(self.region_bar_list) * 2,
+                        sticky="NESW")
 
     def set_widgets(self, region_bar, index):
         """
@@ -201,10 +195,10 @@ class RegionTableFrame(ttk.Frame):
         for i in range(len(widgets)):
             self.rowconfigure(index*2+3, weight=1)
             self.rowconfigure(index*2+4, weight=1)
+
             if self.geometry != "1D" and i == 2:
                 widgets[i].grid_forget()
                 continue
-
             if i < 3:
                 widgets[i].grid(row=index*2+4, column=i, rowspan=2,
                                 sticky="NW", pady=(4, 0))
@@ -231,21 +225,21 @@ class RegionTableFrame(ttk.Frame):
         :param bar: The bar to remove
         """
         # can't have 0 regions
-        if len(self.region_list) == 1:
+        if len(self.region_bar_list) == 1:
             return
 
         # index of the current frame in the region list
-        index = self.region_list.index(bar)
+        index = self.region_bar_list.index(bar)
 
         # actually remove the frame
-        self.region_list.remove(bar)
+        self.region_bar_list.remove(bar)
         self.remove_widgets(bar)
 
         # set correct grid positions
-        for i in range(index, len(self.region_list)):
-            self.set_widgets(self.region_list[i], i)
+        for i in range(index, len(self.region_bar_list)):
+            self.set_widgets(self.region_bar_list[i], i)
 
-        # update ui stuff
+        # update UI stuff
         self.update_add_buttons()
         self.update_region_indexes()
         self.update_all_swap_buttons()
@@ -267,12 +261,12 @@ class RegionTableFrame(ttk.Frame):
         """
 
         # swap list position
-        self.region_list[index1], self.region_list[index2] = \
-            self.region_list[index2], self.region_list[index1]
+        self.region_bar_list[index1], self.region_bar_list[index2] = \
+            self.region_bar_list[index2], self.region_bar_list[index1]
 
         # set correct grid positions
-        self.set_widgets(self.region_list[index1], index1)
-        self.set_widgets(self.region_list[index2], index2)
+        self.set_widgets(self.region_bar_list[index1], index1)
+        self.set_widgets(self.region_bar_list[index2], index2)
 
         # update index and swap buttons
         self.update_region_indexes()
@@ -289,53 +283,51 @@ class RegionTableFrame(ttk.Frame):
         """
         Updates the amount of "add" buttons to the number of regions +1
         """
-        if len(self.add_buttons) == len(self.region_list) + 1:
+        if len(self.add_buttons) == len(self.region_bar_list) + 1:
             return
         # too many buttons -> delete excess ones
-        elif len(self.add_buttons) > len(self.region_list) + 1:
+        elif len(self.add_buttons) > len(self.region_bar_list) + 1:
             for i in range(len(self.add_buttons) - 1,
-                           len(self.region_list), -1):
+                           len(self.region_bar_list), -1):
                 self.add_buttons[i].destroy()
                 del self.add_buttons[i]
         # too few buttons -> add some
         else:
             for i in range(len(self.add_buttons),
-                           len(self.region_list) + 1):
+                           len(self.region_bar_list) + 1):
                 self.add_add_button()
 
     def add_add_button(self):
         """
         Add a new "add" button
         """
-        btn_temp = tk.Button(self, text="add",
-                             width=20, height=20)
-        btn_temp.config(command=lambda button=btn_temp: self.on_btn_add(button))
-        self.set_button(btn_temp, os.path.join("pics", "add.gif"), "add")
-        if len(self.add_buttons) == 0:
-            btn_temp.grid(row=3,
-                          column=6, rowspan=2, pady=(23, 0))
+        add_btn = tk.Button(self, text="add", width=20, height=20)
+        add_btn.config(command=lambda button=add_btn: self.on_btn_add(button))
+        self.set_button(add_btn, os.path.join("pics", "add.gif"), "add")
+        nb = len(self.add_buttons)
+        if nb == 0:                     # first region table row
+            add_btn.grid(row=3, column=6, rowspan=2, pady=(18, 0))
         else:
-            btn_temp.grid(row=len(self.add_buttons)*2+3, column=6, rowspan=2)
+            add_btn.grid(row=nb*2+3, column=6, rowspan=2)
         # force the button to steal focus when clicked
-        btn_temp.bind("<1>", lambda event: btn_temp.focus_set())
-        self.add_buttons.append(btn_temp)
+        add_btn.bind("<1>", lambda event: add_btn.focus_set())
+        self.add_buttons.append(add_btn)
 
-    def set_button(self, widget, file, text):
+    def set_button(self, btn, file, text):
         """
         Set up the Button with the specified text and picture.
 
         This method sets the Button image and text.
 
-        :param widget: the Button to be set
+        :param btn: the Button to be set
         :param file: the name of the new image file
         :param text: the new text of the Button (for identification)
         """
-        btn_new = widget
         photo_new = tk.PhotoImage(file=file, master=self)
-        btn_new.config(image=photo_new)
-        btn_new.image = photo_new
-        btn_new.config(takefocus=False)
-        btn_new.config(text=text)
+        btn.config(image=photo_new)
+        btn.image = photo_new
+        btn.config(takefocus=False)
+        btn.config(text=text)
 
     def shift_region_frames(self, index):
         """
@@ -344,7 +336,7 @@ class RegionTableFrame(ttk.Frame):
 
         :param index: Every RegionFrame above that index gets shifted.
         """
-        for i, region_bar in enumerate(self.region_list):
+        for i, region_bar in enumerate(self.region_bar_list):
             if i >= index:
                 self.set_widgets(region_bar, i+1)
                 region_bar.update_index()
@@ -373,7 +365,7 @@ class RegionTableFrame(ttk.Frame):
         """
         Updates the indexes of all region frames after a change of positions.
         """
-        for i, region_bar in enumerate(self.region_list):
+        for i, region_bar in enumerate(self.region_bar_list):
             region_bar.update_index()
 
     def update_all_swap_buttons(self):
@@ -383,8 +375,8 @@ class RegionTableFrame(ttk.Frame):
         Needs to be called when the amount or the position of regions is
         changed.
         """
-        length = len(self.region_list)
-        for region_bar in self.region_list:
+        length = len(self.region_bar_list)
+        for region_bar in self.region_bar_list:
             region_bar.update_swap_buttons(length)
 
     #def switch_geometry(self, geometry):
@@ -428,8 +420,7 @@ class RegionTableFrame(ttk.Frame):
 
     def get_posif(self):
         """
-        calculates the POSIF values from the thickness and
-        returns the POSIF string.
+        Calculates the POSIF values from thickness and surface position.
 
         :return: POSIF string
         """
@@ -441,7 +432,7 @@ class RegionTableFrame(ttk.Frame):
 
         posif_values = [str(surface_pos)]
 
-        for region_bar in self.region_list:
+        for region_bar in self.region_bar_list:
             thickness = region_bar.get_thickness()
             if thickness == "":
                 thickness = 0
@@ -467,19 +458,22 @@ class RegionTableFrame(ttk.Frame):
 
     def set_surface_pos(self, surface_pos):
         """
-        Sets the text in the thickness box.
+        Sets the text in the surface position box.
         """
         if self.geometry == '1D':
             self.surface_entry.delete(0, "end")
-            self.surface_entry.insert(0, surface_pos)
+            surface_pos = float(surface_pos)
+            if surface_pos == int(surface_pos):
+                surface_pos = int(surface_pos)
+            self.surface_entry.insert(0, str(surface_pos))
 
-    def on_ent_surface_focus_in(self, event):
+    def on_surface_entry_focus_in(self, event):
         """
         Callback for getting focus on the thickness entry box
         """
         self.prev_entry_surface_pos = self.get_surface_pos()
 
-    def on_ent_surface_focus_out(self, event):
+    def on_surface_entry_focus_out(self, event):
         """
         Callback for the on-click event of the thickness Entry-box.
 
@@ -489,37 +483,26 @@ class RegionTableFrame(ttk.Frame):
         self.surface_entry.unbind("<FocusOut>")
 
         # initial value for the simpledialog
-        initial = self.get_surface_pos()
-        # new material thickness
-        new_surface_pos = initial
-        first = True
+        surface_pos = self.get_surface_pos()
 
         # while no valid number is given
         while True:
-            if not first:
-                new_surface_pos = simpledialog.askstring(title="Change surface position",
-                                                         prompt="New surface position:",
-                                                         initialvalue=initial,
-                                                         parent=self)
-            first = False
             # result of the cancel button
-            if new_surface_pos is None:
+            if surface_pos is None:
                 # re-enable on-click event
                 self.set_surface_pos(self.prev_entry_surface_pos)
-                self.surface_entry.bind("<FocusOut>", self.on_ent_surface_focus_out)
+                self.surface_entry.bind("<FocusOut>",
+                                        self.on_surface_entry_focus_out)
                 return
-            initial = new_surface_pos
 
             # check for correct spelling of the molecule
-            number = None
             try:
-                number = float(new_surface_pos)
+                float(surface_pos)
             except ValueError:
                 error = True
             else:
                 error = False
-
-            if new_surface_pos == "":
+            if surface_pos == "":
                 error = False
 
             if error:
@@ -528,22 +511,27 @@ class RegionTableFrame(ttk.Frame):
                                         "Invalid surface position. "
                                         "Enter a valid number.")
             else:
-                # if thickness is valid, proceed
+                # if surface position is valid, proceed
                 break
 
-        # set new thickness if user didn't cancel
-        if new_surface_pos is not None:
-            self.set_surface_pos(new_surface_pos)
+            surface_pos = simpledialog.askstring(
+                    title="Change surface position",
+                    prompt="New surface position:",
+                    initialvalue=surface_pos,
+                    parent=self)
+
+        # set new surface position if user didn't cancel
+        if surface_pos is not None:
+            self.set_surface_pos(surface_pos)
             self.update_posif()
 
         # re-enable on-click event
-        self.surface_entry.bind("<FocusOut>", self.on_ent_surface_focus_out)
+        self.surface_entry.bind("<FocusOut>", self.on_surface_entry_focus_out)
 
 
 class RegionTableBar:
     """
-    Structure that holds the widgets and helper functions for displaying the
-    Region in the RegionTableFrame.
+    Widgets and helper functions for displaying Region in the RegionTableFrame.
     """
 
     def __init__(self, parent: RegionTableFrame,
@@ -569,48 +557,48 @@ class RegionTableBar:
         self.prev_entry_thick_val = ""
 
         # create widgets
-        self.lbl_region = ttk.Label(parent, text="Region "+str(index+1))
-        self.lbl_region.grid(row=0, column=0, padx=4)
+        self.region_label = ttk.Label(parent, text="Region " + str(index + 1))
+        self.region_label.grid(row=0, column=0, padx=4)
 
-        self.ent_name = tk.Entry(parent, width=17)
-        self.ent_name.grid(row=0, column=1)
-        self.ent_name.delete(0, "end")
-        self.ent_name.insert(0, material)
-        self.ent_name.bind("<FocusIn>", self.on_ent_name_focus_in)
-        self.ent_name.bind("<FocusOut>", self.on_ent_name_focus_out)
-        self.ent_name["state"] = "normal"
+        self.material_entry = ttk.Entry(parent, width=17)
+        self.material_entry.grid(row=0, column=1)
+        self.material_entry.delete(0, "end")
+        self.material_entry.insert(0, material)
+        self.material_entry.bind("<FocusIn>", self.on_material_entry_focus_in)
+        self.material_entry.bind("<FocusOut>", self.on_material_entry_focus_out)
+        self.material_entry["state"] = "normal"
 
-        self.ent_thick = tk.Entry(parent, width=17)
-        self.ent_thick.grid(row=0, column=2)
-        self.ent_thick.delete(0, "end")
-        self.ent_thick.insert(0, thickness)
-        self.ent_thick.bind("<FocusIn>", self.on_ent_thick_focus_in)
-        self.ent_thick.bind("<FocusOut>", self.on_ent_thick_focus_out)
-        self.ent_thick["state"] = "normal"
+        self.thickness_entry = ttk.Entry(parent, width=17)
+        self.thickness_entry.grid(row=0, column=2)
+        self.set_thickness(thickness)
+        self.thickness_entry.bind("<FocusIn>", self.on_thickness_entry_focus_in)
+        self.thickness_entry.bind("<FocusOut>",
+                                  self.on_thickness_entry_focus_out)
+        self.thickness_entry["state"] = "normal"
 
-        self.btn_up = tk.Button(parent, text="up", width=20, height=20,
-                                command=self.on_btn_up)
-        self.set_button(self.btn_up, os.path.join("pics", "arrow_u.gif"), "up")
-        self.btn_up.grid(row=0, column=3)
+        self.up_btn = tk.Button(parent, text="up", width=20, height=20,
+                                 command=self.on_btn_up)
+        self.set_button(self.up_btn, os.path.join("pics", "arrow_u.gif"), "up")
+        self.up_btn.grid(row=0, column=3)
 
-        self.btn_down = tk.Button(parent, text="down", width=20, height=20,
+        self.down_btn = tk.Button(parent, text="down", width=20, height=20,
                                   command=self.on_btn_down)
-        self.set_button(self.btn_down, os.path.join("pics", "arrow_d.gif"),
+        self.set_button(self.down_btn, os.path.join("pics", "arrow_d.gif"),
                         "down")
-        self.btn_down.grid(row=0, column=4)
+        self.down_btn.grid(row=0, column=4)
 
-        self.btn_delete = tk.Button(parent, text="delete",
+        self.delete_btn = tk.Button(parent, text="delete",
                                     width=20, height=20,
                                     command=self.on_btn_delete)
-        self.set_button(self.btn_delete, os.path.join("pics", "minus.gif"),
+        self.set_button(self.delete_btn, os.path.join("pics", "minus.gif"),
                         "delete")
-        self.btn_delete.grid(row=0, column=5)
+        self.delete_btn.grid(row=0, column=5)
 
         # force the button to steal focus when clicked
         # so that the focusout event gets called on the entries
-        self.btn_delete.bind("<1>", lambda event: self.btn_delete.focus_set())
-        self.btn_up.bind("<1>", lambda event: self.btn_up.focus_set())
-        self.btn_down.bind("<1>", lambda event: self.btn_down.focus_set())
+        self.up_btn.bind("<1>", lambda event: self.up_btn.focus_set())
+        self.down_btn.bind("<1>", lambda event: self.down_btn.focus_set())
+        self.delete_btn.bind("<1>", lambda event: self.delete_btn.focus_set())
 
     def set_button(self, widget, file, text):
         """
@@ -631,52 +619,54 @@ class RegionTableBar:
 
     def get_widgets(self) -> Tuple[tk.Label, tk.Entry, tk.Entry,
                                    tk.Button, tk.Button, tk.Button]:
-        """
-        Returns the widgets.
-
-        :return: Label, Entry Name, Entry Thickness, Button Up, Button Down, Button Delete.
-        """
-        return (self.lbl_region, self.ent_name, self.ent_thick,
-                self.btn_up, self.btn_down, self.btn_delete)
+        """Returns the widgets."""
+        return (self.region_label, self.material_entry, self.thickness_entry,
+                self.up_btn, self.down_btn, self.delete_btn)
 
     def get_index(self):
         """
         Returns the index of the region.
         """
-        return self.parent.region_list.index(self)
+        return self.parent.region_bar_list.index(self)
 
-    def get_name(self):
+    def get_material(self):
         """
-        Returns the text in the name box.
+        Returns the text in the material box.
         """
-        return self.ent_name.get()
+        return self.material_entry.get()
 
-    def set_name(self, name):
+    def set_material(self, name):
         """
-        Sets the text in the name box.
+        Sets the text in the material box.
         """
-        self.ent_name.delete(0, "end")
-        self.ent_name.insert(0, name)
+        self.material_entry.delete(0, "end")
+        self.material_entry.insert(0, name)
 
     def get_thickness(self):
         """
         Returns the text in the thickness box.
         """
-        return self.ent_thick.get()
+        return self.thickness_entry.get()
 
     def set_thickness(self, thickness):
         """
         Sets the text in the thickness box.
         """
-        self.ent_thick.delete(0, "end")
-        self.ent_thick.insert(0, thickness)
+        self.thickness_entry.delete(0, "end")
+        if thickness == "":
+            self.thickness_entry.insert(0, "")
+        else:
+            thickness = float(thickness)
+            if thickness == int(thickness):
+                thickness = int(thickness)
+            self.thickness_entry.insert(0, str(thickness))
 
     def update_index(self):
         """
         Updates the Label text to the correct index.
         """
         index = self.get_index()
-        self.lbl_region["text"] = "Region " + str(index+1) + ":"
+        self.region_label["text"] = "Region " + str(index + 1) + ":"
 
     def on_btn_delete(self):
         """
@@ -709,21 +699,21 @@ class RegionTableBar:
         """
         index = self.get_index()
         if index == 0:
-            self.btn_up["state"] = "disabled"
+            self.up_btn["state"] = "disabled"
         if index > 0:
-            self.btn_up["state"] = "normal"
+            self.up_btn["state"] = "normal"
         if index == length - 1:
-            self.btn_down["state"] = "disabled"
+            self.down_btn["state"] = "disabled"
         if index < length - 1:
-            self.btn_down["state"] = "normal"
+            self.down_btn["state"] = "normal"
 
-    def on_ent_name_focus_in(self, event):
+    def on_material_entry_focus_in(self, event):
         """
         Callback for getting focus on the name entry box
         """
-        self.prev_entry_val = self.get_name()
+        self.prev_entry_val = self.get_material()
 
-    def on_ent_name_focus_out(self, event):
+    def on_material_entry_focus_out(self, event):
         """
         Callback for the on-click event of the Entry-box.
         Changes Region name and calls update_atoms()
@@ -732,10 +722,10 @@ class RegionTableBar:
         new material name and checks for a valid molecule name.
         """
         # disable another instance of this method from opening
-        self.ent_name.unbind("<FocusOut>")
+        self.material_entry.unbind("<FocusOut>")
 
         # initial value for the simpledialog
-        initial = self.get_name()
+        initial = self.get_material()
         # new material name
         new_name = initial
         first = True
@@ -751,8 +741,8 @@ class RegionTableBar:
             # result of the cancel button
             if new_name is None:
                 # re-enable on-click event
-                self.set_name(self.prev_entry_val)
-                self.ent_name.bind("<FocusOut>", self.on_ent_name_focus_out)
+                self.set_material(self.prev_entry_val)
+                self.material_entry.bind("<FocusOut>", self.on_material_entry_focus_out)
                 return
             initial = new_name
 
@@ -782,61 +772,48 @@ class RegionTableBar:
 
         # set new name if user didn't cancel
         if new_name is not None:
-            self.set_name(new_name)
+            self.set_material(new_name)
             self.parameter_data.set_material_name_at(self.get_index(), new_name)
             self.update_atoms(change_region=True)
 
         # re-enable on-click event
-        self.ent_name.bind("<FocusOut>", self.on_ent_name_focus_out)
+        self.material_entry.bind("<FocusOut>", self.on_material_entry_focus_out)
 
-    def on_ent_thick_focus_in(self, event):
+    def on_thickness_entry_focus_in(self, event):
         """
         Callback for getting focus on the thickness entry box
         """
         self.prev_entry_thick_val = self.get_thickness()
 
-    def on_ent_thick_focus_out(self, event):
+    def on_thickness_entry_focus_out(self, event):
         """
         Callback for the on-click event of the thickness Entry-box.
 
         Updates POSIF values accordingly if value is a number.
         """
         # disable another instance of this method from opening
-        self.ent_thick.unbind("<FocusOut>")
+        self.thickness_entry.unbind("<FocusOut>")
 
         # initial value for the simpledialog
-        initial = self.get_thickness()
-        # new material thickness
-        new_thickness = initial
-        first = True
+        thickness = self.get_thickness()
 
         # while no valid number is given
         while True:
-            if not first:
-                new_thickness = simpledialog.askstring(title="Change Material thickness",
-                                                       prompt="New Material thickness:",
-                                                       initialvalue=initial,
-                                                       parent=self.parent)
-            first = False
             # result of the cancel button
-            if new_thickness is None:
+            if thickness is None:
                 # re-enable on-click event
                 self.set_thickness(self.prev_entry_thick_val)
-                self.ent_thick.bind("<FocusOut>", self.on_ent_thick_focus_out)
+                self.thickness_entry.bind("<FocusOut>",
+                                          self.on_thickness_entry_focus_out)
                 return
-            initial = new_thickness
 
             # check for correct spelling of the molecule
-            number = None
             try:
-                number = float(new_thickness)
+                float(thickness)
             except ValueError:
-                error = True
+                error = (thickness != "")
             else:
-                error = False
-
-            if new_thickness == "":
-                error = False
+                error = (float(thickness) <= 0)
 
             if error:
                 # info for wrong input
@@ -847,11 +824,17 @@ class RegionTableBar:
                 # if thickness is valid, proceed
                 break
 
+            thickness = simpledialog.askstring(
+                    title="Change Material thickness",
+                    prompt="New Material thickness:",
+                    initialvalue=thickness,
+                    parent=self.parent)
+
         # set new thickness if user didn't cancel
-        if new_thickness is not None:
-            self.set_thickness(new_thickness)
+        if thickness is not None:
+            self.set_thickness(thickness)
             self.parent.update_posif()
 
         # re-enable on-click event
-        self.ent_thick.bind("<FocusOut>", self.on_ent_thick_focus_out)
+        self.thickness_entry.bind("<FocusOut>", self.on_thickness_entry_focus_out)
 

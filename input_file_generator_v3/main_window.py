@@ -420,12 +420,14 @@ class MainWindow(tk.Tk):
 
         self.ion_name_entry["state"] = "normal"
         self.ion_energy_entry["state"] = "normal"
-        self.ion_name_entry.bind("<FocusOut>",
-                                 self.on_entry_ion_focus_out)
         self.ion_name_entry.bind("<FocusIn>",
-                                 self.on_entry_ion_focus_in)
+                                 self.on_ion_name_entry_focus_in)
+        self.ion_name_entry.bind("<FocusOut>",
+                                 self.on_ion_name_entry_focus_out)
+        self.ion_energy_entry.bind("<FocusIn>",
+                                   self.on_ion_energy_entry_focus_in)
         self.ion_energy_entry.bind("<FocusOut>",
-                                   self.on_entry_ion_energy_focus_out)
+                                   self.on_ion_energy_entry_focus_out)
 
         # load the current ion parameters
         ions = self.parameter_data.get_entry_value("ions", "NAME")
@@ -435,31 +437,161 @@ class MainWindow(tk.Tk):
 
         self.target_type_cb["state"] = "readonly"
 
-    def on_save_as(self):
+    def on_ion_name_entry_focus_in(self, event):
+        self.prev_entry_val = self.ion_name_entry_var.get()
+        self.ion_name_entry.selection_range(0, 'end')
+
+    def on_ion_name_entry_focus_out(self, event):
         """
-        Opens a File Dialog to create a new file.
+        Callback for the on-click event of the Entry-box
+
+        Opens a new simpledialog window that asks the user for the
+        new ion name and checks for a valid molecule name.
         """
-        loaded_file = filedialog.asksaveasfile(
+        # disable another instance of this method from opening
+        self.ion_name_entry.unbind("<FocusOut>")
+
+        ion_name = self.ion_name_entry_var.get()
+
+        # while no valid name is given
+        while True:
+            # check for correct spelling of the molecule
+            # TODO: get_unique_atoms does not raise an exception if an invalid
+            #  atom name is given after a number, e.g., for 'B2x'.
+            unique_atoms = []
+            try:
+                unique_atoms = get_unique_atoms([ion_name],
+                                                self.all_elements)
+            except ValueError:
+                error = True
+            else:
+                error = False
+
+            # check if the given string was a molecule name
+            if len(unique_atoms) == 0:
+                error = True
+
+            if ion_name == "":
+                error = False
+
+            if error:
+                # info for wrong input
+                tk.messagebox.showerror("Invalid Input",
+                                        "Invalid Ion Name.")
+            else:
+                # if name is valid, proceed
+                break
+
+            ion_name = simpledialog.askstring(
+                    title="Change Ion Name",
+                    prompt="New Ion name:",
+                    initialvalue=ion_name,
+                    parent=self)
+            # result of the cancel button
+            if ion_name is None:
+                # re-enable on-click event
+                self.ion_name_entry_var.set(self.prev_entry_val)
+                self.ion_name_entry.bind("<FocusOut>",
+                                         self.on_ion_name_entry_focus_out)
+                return
+
+        # set new name if user didn't cancel
+        if ion_name is not None:
+            self.ion_name_entry_var.set(ion_name)
+            self.parameter_data.set_entry_value("ions", "NAME", ion_name)
+            self.update_atoms(change_ion=True)
+
+            # re-enable on-click event
+        self.ion_name_entry.bind("<FocusOut>", self.on_ion_name_entry_focus_out)
+
+    def on_ion_energy_entry_focus_in(self, event):
+        self.ion_energy_entry.selection_range(0, 'end')
+
+    def on_ion_energy_entry_focus_out(self, event):
+        """
+        Callback for the focus-out event of the Entry-box.
+        """
+        ion_energy = self.ion_energy_entry_var.get()
+        self.parameter_data.set_entry_value("ions", "ENERGY", ion_energy)
+        # TODO: Validate ion energy can be converted to float
+
+    def on_target_type_cb_change(self, value):
+        """
+        Target Combobox change event.
+        Changes Target frame to region or cell view.
+
+        :param value: VirtualEvent passed by the event handler.
+        """
+
+        if self.target_type_cb_var.get() == "Regions":
+            #self.load_regions_frame()
+            self.parameter_data.set_entry_value("setup", "USECELL", "F")
+        elif self.target_type_cb_var.get() == "Cells":
+            #self.load_cells_frame()
+            self.parameter_data.set_entry_value("setup", "USECELL", "T")
+        self.load_target_frame(row=2)
+
+    def on_geom_dim_cb_change(self, value):
+        self.load_regions_widgets()
+
+    def on_open_cells_file(self, event):
+        """
+        Opens a File Dialog to open an existing file.
+        """
+        loaded_file = filedialog.askopenfile(
                 initialdir=self.statusbar_entry_var.get(),
-                title="Select IMSIL input file",
-                filetypes=[("Input File", ".inp"), ("any", ".*")])
+                title="Select Cells file")
         if loaded_file:
-            self.statusbar_entry_var.set(loaded_file.name)
-
-            self.on_save()
-
+            self.cells_entry_var.set(loaded_file.name)
             loaded_file.close()
             self.statusbar_entry["state"] = "readonly"
 
-    def on_save(self):
-        filename = self.statusbar_entry_var.get()
-        # if no file is selected, try creating a new one
-        if filename == "No file selected.":
-            self.on_save_as()
-        else:
-            # create the Namelist and save it
-            nml = create_nml(self.parameter_data)
-            save_nml(nml, filename)
+            self.parameter_data.set_entry_value("setup", "FILCELL",
+                                                loaded_file.name)
+
+    def open_imsil_input_parameter_editor(self):
+        """
+        Open the Imsil Input Parameter Editor.
+        """
+
+        self.withdraw()  # Hide the current window
+        region_names = self.parameter_data.get_materials()
+
+        # Open the ImsilInputParameterEditor
+        ImsilInputParameterEditor(
+            type_of_simulation=None,
+            input_file_path="",
+            parameter_data=self.parameter_data,
+            region_names=region_names,
+            on_close=self.on_close_parameter_editor)
+
+    def on_close_parameter_editor(self, apply=False):
+        """
+        Callback when closing the parameter editor.
+
+        :param apply: True if the user wants to apply the changes.
+        """
+        if apply:
+            self.parameter_data.readout_parameter_editor()
+
+            usecell = self.parameter_data.get_entry_value("setup", "USECELL")
+            if usecell == "T":
+                # self.load_cells_frame()
+                self.target_type_cb_var.set("Cells")
+                filename = self.parameter_data.get_entry_value("setup",
+                                                               "FILCELL")
+                self.cells_entry_var.set(filename)
+            else:
+                # self.load_regions_frame()
+                self.target_type_cb_var.set("Regions")
+            self.load_target_frame(row=2)
+
+            ions = self.parameter_data.get_entry_value("ions", "NAME")
+            ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
+            self.ion_name_entry_var.set(ions)
+            self.ion_energy_entry_var.set(ion_energy)
+
+        self.deiconify()
 
     def on_open_file(self):
         """
@@ -490,6 +622,32 @@ class MainWindow(tk.Tk):
             self.ion_name_entry_var.set(ions)
             self.ion_energy_entry_var.set(ion_energy)
 
+    def on_save(self):
+        filename = self.statusbar_entry_var.get()
+        # if no file is selected, try creating a new one
+        if filename == "No file selected.":
+            self.on_save_as()
+        else:
+            # create the Namelist and save it
+            nml = create_nml(self.parameter_data)
+            save_nml(nml, filename)
+
+    def on_save_as(self):
+        """
+        Opens a File Dialog to create a new file.
+        """
+        loaded_file = filedialog.asksaveasfile(
+                initialdir=self.statusbar_entry_var.get(),
+                title="Select IMSIL input file",
+                filetypes=[("Input File", ".inp"), ("any", ".*")])
+        if loaded_file:
+            self.statusbar_entry_var.set(loaded_file.name)
+
+            self.on_save()
+
+            loaded_file.close()
+            self.statusbar_entry["state"] = "readonly"
+
     def create_tooltip_btn(self, parent, parameter_entry):
 
         short_desc = parameter_entry.get_short_desc()
@@ -508,118 +666,6 @@ class MainWindow(tk.Tk):
                 command=lambda: messagebox.showinfo(par_name, long_desc))
 
         return info_btn
-
-    def on_open_cells_file(self, event):
-        """
-        Opens a File Dialog to open an existing file.
-        """
-        loaded_file = filedialog.askopenfile(
-                initialdir=self.statusbar_entry_var.get(),
-                title="Select Cells file")
-        if loaded_file:
-            self.cells_entry_var.set(loaded_file.name)
-            loaded_file.close()
-            self.statusbar_entry["state"] = "readonly"
-
-            self.parameter_data.set_entry_value("setup", "FILCELL",
-                                                loaded_file.name)
-
-    def on_target_type_cb_change(self, value):
-        """
-        Target Combobox change event.
-        Changes Target frame to region or cell view.
-
-        :param value: VirtualEvent passed by the event handler.
-        """
-
-        if self.target_type_cb_var.get() == "Regions":
-            #self.load_regions_frame()
-            self.parameter_data.set_entry_value("setup", "USECELL", "F")
-        elif self.target_type_cb_var.get() == "Cells":
-            #self.load_cells_frame()
-            self.parameter_data.set_entry_value("setup", "USECELL", "T")
-        self.load_target_frame(row=2)
-
-    def on_geom_dim_cb_change(self, value):
-        self.load_regions_widgets()
-
-    def on_entry_ion_focus_in(self, event):
-        self.prev_entry_val = self.ion_name_entry_var.get()
-
-    def on_entry_ion_focus_out(self, event):
-        """
-        Callback for the on-click event of the Entry-box
-
-        Opens a new simpledialog window that asks the user for the
-        new ion name and checks for a valid molecule name.
-        """
-        # disable another instance of this method from opening
-        self.ion_name_entry.unbind("<FocusOut>")
-
-        # initial value for the simpledialog
-        initial = self.ion_name_entry_var.get()
-
-        new_name = initial
-        first = True
-
-        # while no valid name is given
-        while True:
-            if not first:
-                new_name = simpledialog.askstring(
-                    title="Change Ion Name",
-                    prompt="New Ion name:",
-                    initialvalue=initial,
-                    parent=self)
-            first = False
-            # result of the cancel button
-            if new_name is None:
-                # re-enable on-click event
-                self.ion_name_entry_var.set(self.prev_entry_val)
-                self.ion_name_entry.bind("<FocusOut>",
-                                         self.on_entry_ion_focus_out)
-                return
-            initial = new_name
-
-            # check for correct spelling of the molecule
-            unique_atoms = []
-            try:
-                unique_atoms = get_unique_atoms([new_name],
-                                                self.all_elements)
-            except ValueError:
-                error = True
-            else:
-                error = False
-            # check if the given string was a molecule name
-            if len(unique_atoms) == 0:
-                error = True
-
-            if new_name == "":
-                error = False
-
-            if error:
-                # info for wrong input
-                tk.messagebox.showerror("Invalid Input",
-                                        "Invalid Ion Name.")
-            else:
-                # if name is valid, proceed
-                break
-
-        # set new name if user didn't cancel
-        if new_name is not None:
-            self.ion_name_entry_var.set(new_name)
-            self.parameter_data.set_entry_value("ions", "NAME", new_name)
-            self.update_atoms(change_ion=True)
-
-            # re-enable on-click event
-        self.ion_name_entry.bind("<FocusOut>", self.on_entry_ion_focus_out)
-
-    def on_entry_ion_energy_focus_out(self, event):
-        """
-        Callback for the focus-out event of the Entry-box.
-        """
-
-        new_name = self.ion_energy_entry_var.get()
-        self.parameter_data.set_entry_value("ions", "ENERGY", new_name)
 
     def update_atoms(self, change_ion=False, change_region=False):
         """
@@ -869,46 +915,3 @@ class MainWindow(tk.Tk):
             db_table.regroup()
             self.db_tables.append(db_table)
 
-    def open_imsil_input_parameter_editor(self):
-        """
-        Open the Imsil Input Parameter Editor.
-        """
-
-        self.withdraw()     # Hide the current window
-        region_names = self.parameter_data.get_materials()
-
-        # Open the ImsilInputParameterEditor
-        ImsilInputParameterEditor(
-            type_of_simulation=None,
-            input_file_path="",
-            parameter_data=self.parameter_data,
-            region_names=region_names,
-            on_close=self.on_close_parameter_editor)
-
-    def on_close_parameter_editor(self, apply=False):
-        """
-        Callback when closing the parameter editor.
-
-        :param apply: True if the user wants to apply the changes.
-        """
-        if apply:
-            self.parameter_data.readout_parameter_editor()
-
-            usecell = self.parameter_data.get_entry_value("setup", "USECELL")
-            if usecell == "T":
-                #self.load_cells_frame()
-                self.target_type_cb_var.set("Cells")
-                filename = self.parameter_data.get_entry_value("setup",
-                                                               "FILCELL")
-                self.cells_entry_var.set(filename)
-            else:
-                #self.load_regions_frame()
-                self.target_type_cb_var.set("Regions")
-            self.load_target_frame(row=2)
-
-            ions = self.parameter_data.get_entry_value("ions", "NAME")
-            ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
-            self.ion_name_entry_var.set(ions)
-            self.ion_energy_entry_var.set(ion_energy)
-
-        self.deiconify()
