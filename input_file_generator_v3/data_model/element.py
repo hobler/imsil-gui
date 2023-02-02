@@ -1,6 +1,12 @@
 """
 Perform functions to analyze molecule names and to get all the unique atoms.
 
+Parameters:
+    `MOLECULE_END`
+        = -1. Indicates the end of a molecule in get_unique_atoms.
+    `VALUE_ERROR`
+        = -2. Indicates a wrong character in the molecule name.
+
 Functions:
     `get_all_elements`
         Extracts all of the Elements of the element.f90 file and returns them
@@ -19,6 +25,9 @@ Classes:
         Chemical element data type
 """
 import os
+
+MOLECULE_END = -1
+VALUE_ERROR = -2
 
 
 def get_all_elements():
@@ -59,8 +68,11 @@ def get_unique_atoms(molecule_list, elements):
         molec = [molecule.strip()]
         while True:
             molec = analyze_molecule(molec[0], get_element_names(elements))
-            if molec == -1:
+            if molec == MOLECULE_END:
                 break
+            elif molec == VALUE_ERROR:
+                raise ValueError
+
             if elements[molec[2]] not in unique_atoms:
                 unique_atoms.append(elements[molec[2]])
     return unique_atoms
@@ -91,9 +103,9 @@ def analyze_molecule(molecule, elements_short):
             ele += molecule[k]
             k += 1
         else:
-            return -1
+            return VALUE_ERROR
     else:
-        return -1
+        return MOLECULE_END
 
     if len(molecule) > k:
         if molecule[k].isalpha() and molecule[k].islower():
