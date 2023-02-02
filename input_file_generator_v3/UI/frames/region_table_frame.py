@@ -121,7 +121,7 @@ class RegionTableFrame(ttk.Frame):
         materials = self.parameter_data.get_materials()
 
         posif = self.parameter_data.get_entry_value("geom", "POSIF")
-        if posif.startswith("-"):
+        if posif.startswith("- POSIF"):
             posif = '0,'
         posif = posif.split(",")
         surface_pos = posif[0]
