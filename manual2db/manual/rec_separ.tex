@@ -1,0 +1,328 @@
+This record is used to define the parameters of the electronic stopping model.
+For a description of the parameters refer to Chapter \ref{s:stop}. The
+\texttt{\&SEPAR} record has the index variables \texttt{ATOM1} and
+\texttt{ATOM2}. \texttt{ATOM1} corresponds to the index of the projectile, while
+\texttt{ATOM2} corresponds to the index of the target atom/recoil. Regarding the
+definition of atom indices, see Section~\ref{s:atom}.
+
+\begin{keydescription}{\texttt{CORLIN} --- Correction to Lindhard stopping}
+%
+  This parameter specifies the correction factor $k/k_L$ to be applied to the 
+  Lindhard stopping formula $S_e=k_L \sqrt{E}$ in the velocity proportional 
+  regime.  \texttt{CORLIN} is only effective if
+  \texttt{MODEL=1} or \texttt{MODEL=3}.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> see \cite{I0104} for Si targets \\
+             \> 1.1 for \texttt{Z1=5} in SiO$_2$, \\
+             \> 1 otherwise \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{C0BETHE} --- Bethe Bloch stopping power constant}
+%
+  This parameter specifies the Bethe constant $c_0$ to be applied in
+  calculation of the Bethe-Bloch stopping power.
+  \texttt{C0BETHE} is only effective if \texttt{MODEL=1} or \texttt{MODEL=3}.
+
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> 1.43 for \texttt{Z1=1} \cite{Hob05a} \\
+             \> 1 otherwise \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+%
+
+\begin{keydescription}{\texttt{C1BETHE} --- Bethe Bloch stopping power linear factor}
+%
+  This parameter specifies the linear Bethe factor $c_1$ to be applied in
+  calculation of the Bethe-Bloch stopping power.
+  \texttt{C1BETHE} is only effective if \texttt{MODEL=1} or \texttt{MODEL=3}.
+
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> 40*\texttt{Z1*Z2} for \texttt{Z1=1} \cite{Hob05a}\\
+             \> 100*\texttt{Z1*Z2} for \texttt{Z1=2} \\
+	     \> 5 otherwise \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{EMINSE} --- Minimum energy for electronic
+    stopping}
+%
+  This parameter specifies the energy below which electronic stopping
+  vanishes. For energies below \texttt{EMINSE} the electronic stopping
+  power $S_\mathrm{e}$ is set to zero. For energies above \texttt{EMINSE},
+  \texttt{EMINSE} is subtracted from the particle energy for the evaluation
+  of the stopping power. The units of \texttt{EMINSE} are eV.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> 0 \\
+    Range:   \> any
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ENL} --- Energies for nonlocal fractions}
+%
+  This parameter specifies the energies $E^\mathrm{nl}$ to which the
+  nonlocal fraction \texttt{XNL} values correspond. The units of \texttt{ENL}
+  are eV. \texttt{ENL=0} means the energy at the stopping power maximum and
+  is allowed only as the last \texttt{ENL} value. If \texttt{ENL} values for the
+  same atom indices appear on different records, later specifications override
+  earlier ones.
+  \ifprivate
+  \texttt{XNL} is only effective if \texttt{MODEL=1...6}.
+  \fi
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of simple arrays (arbitrary size $\le 20$) of real \\
+    Default: \> see \texttt{XNL} \\
+    Range:   \> $\ge 0$, increasing
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ESTRAG} --- Kink energy for electronic
+    straggling}
+%
+  This parameter specifies the energy where the low- and high-energy
+  asymptotic behaviors of the electronic straggling intersect. At low
+  energies the straggling is proportional to the energy, while at high
+  energies it is constant and equal to the Bohr straggling.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> 100~keV $\times$ mass of \texttt{ATOM1} \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FACSCR} --- Factor for the screening length}
+%
+  This parameter specifies the factor $f$ to be applied to the
+  Oen-Robinson screening length if \texttt{FAC2SCR} is not specified.
+  If \texttt{FAC2SCR} is specified, it specifies $f$ in the low-energy
+  limit.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> $1.37 / \texttt{Z1}^{1/3}$ \\
+    Range:   \> $> 0$
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FAC2SCR} --- Factor for the screening length
+  at $x^\mathrm{nl}=1$}
+%
+  This parameter specifies a linear dependence of the factor $f$ for the 
+  screening length on the nonlocal fraction $x^\mathrm{nl}$. If 
+  \texttt{FAC2SCR} is specified, \texttt{FACSCR} is considered the value 
+  of $f$ at $x^\mathrm{nl} = 0$ and \texttt{FAC2SCR} the value 
+  of $f$ at $x^\mathrm{nl} = 1$. 
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> \texttt{FACSCR} \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FIRSOV} --- Firsov stopping flag}
+%
+  This parameter specifies whether the impact parameter dependent electronic 
+  stopping shall be described by the Firsov model. Firsov stopping may 
+  be  modified by \texttt{POWFIRS}. If \texttt{FIRSOV='off'}, the Oen-Robinson
+  model is used instead.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2}, \texttt{ATOM1})
+                of character strings \\
+    Default: \> \texttt{'off'} \\
+    Range:   \> \texttt{'on'}, \texttt{'off'}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LAPSIS} --- Apsis flag}
+%
+  This parameter specifies whether the apsis (distance of closest
+  approach) of the collision (\texttt{LAPSIS=T}) or the impact
+  parameter (\texttt{LAPSIS=F}) is used in the local electronic
+  stopping model. Using the apsis is physically more sound, while using the
+  impact parameter may save some computation time.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} if \texttt{LRCOIL=T} and \texttt{ELIMKP$<$100} \\
+             \> \texttt{F} otherwise \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LSE} --- Electonic stopping flag}
+%
+  This parameter specifies whether electronic stopping shall be
+  considered. 
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LTAB} --- Stopping table flag}
+%
+  This parameter specifies whether tables of the nonlocal electronic
+  stopping power shall be written to the file \texttt{SE} for each ion species. 
+  The energies are equally spaced on a logarithmic
+  scale between \texttt{EF} of the \texttt{\&SNPAR} record and
+  \texttt{ENERGY} of the \texttt{\&IONS} record.  Units are eV for the
+  energy and eV/\AA\ for the stopping power.  For \texttt{LTAB=T} no
+  simulation of ion trajectories is performed.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{MODEL} --- Electronic stopping model}
+%
+  This parameter specifies the electronic stopping model.  \texttt{MODEL=1} or
+  \texttt{3} denotes the default stopping power model described in
+  Section~\ref{s:stop}. \texttt{MODEL=2} or \texttt{4} indicates that ZBL
+  stopping, \texttt{MODEL=5} or \texttt{6} that KKK stopping should be used
+  instead of Lindhard stopping. \texttt{MODEL=5} or \texttt{6} are only allowed
+  for \texttt{ATOM2} corresponding to Si atoms. \texttt{MODEL=7} denotes that
+  the electronic stopping will be read from the file \texttt{SEFILE}. Values
+  beyond the last tabluted energy are set to zero. For \texttt{MODEL=3},
+  \texttt{4}, or \texttt{6} Eq.~\ref{eq6} is used, for \texttt{MODEL=1},
+  \texttt{2}, or \texttt{5} Eq.~\ref{eq6a} is used. 
+%
+  \ifprivate
+  \texttt{MODEL=11...14} denote electronic stopping models based on
+  tabulated electron densities.
+  \fi 
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of integer \\
+    Default: \> 1 for $\texttt{E0} < 10~$keV$\cdot$ion atom mass, \\
+             \> 3 otherwise \\
+    Range:   \> 1...7\ifprivate , 11...14 \fi
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POWFIRS} --- Power in Firsov model}
+%
+  This parameter specifies the power used in the Firsov model that
+  describes the impact parameter dependence of the electronic stopping.
+  Note that Firsov stopping is only used if \texttt{FIRSOV='on'}.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> 5 \\
+    Range:   \> $> 2$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POWINT} --- Power for Interpolation of 
+    Stopping Powers}
+%
+  This parameter specifies the constant used to interpolate the
+  low-energy (Lindhard like) stopping power with the modified Bethe
+  Bloch stopping power.  \texttt{POWINT} is only effective if
+  \texttt{MODEL=1} or \texttt{3}.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> according to \cite{I0104} for ions specified there \\
+             \> 1 otherwise \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POWLIN} --- Power for low energy
+    electronic stopping}
+%
+  This parameter specifies the power $p$ in the energy dependence of
+  the Lindhard stopping power.  \texttt{POWLIN} is only effective for
+  \texttt{MODEL=1} or \texttt{3}. Note that changing \texttt{POWLIN} 
+  will leave the electronic stopping power at 1~eV constant. Since this 
+  is probably not what you want, you have to change \texttt{CORLIN} 
+  accordingly. 
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM1}) of real \\
+    Default: \> 0.5 \\
+    Range:   \> $0 < \texttt{POWLIN} \le 1$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{PTAB} --- Impact parameter for stopping
+    power tabulation}
+%
+  This parameter specifies the impact parameter to be used for the local
+  part of the electronic energy loss. It is only used for the stopping
+  power table to be written to the file \texttt{SE} if the flag 
+  \texttt{LTAB} is set.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SEFILE} --- Random electronic stopping file}
+%
+  This parameter specifies the name of the random electronic stopping
+  file. \texttt{SEFILE} is only effective if \texttt{MODEL=7}.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character strings \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{MODEL=7}) \\
+    Range:   \> any name ($\le$ 80 characters) of a file containing a random
+    electronic stopping.
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{STRAGGLE} --- Electronic straggling flag}
+%
+  This parameter specifies whether electronic straggling according to
+  Konac, Klatt, and Kalbitzer (KKK) shall be taken into account. The
+  KKK model may be modified using the \texttt{ESTRAG} parameter.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2}, \texttt{ATOM1})
+                of character strings \\
+    Default: \> \texttt{'on'} if \texttt{ESTRAG} is specified \\
+             \> \texttt{'off'} otherwise \\
+    Range:   \> \texttt{'on'}, \texttt{'off'}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{XNL} --- Nonlocal fraction}
+%
+  This parameter specifies the nonlocal fraction $x^{nl}$. If \texttt{ENL}
+  values are specified, the same number of \texttt{XNL} values have to be 
+  specified, which then correspond to the respective \texttt{ENL} values. 
+  If \texttt{ENL} values are not specified, not more \texttt{XNL}
+  values must be specified than default values of \texttt{ENL} exist (usually
+  2). If only one \texttt{XNL} value is given, the nonlocal fraction of
+  electronic stopping is independent of energy. If \texttt{XNL} values for
+  the same atom indices appear on different records, later specifications
+  override earlier ones.
+  \ifprivate
+  \texttt{XNL} is only effective if \texttt{MODEL=1...6}.
+  \fi
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of simple array (arbitrary size) of real \\
+    Default: \> 0.15, 0.32 at 1eV, 1keV for \texttt{Z1=5}, \\
+             \> 0.25, 0.50 at 1eV, 1MeV for \texttt{Z1=15}, \\
+             \> according to \cite{I0104} for ions specified there, \\
+             \> 0.5 otherwise \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+

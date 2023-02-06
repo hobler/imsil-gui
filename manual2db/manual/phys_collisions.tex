@@ -1,0 +1,125 @@
+\ifprivate
+Aside from being a binary collision simulator, IMSIL also has a
+simplified molecular dynamics mode which treats the ion target
+interaction by integration of the equations of motion of the moving
+particles. It is simplified inasmuch as only interations between the
+ion or recoil and the target atoms are taken into acoount and
+interactions among the target atoms are disregarded. Also, it is
+restricted to simulations in a single crystalline layer, and no
+lattice damage may be taken into account. Nevertheless, the user is
+given access to this mode by the \texttt{LMD} flag. There are only a
+few parameters specific to the MD mode, such as the accuracy of time
+integration, which are hard-coded. For more information and
+applications see \cite{I9701,I0101}. 
+\fi
+
+In the binary collision approximation, the collisions are treated as if the ions
+interacted with only one target atom at a time.  In \textbf{amorphous} targets,
+the algorithm used is similar to that implemented in TRIM \cite{I8001}, however,
+with a different choice of the maximum impact parameter. $p_\mathrm{max}$ is
+calculated depending on energy and ion and target atom species, based on two
+criteria \cite{hobler_acceleration_1995}. The energy transfer criterion
+guarantees that scattering events with energy transfers larger than a
+user-specified value $T_\mathrm{min}$ are taken into account. The scattering
+angle criterion guarantees that all scattering events with scattering angles
+larger than the user-specified value $\psi_\mathrm{min}$ are taken into account.
+The resulting  $p_\mathrm{max}$ values are limited by $p_\mathrm{max,max}$ and
+$p_\mathrm{max,\psi}$, respectively. The larger of the maximum impact parameters
+determined from the two criteria is taken. In addition, the impact parameter is
+forced to be at least $p_\mathrm{max,min}$. It is possible to use a fixed
+maximum impact parameter by setting all of $p_\mathrm{max,max}$,
+$p_\mathrm{max,\psi}$, and $p_\mathrm{max,min}$ to the desired value. 
+
+The user can choose between a deterministic and a random free flight path. The
+latter assumes an exponential probability density function with a mean value
+equal to the deterministic free flight path. The (mean) free flight path
+$\overline{L}$ is calculated from the relation 
+$\overline{L} \cdot \pi p_{max}^2 = N^{-1}$, which considers the correct atomic 
+density $N$ of the target. As usual \cite{I8001}, the square of the impact
+parameter $p$ is selected randomly with a uniform distribution between 0 and 
+$p_{max}^2$, and the azimuthal position of the target atom with respect to the 
+ion path is chosen randomly between 0 and $2\pi$. 
+
+In a \textbf{crystalline} target region, after each collision, the next target
+atom to be hit has to be selected from the lattice positions surrounding the 
+ion. This is done among all lattice sites that lead to impact parameters
+$p < p_\mathrm{max,c}$ and free flight paths $0 < L < L_\mathrm{max,c}$. In
+addition, to limit the size of the search cell, only atoms with a distance from
+the projectile less than the search distance $r_\mathrm{min,c}$ are guaranteed
+to be checked. For consistency, the following condition must hold:
+%
+\begin{equation}
+   L_\mathrm{max,c}^2 + p_\mathrm{max,c}^2 \le r_\mathrm{min,c}^2   
+   \label{eq:search}
+\end{equation}
+%
+For the diamond crystal structure, it is usually not necessary to change the
+default values of these parameters. If it is done, it is important to obey
+Eq.~(\ref{eq:search}). For other crystal structures, it might be essential to
+set $p_\mathrm{max,c}$ in the input file. With larger $p_\mathrm{max,c}$, more
+distant collision partners are taken into account, which might increase accuracy
+at low energies on the expense of increasing computation times. Too small
+$p_\mathrm{max,c}$ might introduce inaccuracies into the simulation. For crystal
+structures other than the default diamond structure, $r_\mathrm{min,c}$ is
+calculated by the program. The choice of $L_\mathrm{max,c}$ is uncritical, it
+only affects the computational efficiency.
+
+The default values of $p_\mathrm{max,\psi}$ and $p_\mathrm{max,c}$ are implant
+energy dependent for energies less than $10$~keV in order to allow more accurate
+simulation of low-energy implantations.
+
+Small displacements from the lattice positions due to thermal vibrations are
+taken into account. These are assumed to be uncorrelated and distributed
+according to a Gaussian function. The RMS displacement in one direction,
+$x_\mathrm{rms}$, may be calculated using the Debye theory \cite{I7403}. A value
+of 490~K is recommended for the Debye temperature of Si
+\cite{hobler_role_1993,hobler_verification_1996}. The values of the Debye
+temperatures for all elements are tabulated within IMSIL and appropriate
+vibrational amplitudes are calculated using the Debye function \cite{I7403}.
+
+It has been shown that ``simultaneous collisions'' are not beneficial
+for dopant profile calculation \cite{hobler_study_1997,
+hobler_modeling_1997,hobler_useful_2001}. ``Simultaneous collisions'' refer to
+an algorithm which treats collisions with several target atoms simultaneously,
+when the collisions are separated by a free flight path smaller than a (small)
+value $L_\mathrm{sim}$ \cite{I7401}. This treatment can only be approximate,
+since the three-body problem cannot be solved exactly, as is known from
+classical mechanics. To our experience, no improvement can be obtained by using
+``simultaneous collsions''. This feature has therefore been eliminated from
+IMSIL.  The quality of the treatment of collisions in crystalline targets is
+also supported by the good results obtained in round robin simulations
+\cite{gartner_round_1995} and other comparisons with MD simulations
+\cite{schlueter_absence_2020,hobler_channeling_2019}.
+
+The motion of the ions near \textbf{interfaces} between regions and between
+a region and vacuum is carefully treated. For this purpose, when the ion moves
+near to an interface, potential collision partners from both adjoining regions
+are considered.  This is particularly important for dynamic simulations
+(\texttt{LDYN=T}) where the composition and density of the target may change
+from cell to cell with the cells typically being quite small.  In a dynamic
+simulation, the implanted ions are recorded and taken into account as potential
+collision partners for subsequent ions and recoils.
+%%% we need a more extended description of the dynamic mode, otherwise
+%%% it might be difficult to set up an input file
+
+\begin{center}
+\begin{tabular}{lll}
+parameter \quad    & IMSIL name     & to be specified in record \\
+\hline
+\ifprivate
+MD mode flag            & \texttt{LMD}  & \texttt{\&SETUP} \\
+\fi
+dynamic simulation flag & \texttt{LDYN}     & \texttt{\&SETUP} \\
+$\psi_\mathrm{min}$     & \texttt{PSIFFP}   & \texttt{\&SNPAR} \\
+$T_\mathrm{min}$        & \texttt{DENFFP}   & \texttt{\&SNPAR} \\
+$p_\mathrm{max,min}$    & \texttt{PMAXMIN}  & \texttt{\&SNPAR} \\  
+$p_\mathrm{max,max}$    & \texttt{PMAXMAX}  & \texttt{\&SNPAR} \\  
+$p_\mathrm{max,\psi}$   & \texttt{PMAXPSI}  & \texttt{\&SNPAR} \\  
+$N$                     & \texttt{DENSITY}  & \texttt{\&MATERIAL} \\
+$p_\mathrm{max,c}$      & \texttt{PMAX}     & \texttt{\&CRYSTAL} \\
+$L_\mathrm{max,c}$      & \texttt{FFPMAX}   & \texttt{\&CRYSTAL} \\
+$r_\mathrm{min,c}^2-1$  & \texttt{NRAD2}    & \texttt{\&CRYSTAL} \\
+$x_\mathrm{rms}$        & \texttt{VIB}      & \texttt{\&MATERIAL} \\
+
+\end{tabular}
+\end{center}

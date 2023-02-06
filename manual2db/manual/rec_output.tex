@@ -1,0 +1,1052 @@
+This record is used to specify the amount of output to be written to output files.
+
+\begin{keydescription}{\texttt{AMAXA} --- Analyzer maximum acceptance angle}
+%
+  This parameter specifies the upper limit to the acceptance angle for
+  backscattered or transmitted projectiles.  Ions with directions farther away 
+  from the analyzer direction than \texttt{AMAXA} are not included in the
+  statistics and they are not written to the trajectory file. For the definition
+  of the analyzer direction see \texttt{TILTA} and \texttt{ROTATA}. The units of
+  \texttt{AMAXA} are degrees. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 180  \\
+    Range:   \> $\texttt{AMINA} \le \texttt{AMAXA} \le 180$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{AMINA} --- Analyzer minimum acceptance angle}
+%
+  This parameter specifies the lower limit to the acceptance angle for
+  backscattered or transmitted projectiles.  Ions with directions closer to 
+  the analyzer direction than \texttt{AMINA} are not included in the
+  statistics and they are not written to the trajectory file. For the definition
+  of the analyzer direction see \texttt{TILTA} and \texttt{ROTATA}. The units of
+  \texttt{AMINA} are degrees. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0  \\
+    Range:   \> $0 \le \texttt{AMINA} \le \texttt{AMAXA}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DPOWER} --- Displacement power in displacement histograms}
+%
+  This parameter specifies the box width variation of displacement histograms (\texttt{HISD} 
+  file): Internally, $d^\texttt{1/DPOWER}$ is scored in an equidistant histogram, but the box 
+  boundaries are taken to the \texttt{DPOWER}-th power when witten to the \texttt{HISD} file, 
+  thus the displacements $d$ appear as non-equidistant box boundaries in the \texttt{HISD} 
+  file. For \texttt{DPOWER=1}, the histogram is equidistant; for \texttt{DPOWER>1}, box widths 
+  are smaller at small energies and larger at large energies. Each histogram box will receive 
+  the same number of particles if the diplacement distribution is proportional to 
+  $d^\texttt{-DPOWER+1}$. Note that the displacement distribution must decay faster than 
+  $d^\texttt{-2}$ if it is given by a power law. Therefore, for the default value of 
+  \texttt{DPOWER=3} we still expect increasing statistical error with increasing displacement 
+  $d$.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 3  \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{EMAXA} --- Analyzer maximum acceptance energy}
+%
+  This parameter specifies the upper limit to the acceptance energy, Ions with energies larger 
+  than \texttt{EMAXA} are not included in the RBS statistics or in the statistics of 
+  transmitted or backscattered ions. The units of \texttt{EMAXA} are keV.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> \texttt{E0}  \\
+    Range:   \> $\texttt{EMINA} \le \texttt{EMAXA}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{EMINA} --- Analyzer minimum acceptance energy}
+%
+  This parameter specifies the lower limit to the acceptance energy, i.e., ions with energies 
+  lower than \texttt{EMINA} are not included in the RBS statistics or in the statistics of 
+  transmitted or backscattered ions. The units of \texttt{EMINA} are keV.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0  \\
+    Range:   \> $0 \le \texttt{EMINA} \le \texttt{EMAXA}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{EPOWER} --- Energy power in histogram}
+%
+  This parameter specifies the box width variation of energy histograms for backward and 
+  forward sputtering if \texttt{LHISEB=T} and/or \texttt{LHISET=T}: Internally, 
+  $E^\texttt{1/EPOWER}$ is scored in an equidistant histogram, but the box boundaries are 
+  taken to the \texttt{EPOWER}-th power when witten to the \texttt{HISEB} and/or \texttt{HISET} 
+  file, thus the displacements $E$ appear as non-equidistant box boundaries in the 
+  \texttt{HISEB} and/or \texttt{HISET} file. For \texttt{EPOWER=1}, the histogram is 
+  equidistant; for \texttt{EPOWER>1}, box widths are smaller at small energies and larger at 
+  large energies. Each histogram box will receive the same number of particles if the energy 
+  distribution of the sputtered particles is proportional to $E^\texttt{-EPOWER+1}$. The 
+  default value of \texttt{EPOWER=3} corresponds to the energy distribution predicted by 
+  Sigmund. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 3  \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{I2PAIR} --- Target atom index for pair distibution function}
+%
+  This parameter the index of the target atom which has to be considered for the pair 
+  distribution function on a 2-D grid (\texttt{LHISP2=T}).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> 1 \\
+    Range:   \> $1 \le \texttt{I2PAIR} \le \texttt{N2}$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{ITRA} --- Output indicator for trajectory file}
+%
+  This parameter indicates what output is to be written to the \texttt{TRA} file. Lines with 
+  the last value (\texttt{IFLAG}, see the description of the \texttt{TRA} file
+  in Chapter~\ref{k:files}) corresponding to a value of \texttt{ITRA} will be written.
+  \begin{keytab}
+    Type:    \> array of integer (arbitrary size) \\
+    Default: \> '-1,0,1,2,3,4,5' if \texttt{LTRA=T}, ' ' otherwise \\
+    Range:   \> $-1 \le \texttt{ITRA} \le 5$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LCELL} --- Output of dynamic cell target}
+%
+  This parameter specifies whether the contents of the dynamic cell target structure shall be 
+  written to the \texttt{CELL} or \texttt{CELL2} file.
+ \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LCYL} --- Output in cylinder coordinates}
+%
+  This parameter specifies whether the 2-D histograms are distributions in cylinder 
+  coordinates. The first coordinate is the radius, the second is depth. The axis of the 
+  cylinder is parallel to the $z$ axis and has (x,y) coordinates
+  (\texttt{XINIT},\texttt{YINIT}) from the \texttt{\&IONS} record.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{LDEF} --- Output of deterministic defects}
+%
+  This parameter specifies whether the deterministic defect contained in a simulation cell 
+  shall be written to the \texttt{DEF} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LDIST} --- Output of distance function}
+%
+  This parameter specifies whether the signed distance from the surface shall be written to the 
+  \texttt{DIST2} file. Only effective if \texttt{NDIM=2}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHIS} --- Output of 1-D spatial atom distribution}
+%
+  This parameter specifies whether the 1-D histogram of the spatial atom distributions shall be 
+  written to the \texttt{HIS} file. \texttt{LHIS=T} is required if
+  \texttt{LDAM=T} and \texttt{\&DAMAGE/NDIM=1}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} if \texttt{LDAM=T} and \texttt{\&DAMAGE/NDIM=1} \\
+             \> \texttt{F} otherwise \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHIS2} --- Output of 2-D spatial atom distributions}
+%
+  This parameter specifies whether the 2-D histogram of the spatial atom distribution shall be 
+  written to the \texttt{HIS2} file. \texttt{LHIS2=T} is required if
+  \texttt{LDAM=T} and \texttt{\&DAMAGE/NDIM=2}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} if \texttt{LDAM=T} and \texttt{\&DAMAGE/NDIM=2} \\
+             \> \texttt{F} otherwise \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHIS2B} --- Output of 2-D backscattered atom spatial distributions}
+%
+  This parameter specifies whether the 2-D histogram of the exit points
+  and points of origin of backscattered atoms shall be written to
+  the \texttt{HIS2B} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHIS2T} --- Output of 2-D transmitted atom spatial distributions}
+%
+  This parameter specifies whether the 2-D histogram of the exit points
+  and points of origin of transmitted atoms shall be written to
+  the \texttt{HIS2T} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHIS3} --- Output of 3-D spatial atom distributions}
+%
+  This parameter specifies whether the histogram of the 3-D spatial atom
+  distribution shall be written to the \texttt{HIS3} file. \texttt{LHIS3=T} is
+  required if \texttt{LDAM=T} and \texttt{\&DAMAGE/NDIM=3}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} if \texttt{LDAM=T} and \texttt{\&DAMAGE/NDIM=3} \\
+             \> \texttt{F} otherwise \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISA2B} --- Output of 2-D backscattered angular distributions}
+%
+  This parameter specifies whether the histogram for the 2-D angular
+  distribution of the backscattered atoms shall be written to the
+  \texttt{HISA2B} file. The independent variables of the histogram are the
+  direction cosines with respect to the $x$ and $y$ axis.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISA2T} --- Output of 2-D transmitted angular distributions}
+%
+  This parameter specifies whether the histogram for the 2-D angular
+  distribution of the transmitted atoms shall be written to the
+  \texttt{HISA2T} file. The independent variables of the histogram are the
+  direction cosines with respect to the $x$ and $y$ axis.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISAAB} --- Output of backscattered angular distributions (3-D)}
+%
+  This parameter specifies whether the histogram for the angular distribution of the 
+  backscattered atoms shall be written to the \texttt{HISAAB} file. The angle is measured
+  with respect to the analyzer direction.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISAAT} --- Output of transmitted angular distributions (3-D)}
+%
+  This parameter specifies whether the histogram for the angular distribution of the 
+  transmitted atoms shall be written to the \texttt{HISAAT} file. The angle is measured
+  with respect to the analyzer direction.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISAB} --- Output of backscattered angular distributions (2-D)}
+%
+  This parameter specifies whether the histogram for the angular distribution of the 
+  backscattered atoms shall be written to the \texttt{HISAB} file. The angle is measured
+  between the projection to the $xz$ plane and the negative $z$ axis.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISAT} --- Output of transmitted angular distributions (2-D)}
+%
+  This parameter specifies whether the histogram for the angular distribution of the 
+  transmitted atoms shall be written to the \texttt{HISAT} file. The angle is measured
+  between the projection to the $xz$ plane and the negative $z$ axis.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISB} --- Output of backscattered spatial distributions}
+%
+  This parameter specifies whether the histogram for the spatial distribution of the 
+  backscattered atoms shall be written to the \texttt{HISB} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISD} --- Output of displacement distributions}
+%
+  This parameter specifies whether the histogram of the atom displacement distribution shall be 
+  written to the \texttt{HISD} file. The atom displacements are the distances between the 
+  starting and end points of the recoils that do not leave the target.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISEB} --- Output of backscattered energy distributions}
+%
+  This parameter specifies whether the histogram for the energy distribution of the 
+  backscattered atoms shall be written to the \texttt{HISEB} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISEE} --- Output of electronic energy deposition 
+    distributions}
+%
+  This parameter specifies whether the histogram of the 1D electronic energy
+  deposition distribution shall be written to the \texttt{HISNE} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISEE2} --- Output of 2-D electronic energy deposition distributions}
+%
+  This parameter specifies whether the histogram of the 2-D electronic energy
+  deposition distribution shall be written to the \texttt{HISEE2} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISEE3} --- Output of 3-D electronic energy deposition distributions}
+%
+  This parameter specifies whether the histogram of the 3-D electronic energy
+  deposition distribution shall be written to the \texttt{HISEE3} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISET} --- Output of transmitted energy distributions}
+%
+  This parameter specifies whether the histogram for the energy distribution of the 
+  transmitted atoms shall be written to the \texttt{HISET} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISNE} --- Output of nuclear energy deposition distributions}
+%
+  This parameter specifies whether the histogram of the 1D nuclear energy
+  deposition distribution shall be written to the \texttt{HISNE} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISNE2} --- Output of 2-D nuclear energy deposition distributions}
+%
+  This parameter specifies whether the histogram of the 2-D nuclear energy
+  deposition distribution shall be written to the \texttt{HISNE2} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISNE3} --- Output of 3-D nuclear energy deposition distributions}
+%
+  This parameter specifies whether the histogram of the 3-D nuclear energy
+  deposition distribution shall be written to the \texttt{HISNE3} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISIV} --- Output of I--V pair distributions}
+%
+  This parameter specifies whether the histogram for the I--V pair distribution function shall 
+  be written to the \texttt{HISIV} file. \texttt{LHISIV=T} requires the capture radius model to 
+  be activated (\texttt{LCAP=T} on the \texttt{\&DAMAGE} record), and is not possible for 
+  dynamic simulations (\texttt{LDYN=T} on the \texttt{\&SETUP} record).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{LHISIV2} --- Output of I--V pair distributions on 2-D grid}
+%
+  This parameter specifies whether the histogram for the I--V pair distribution
+  function shall be written to the \texttt{HISIV2} file for each box of the 2-D
+  histogram. The 2-D histogram is usually the same as that written with
+  \texttt{LHIS2=T}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LHISM} --- Output of first redistributive moment depth
+    distribution}
+%
+  This parameter specifies whether the histogram of the first redistributive moment as a 
+  function of depth shall be written to the \texttt{HISM} file. See Section~\ref{s:his1d} for 
+  an explanation of the first redistributive moment. 
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHISP} --- Output of the deposited momentum depth distribution}
+%
+  This parameter specifies whether the histogram of the deposited momentum distribution shall 
+  be written to the \texttt{HISP} file. See Section~\ref{s:his1d} for an explanation of 
+  deposited momentum. 
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LHIST} --- Output of transmitted spatial distributions}
+%
+  This parameter specifies whether the histogram for the spatial distribution of the 
+  transmitted atoms shall be written to the \texttt{HIST} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\iffalse
+\begin{keydescription}{\texttt{LLINCOLL} --- Linear collision sequence flag}
+%
+  This parameter specifies whether linear collision sequences shall be
+  analyzed. Currently, only linear collision sequences leading to sputtering
+  are analyzed. If a linear collision sequence is identified, \texttt{N, DIRLIN(:)} 
+  is appended to the respective line in the \texttt{TRA} file. Here,
+  \texttt{N} denotes the length of the linear collision sequence, and
+  \texttt{DIRLEN} its direction vector in the crystal coordinate
+  system. Linear collision sequences are only identified in crystalline regions
+  and are reported only in the \texttt{TRA} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LMOM} --- Output of spatial atom distribution moments}
+%
+  This parameter specifies whether the global moments of the ion distribution shall be written 
+  to the \texttt{OUT} file. If \texttt{LDAM=T} the moments of the interstitial distribution are
+  written as well. If in addition \texttt{LRCOIL=T} also the moments of the vacancies are 
+  written.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMAAB} --- Output of backscattered atoms
+angular moments (3-D)}
+%
+  This parameter specifies whether the moments of the angular distribution 
+  of backscattered ions and backsputtered atoms shall be written to the
+  \texttt{OUT} file. The angle is measured with respect to the analyzer direction.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMAAT} --- Output of transmitted atoms angular
+moments (3-D)}
+%
+  This parameter specifies whether the moments of the angular distribution 
+  of transmitted ions and forward sputtered atoms shall be written to
+  the \texttt{OUT} file. The angle is measured with respect to the analyzer direction.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMAB} --- Output of backscattered atoms
+angular moments (2-D)}
+%
+  This parameter specifies whether the moments of the angular distribution 
+  of backscattered ions and backsputtered atoms shall be written to the
+  \texttt{OUT} file. The angle is measured
+  between the projection to the $xz$ plane and the negative $z$ axis.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMAT} --- Output of transmitted atoms angular
+moments (2-D)}
+%
+  This parameter specifies whether the moments of the angular distribution 
+  of transmitted ions and forward sputtered atoms shall be written to
+  the \texttt{OUT} file. The angle is measured
+  between the projection to the $xz$ plane and the negative $z$ axis.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMB} --- Output of backscattered atoms
+spatial moments}
+%
+  This parameter specifies whether the moments of the and spatial distribution 
+  of backscattered ions and backsputtered atoms shall be written to the \texttt{OUT} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMEB} --- Output of backscattered atoms
+energy moments}
+%
+  This parameter specifies whether the moments of the energy distribution 
+  of backscattered ions and backsputtered atoms shall be written to the
+  \texttt{OUT} file. 
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMEE} --- Output of electronic energy deposition moments}
+%
+  This parameter specifies whether the moments of the electronic energy
+  deposition distribution shall be written to the \texttt{OUT} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMET} --- Output of transmitted atoms energy
+moments}
+%
+  This parameter specifies whether the moments of the energy distribution 
+  of transmitted ions and forward sputtered atoms shall be written to
+  the \texttt{OUT} file. 
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMNE} --- Output of nuclear energy deposition moments}
+%
+  This parameter specifies whether the moments of the nuclear energy deposition distribution 
+  shall be written to the \texttt{OUT} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LMOMT} --- Output of transmitted ions spatial moments}
+%
+  This parameter specifies whether the moments of the spatial distribution 
+  of transmitted ions and forward sputtered atoms shall be written to the \texttt{OUT} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LPERX} --- Periodic boundary condition flag}
+%
+  This parameter specifies whether the x-coordinates of the positions of events that are used 
+  for output, are mapped into the periodic boundary interval (\texttt{XPER} of 
+  \texttt{\&geometry} record).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{LPERX} of \texttt{\&GEOMETRY} record \\
+    Range:   \> \texttt{T} only if \texttt{LPERX=T} of \texttt{\&GEOMETRY}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LRBS} --- RBS energy spectrum histogram}
+%
+  This parameter specifies whether the RBS simulation is performed and the energy spectrum is 
+  written to the \texttt{RBS} file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{LSURF} --- Output of surface}
+%
+  This parameter specifies whether the surface shall be written to the \texttt{SURF} file.
+ \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LTRA} --- Output of trajectory}
+%
+  This parameter specifies that information about the trajectories shall be written to the 
+  \texttt{TRA} file. If \texttt{ITRA} is specified, only the output corresponding to the values 
+  of \texttt{ITRA} are written, and \texttt{LTRA} is ignored. If \texttt{LTRA=T} and 
+  \texttt{ITRA} is not specified, all possible output is written. If \texttt{LTRA=F} and
+  \texttt{ITRA} is not specified, no trajectory file is written (regarding the \texttt{TRA} 
+  file and its format see Chapter~\ref{k:files}).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{MCOORD} --- Coordinate system model}
+%
+  This parameter specifies the model of the coordinate system to be used with the statistics 
+  output. The meaning of the model numbers are specified below.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 1 \\
+    Range:   \> $\texttt{1} \ldots $ same as in \texttt{\&GEOM} \\
+             \> $\texttt{2} \ldots $ aligned with the ion's incidence direction \\
+             \> $\texttt{3} \ldots $ aligned with direction given by \texttt{TILT} and 
+                \texttt{ROTATE} \\
+             \> $\texttt{4} \ldots $ aligned with direction given by \texttt{TILTA} and 
+                \texttt{ROTATA} \\
+             \> $\texttt{5} \ldots $ crystal coordinate system
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOX} --- Maximum number of 1-D histogram boxes}
+%
+  This parameter specifies the maximum number of boxes in 1-D histograms. If
+  zero, there is no upper bound to the number of boxes, and the box width is
+  kept equal to \texttt{WBOX}.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 32 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOX2} --- Maximum number of 2-D histogram boxes} 
+%
+  This parameter specifies the maximum number of boxes in 2-D histograms. The first value 
+  corresponds to the x-direction, the second value corresponds to the
+  z-direction. If zero, there is no upper bound to the number of boxes in that
+  direction, and the box width is kept equal to \texttt{WBOX2}. Either all or
+  none of \texttt{NBOX2} must be zero.
+  \begin{keytab}
+    Type:    \> simple array (2) of integer \\
+    Default: \> 36, 24 for point responses \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOX3} --- Maximum number of 3-D histogram boxes} 
+%
+  This parameter specifies the maximum number of boxes in 3-D histograms. The first value 
+  corresponds to the x-direction, the second to the y-direction, and the third one to the 
+  z-direction. If zero, there is no upper bound to the number of boxes, and the
+  box width is kept equal to \texttt{WBOX3}. Either all or none of \texttt{NBOX3} must be zero. 
+  \begin{keytab}
+    Type:    \> simple array (3) of integer \\
+    Default: \> 36, 36, 24 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOXA} --- Maximum number of angular histogram boxes}
+%
+  This parameter specifies the maximum number of boxes in angular histograms
+  (with respect to the analyzer direction) in the backscattered/transmitted ions
+  statistics.  The maximum number of boxes in angular histograms of the 2-D
+  projection will be \texttt{2*NBOXA}. If zero, there is no upper bound to the
+  number of boxes, and the box width is kept equal to \texttt{WBOXA}.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 90 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOXA2} --- Maximum number of 2-D angular histogram boxes}
+%
+  This parameter specifies the maximum number of boxes in 2-D angular histograms
+  in the backscattered/transmitted ions statistics.  If
+  zero, there is no upper bound to the number of boxes, and the box width is
+  kept equal to \texttt{WBOXA2}.
+  \begin{keytab}
+    Type:    \> simple array (2) of integer \\
+    Default: \> 50, \texttt{NBOXA2(1)} \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOXD} --- Maximum number of displacement and pair histogram 
+    boxes}
+%
+  This parameter specifies the maximum number of boxes in displacement and pair histograms 
+  (\texttt{HISD}, \texttt{HISIV}, and \texttt{HISIV2} files). If zero, there is
+  no upper bound to the number of boxes, and the box width is kept equal to
+  \texttt{WBOXD}. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 100 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOXE} --- Maximum number of energy histogram boxes}
+%
+  This parameter specifies the maximum number of boxes in energy histograms in the 
+  backscattered/transmitted ions statistics. If zero, there is no upper bound to
+  the number of boxes, and the box width is kept equal to \texttt{WBOXE}.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 100 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NHISIV} --- Number of pair distribution histograms}
+%
+  This parameter specifies the number of pair distribution histograms. The positions of point 
+  defects considered may be restricted for each histogram to a range in depth by 
+  \texttt{POSIVMIN} and \texttt{POSIVMAX}.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> required if \texttt{LHISIV=T} or \texttt{LHISIV2=T} \\
+    Range:   \> $1 \le \texttt{NHISIV} \le 10$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONBK} --- Number of ions for backup}
+	%
+	This parameter specifies that a backup file shall be written/updated after every 
+	\texttt{NIONBK} ions. \texttt{NIONBK=0} means that no backup file shall be written. In 
+	case \texttt{NIONBK>NION}, a backup file is written after the last ion. \texttt{NIONBK} 
+	cannot be specified in case of a dynamic simulation (\texttt{LDYN=T}).
+	\begin{keytab}
+		Type:    \> integer \\
+		Default: \> 0  \\
+		Range:   \> $\ge 0$
+	\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONTRA} --- Number of ions for trajectory output}
+	%
+	This parameter specifies that a trajectory shall be written to the \texttt{TRA} file for 
+	every \texttt{NIONTRA}th ion. \texttt{NIONTRA=1} means that trajectory output shall be 
+	written	for every ion. In case \texttt{NIONTRA>NION}, a backup file is written after the 
+	last ion. This parameter can be used for debugging to limit the trajectory output to the 
+	cascade of interest.
+\begin{keytab}
+	Type:    \> integer \\
+	Default: \> 1  \\
+	Range:   \> $> 0$
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NLATMOM} --- Maximum order of lateral moments}
+%
+  This parameter specifies the maximum order of the calculated lateral moments.
+  \texttt{NLATMOM=0} means there is no output of lateral moments. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 2 \\
+    Range:   \> $0 \le \texttt{NLATMOM} \le 4$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NMIXMOM} --- Maximum order of mixed moments}
+%
+  This parameter specifies the maximum order of the calculated mixed moments.
+  \texttt{NMIXMOM=0} or \texttt{NMIXMOM=1} means there is no output of mixed moments. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{NMIXMOM} \le 4$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{NUPDOUT} --- Number of updates for writing output}
+%
+  This parameter specifies the number of cell relaxations (updates) after which data are 
+  written to the \texttt{CELL2} and \texttt{SURF} file, if \texttt{LCELL=T} and 
+  \texttt{LSURF=T}, respectively. There will be \texttt{NION/(NIONUPD*NUPDOUT} records written 
+  to the \texttt{CELL2} and \texttt{SURF} file.  No data are written if \texttt{NIONUPD=0}. In 
+  addition, in any case one record is written at the beginning and at the end of the 
+  simulation if \texttt{LCELL=T} and \texttt{LSURF=T}, respectively. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 1 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{POSIVMAX} --- Maximum depth for pair distribution histogram}
+%
+  This parameter specifies the maximum depth of the point defects to be considered for each 
+  pair distribution histogram.
+  \begin{keytab}
+    Type:    \> simple array (\texttt{NHISIV}) of real \\
+    Default: \> $\infty$ \\
+    Range:   \> $\texttt{POSIVMIN} < \texttt{POSIVMAX}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POSIVMIN} --- Minimum depth for pair distribution histogram}
+%
+  This parameter specifies the minimum depth of the point defects to be considered for each 
+  pair distribution histogram.
+  \begin{keytab}
+    Type:    \> simple array (\texttt{NHISIV}) of real \\
+    Default: \> 0 \\
+    Range:   \> $\texttt{POSIVMIN} < \texttt{POSIVMAX}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ROTATA} --- Analyzer rotation angle}
+%
+  This parameter specifies the rotation angle of the sample with respect to the analyzer used 
+  for transmission and backscattering statistics. For the meaning of the analyzer direction see
+  \texttt{TILTA}. {\tt ROTATA} is defined analogously to \texttt{ROTATE}. The units of 
+  \texttt{ROTATA} are degrees.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SHORTTRA} --- Shorten trajectory file}
+%
+  This parameter is a flag, if set, specifying that collision points
+  along the trajectory (\texttt{IFLAG=2}) are only written to the \texttt{TRA}
+  file if a recoil starts motion in this collision. \texttt{SHORTTRA} is ignored
+  unless \texttt{ITRA='..,2,..'} or \texttt{LTRA=T} is specified.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{TILTA} --- Analyzer tilt angle}
+%
+  This parameter specifies the tilt angle of the sample with respect to the
+  analyzer direction. The analyzer direction is the reference direction for
+  \texttt{AMINA} and \texttt{AMAXA}. In addition, it defines the statistics
+  coordinate system if \texttt{MCOORD=4}. For RBS statistics, it is used
+  independent of the value of \texttt{MCOORD}. For backscattering statistics and
+  RBS, the analyzer is just opposite the direction specified by \texttt{TILTA}
+  and \texttt{ROTATA}, i.e., in these cases \texttt{TILTA=0} means the analyzer
+  is in negative $z$ direction, while otherwise it is in positive $z$ direction.
+  In particular, for RBS, \texttt{TILTA=0} means the RBS detector is
+  located along the negative $z$ axis ($180^\circ$ backscattering angle). The
+  units of \texttt{TILTA} are degrees.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{TILTA} \le 90$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOX} --- Initial 1-D histogram box width}
+%
+  This parameter specifies the initial box width of all 1-D histograms. If
+  \texttt{NBOX=0}, the box widths remain constant throughout the simulation.
+  Otherwise, they are doubled whenever necessary to accomodate all scores in
+  \texttt{NBOX} boxes. The units are \AA. The value of \texttt{WBOX} might be
+  slightly adjusted by IMSIL if \texttt{LVAC=T} is set. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 100/128 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOX2} --- Initial 2-D histogram box widths}
+%
+  This parameter specifies the initial box widths of all 2-D histograms. The first value 
+  corresponds to the box width in $x$ direction, the second value corresponds to the box width 
+  in $z$ direction. If \texttt{NBOX2=0}, the box widths remain constant
+  throughout the simulation. Otherwise, they are doubled whenever necessary
+  to accomodate all scores in \texttt{NBOX2} boxes. The values of \texttt{WBOX2}
+  might be slightly adjusted by IMSIL if \texttt{LVAC=T} is set. The units are
+  \AA.  
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> \texttt{WBOX}, \texttt{WBOX2(1)} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOX3} --- Initial 3-D histogram box widths}
+%
+  This parameter specifies the initial box widths of the 3-D histograms. The first value 
+  corresponds to the box width in $x$ direction, the second to the box width in $y$ direction, 
+  and the third one to the box width in $z$ direction. If \texttt{NBOX3=0}, the
+  box widths remain constant throughout the simulation. Otherwise, they are
+  doubled whenever necessary to accomodate all scores in \texttt{NBOX3} boxes.
+  The values of \texttt{WBOX3} might be slightly adjusted by IMSIL if
+  \texttt{LVAC=T} is set. The units are \AA. 
+  \begin{keytab}
+    Type:    \> simple array (3) of real \\
+    Default: \> \texttt{WBOX}, \texttt{WBOX3(1)}, \texttt{WBOX3(1)} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOXA} --- Initial angular histogram box width}
+%
+  This parameter specifies the initial box width of all angular histograms for the 
+  backscattered/transmitted ions statistics. If \texttt{NBOXA=0}, the box
+  widths remain constant throughout the simulation. Otherwise, they are doubled
+  whenever necessary to accomodate all scores in \texttt{NBOXA} boxes. The
+  units are degrees. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 1 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOXA2} --- Initial 2-D angular histogram box width}
+%
+  This parameter specifies the initial box widths of all 2-D angular histograms
+  for the backscattered/transmitted ions statistics. If \texttt{NBOXA2=0}, the
+  box widths remain constant throughout the simulation. Otherwise, they are doubled
+  whenever necessary to accomodate all scores in \texttt{NBOXA2} boxes. Note
+  that the independent variables of 2-D angular distributions are the direction
+  cosines with respect to the $x$ and $y$ axis.
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> 0.01, \texttt{WBOXA2(1)} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOXD} --- Initial displacement histogram box width}
+%
+  This parameter specifies the initial box width of the displacement histograms 
+  (\texttt{HISD} file). If \texttt{NBOXD=0}, the box widths remain constant
+  throughout the simulation. Otherwise, they are doubled whenever necessary
+  to accomodate all scores in \texttt{NBOXD} boxes. The units are \AA\ if
+  \texttt{DPOWER=1}. If \texttt{DPOWER>1}, the box width applies to 
+  $d^\texttt{1/DPOWER}$, and the units of \texttt{WBOXD} are
+  \AA$^\texttt{1/DPOWER}$. As a result, the right histogram edges are at
+  $d = (i \cdot \texttt{WBOXD})^\texttt{DPOWER}$ where $i$ are integers.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0.1 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOXE} --- Initial energy histogram box width}
+%
+  This parameter specifies the initial box width of all energy histograms for the 
+  RBS/backscattered/transmitted ions statistics. If \texttt{NBOXE=0}, the box
+  widths remain constant throughout the simulation. Otherwise, they are doubled
+  whenever necessary to accomodate all scores in \texttt{NBOXE} boxes. The
+  units are eV if \texttt{EPOWER=1}. If \texttt{EPOWER>1}, the box width applies to
+  $E^\texttt{1/EPOWER}$, and the units of \texttt{WBOXE} are
+  eV$^\texttt{1/EPOWER}$. As a result, the right histogram edges are at
+  $E = (i \cdot \texttt{WBOXE})^\texttt{EPOWER}$ where $i$ are integers.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> \texttt{ENERGY**(1/EPOWER)/NBOXE} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+

@@ -1,0 +1,30 @@
+\contentsline {chapter}{\numberline {1}Introduction}{1}
+\contentsline {chapter}{\numberline {2}Physical Models}{3}
+\contentsline {section}{\numberline {2.1}Selection of Collision Partners}{3}
+\contentsline {section}{\numberline {2.2}Interatomic Potential}{5}
+\contentsline {section}{\numberline {2.3}Implantation Damage}{5}
+\contentsline {section}{\numberline {2.4}Sputtering}{7}
+\contentsline {section}{\numberline {2.5}Electronic Stopping}{8}
+\contentsline {section}{\numberline {2.6}Rutherford Backscattering / Channeling}{10}
+\contentsline {section}{\numberline {2.7}Deterministic damage model}{11}
+\contentsline {chapter}{\numberline {3}Files}{13}
+\contentsline {section}{\numberline {3.1}Input Files}{14}
+\contentsline {section}{\numberline {3.2}The Output File \texttt {OUT}}{17}
+\contentsline {section}{\numberline {3.3}1D Histogram Files}{18}
+\contentsline {section}{\numberline {3.4}2D Histogram Files}{22}
+\contentsline {section}{\numberline {3.5}3D Histogram File}{23}
+\contentsline {section}{\numberline {3.6}Miscellaneous Output Files}{24}
+\contentsline {chapter}{\numberline {4}Input Records}{27}
+\contentsline {section}{\numberline {4.1}\texttt {\&SETUP} \nobreakspace {}}{29}
+\contentsline {section}{\numberline {4.2}\texttt {\&ATOMS} \nobreakspace {}}{37}
+\contentsline {section}{\numberline {4.3}\texttt {\&IONS} \nobreakspace {}}{40}
+\contentsline {section}{\numberline {4.4}\texttt {\&MATERIAL} \nobreakspace {}}{48}
+\contentsline {section}{\numberline {4.5}\texttt {\&CRYSTAL} \nobreakspace {}}{52}
+\contentsline {section}{\numberline {4.6}\texttt {\&SNPAR} \nobreakspace {}}{55}
+\contentsline {section}{\numberline {4.7}\texttt {\&SEPAR} \nobreakspace {}}{64}
+\contentsline {section}{\numberline {4.8}\texttt {\&DAMAGE} \nobreakspace {}}{70}
+\contentsline {section}{\numberline {4.9}\texttt {\&GEOMETRY} \nobreakspace {}}{83}
+\contentsline {section}{\numberline {4.10}\texttt {\&OUTPUT} \nobreakspace {}}{91}
+\contentsline {chapter}{\numberline {5}Examples}{109}
+\contentsline {section}{\numberline {5.1}Example 1}{109}
+\contentsline {section}{\numberline {5.2}Example 2}{110}

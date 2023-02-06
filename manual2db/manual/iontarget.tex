@@ -1,0 +1,33 @@
+IMSIL simulates the interaction of an ion beam with a target. Throughout this
+manual, \textbf{ion} means the particle that is given initial conditions by the
+user. We use this term irrespective of the atom's actual charge
+state.\footnote{Ions ``forget'' their initial charge state after a short
+distance travelled inside the target.} The ions may be single atoms or
+molecules.
+
+\textbf{Beam} denotes the properties of a collection of ions. The term is
+used here in a broader sense than in common parlance. During conventional ion
+implantation or sputtering, ions are part of a ``beam''. During single-ion
+implantation, the ``beam'' consists of only one ion. In this case, when many
+ions are simulated, the results can be interpreted as probabilities and
+probability density functions. Atoms starting from inside the target, e.g., as
+recoils in nuclear reactions, are also considered a ``beam'' in the context
+of this manual.
+
+The target consists of one or several \textbf{regions} with homogeneous material
+properties. A crystalline region may be modified during a simulation due to
+damage formation. While this kind of simulation can be considered
+\textbf{dynamic}, we reserve the word here for sputtering simulations where the
+geometry and composition of the target changes as a function of time. In this
+case, the target is defined by \textbf{cells} rather than regions. Cells
+typically have the size of histogram bins in order to resolve the spatial and
+temporal variations of the target composition as the simulation proceeds. In the
+code, regions and cells are considered ``domains''.
+
+While ``ion'' refers to a particle that receives initial conditions by
+specifications in the input file, we use the terms \textbf{projectile} and
+\textbf{recoil} when we talk about collisions: The projectile is the energetic
+atom that impinges on another atom, the recoil, which initially is at rest and
+receives energy in the collision. We use the term ``recoil'' irrespective of
+whether the atom permanently leaves its original site.
+

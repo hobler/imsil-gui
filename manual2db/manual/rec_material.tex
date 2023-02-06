@@ -1,0 +1,207 @@
+This record is used to describe the materials of the regions. Special properties
+of the crystalline region are specified in the \texttt{\&XTAL} record (see
+Section~\ref{s:xtal}). The geometry of the target regions is specified in the
+\texttt{\&GEOMETRY} record (see Section~\ref{s:geom}). 
+
+The \texttt{\&MATERIAL}
+record has the index variables \texttt{REGION}, \texttt{ATOM1}, and
+\texttt{ATOM2}, of which \texttt{REGION} is required on each \texttt{\&MATERIAL}
+record.  At least one \texttt{\&MATERIAL} record has to appear for each region.
+\texttt{ATOM1} is the atom index of a projectile, \texttt{ATOM2} the atom
+index of a target atom (recoil). Therefore, it is possible to define the
+properties of an atom as a projectile and as a recoil separately. Regarding the
+definition of atom indices, see Section~\ref{s:atom}. 
+
+
+\begin{keydescription}{\texttt{DENSITY} --- Atom density}
+%
+  This parameter specifies the number of target atoms (irrespective of
+  their species) per cm$^3$. E.g., \texttt{DENSITY=7.E22} for
+  \texttt{NAME='SIO2'} means that there are $2.33 \cdot
+  10^{22}~\mathrm{cm}^{-3}$ silicon atoms and $4.67 \cdot
+  10^{22}~\mathrm{cm}^{-3}$ oxygen atoms. 
+  %\texttt{'PMMA'} is interpreted as \texttt{'C5H8O2'}.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of real \\
+    Default: \> depending on \texttt{NAME}, weighted densities of the 
+                elementary targets \\
+            \> as specified on the \texttt{\&ATOMS} record \\
+%             \> except: \\
+%             \> \begin{tabular}{ll}
+%                   \texttt{'SIO2'} (or \texttt{'SiO2'}, \texttt{'sio2'}):    
+%                      & $7 \cdot 10^{22}~\mathrm{cm^{-3}}$ \\
+%                   \texttt{'SI3N4'} (or \texttt{'Si3N4'}, \texttt{'si3n4'}):   
+%                      & $9 \cdot 10^{22}~\mathrm{cm^{-3}}$ \\
+%                   \texttt{'GAAS'} (or \texttt{'GaAs'}, \texttt{'gaas'}):    
+%                      & $4.4 \cdot 10^{22}~\mathrm{cm^{-3}}$ \\
+%                   \texttt{'C5H8O2'} (or \texttt{'PMMA'}, \texttt{'pmma'}):  
+%                      & $8.52 \cdot 10^{22}~\mathrm{cm^{-3}}$ \\
+%                \end{tabular} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NAME} --- Material name}
+%
+  This parameter specifies the chemical name of the target material.
+  E.g. \texttt{NAME='SI'} for silicon, \texttt{NAME='SIO2'} for
+  SiO$_2$ etc. The number of atom species, the atom names, their
+  atomic number, and the probability to encounter each species in the
+  target are extracted automatically.  Moreover, default values of the
+  atom masses \texttt{MASS} and material densities \texttt{DENSITY} are
+  provided by the program, if \texttt{NAME} is defined.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of character strings \\
+    Default: \> ~ -- ~~~ (obligatory) \\
+    Range:   \> any chemical name of a material ($\le$ 80 characters)
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LPOLY} --- Polycrystalline flag}
+%
+  This parameter specifies whether the orientation of the crystal system
+  shall be rotated randomly before each ion. \texttt{LPOLY=T} requires 
+  \texttt{XTAL='yes'} and causes \texttt{WAFER} and \texttt{VSURF} to
+  be ignored.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ROTX} --- Rotation angle of the $x$ axis}
+%
+  This parameter specifies the rotation angle of the $x$ axis with
+  respect to the \texttt{VSURF} vector. The $x$ axis will be along the
+  surface. The $x$ axis together with the surface normal defines the
+  plane to which the results are projected in 2-D simulations. For a
+  line implantation, ions are implanted between \texttt{XINIT(1)} and
+  \texttt{XINIT(2)} (see \texttt{\&IONS} record) which are measured
+  along the $x$ axis. This means that the mask edge orientation of the
+  corresponding impenetrable mask is perpendicular to the $x$ axis.
+  Notice that the rotation angle \texttt{ROTATE} (see \texttt{\&IONS}
+  record) for the ion incidence direction is not measured with respect
+  to the $x$ axis, but with respect to the surface vector
+  \texttt{VSURF}.  The units of \texttt{ROTX} are degrees.
+  \texttt{ROTX} must only be specified for a crystalline region.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of real \\
+    Default: \> 0 \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SYIELD} --- Sputtering yield}
+%
+  This parameter specifies the sputtering yield, i.e.\ the ratio of
+  sputtered particles to implanted ions.  The sputtering yield is used
+  to calculate the movement of the surface depending on the implanted
+  dose. \texttt{SYIELD} is only allowed for static 1-D simulations when
+  regions are defined (\texttt{LDYN=F}, \texttt{NDIM=1}, \texttt{USECELL=F}).
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION},\texttt{ATOM1}) 
+                of real \\
+    Default: \> 0 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{TDEBYE} --- Debye temperature}
+%
+  This parameter specifies the Debye temperature of the material. It is used
+  for calculation of vibrational amplitude using Debye function.  
+  \texttt{TDEBYE=0} means a thermal vibration amplitude of 0.083 will be used. 
+  Note that some internally tabulated values (e.g. for noble gases) are
+  inaccurate. The units of \texttt{TDEBYE} are K.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION},\texttt{ATOM2}) 
+                of real \\
+    Default: \> \texttt{TDEBYE} of the \texttt{\&ATOMS} record \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{VIB} --- Thermal vibration amplitude}
+%
+  This parameter specifies the mean square amplitude in \AA ~of
+  vibrating lattice atoms in a given direction. The displacements of
+  the atoms from their lattice sites is Gaussian distributed.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION},\texttt{ATOM2}) 
+                of real \\
+    Default: \> Calculated from \texttt{TDEBYE} \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{VSURF} --- Surface vector}
+%
+  This parameter specifies a reference vector in the wafer surface.  If
+  \texttt{ROTX=0}, \texttt{VSURF} specifies the direction of the $x$ axis of
+  the target coordinate system in the crystal coordinate system (the $x$ and
+  $y$ axes of the target coordinate system are parallel to the wafer surface,
+  the $z$ axis is perpendicular to the wafer surface). Otherwise, the $x$ axis
+  will be rotated by \texttt{ROTX} with respect to \texttt{VSURF}.
+  \texttt{VSURF} is the reference direction for the rotation angle of
+  the ion incidence direction (see \texttt{ROTATE} in the
+  \texttt{\&IONS} record). The components of \texttt{VSURF} have to be
+  given in the crystal coordinate system, i.~e.  the coordinate
+  system connected with the [100], [010], and [001] axis of the
+  crystal.  \texttt{VSURF} is ignored for non-crystalline regions.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of simple array
+                (3) of real \\
+    Default: \> 1.,1.,0. \\
+    Range: \> perpendicular to \texttt{WAFER}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WAFER} --- Wafer surface normal vector}
+%
+  This parameter specifies a vector normal to the wafer surface. The
+  components of \texttt{WAFER} have to be given in the crystal
+  coordinate system, i.~e.  the coordinate system connected with the
+  [100], [010], and [001] axis of the crystal. E.~g. for a (110)
+  wafer, a surface normal may be (0,1,1), thus \texttt{WAFER=0,1,1}.
+  \texttt{WAFER}  is ignored for non-crystalline regions.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of simple array
+                (3) of real \\
+    Default: \> 0.,0.,1. \\
+    Range:   \> perpendicular to \texttt{VSURF}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{XTAL} --- Crystalline region flag}
+%
+  This parameter specifies for each region \texttt{IR} whether it is amorphous
+  (\texttt{XTAL='no'} or \texttt{XTAL='off'}) or crystalline
+  (\texttt{XTAL='yes'} or any other value).  Notice that, due to present
+  limitations of the program, only one region may be crystalline. See
+  \texttt{XTAL} record for further parameters defining the crystal
+  structure and controlling simulation in crystalline regions. A crystalline
+  region must not be specified in a dynamic simulation (\texttt{LDYN=T}).
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of character strings \\
+    Default: \> \texttt{'no'} \\
+    Range:   \> any character string ($\le$ 80 characters)
+  \end{keytab}
+\end{keydescription}
+
+
+
+
+
+
+
+

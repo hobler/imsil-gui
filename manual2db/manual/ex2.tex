@@ -1,0 +1,106 @@
+The following example shows the \texttt{INP} file for the simulation of an
+RBS/C spectrum into a 1 $\mu$m thick (100) crystalline silicon with a damage
+profile defined in a histogram input file. Damage is in the form of
+split-$\langle 110 \rangle$ interstitials. The coordinates of the defects and
+strained regions are taken from ab-initio calculations. A silicon cell
+containing 1.6 million lattice atoms (10x10x2000 unit cells) is populated
+according to the requested damage concentrations (defined in histogram file
+\texttt{'hisfile'}) with required defect type (\texttt{FRACSPL=1.0}). Periodic
+boundary conditions in lateral dimensions are applied. 3~MeV He$^+$ ions and a
+backscattering angle of $170^\circ$ are used.  Recoils are not followed.
+
+\begin{verbatim}
+IMSIL test example2
+RBS/C (100) spectra of 3 Mev He ions. 
+ &setup    nr=1 natom=2 usehis=t hisfile='profile.his' 
+           atom1=2 atom2=2 / 
+ &ions     name='He' energy=3000 dose=1e14 ranrot=t 
+           nion=100000 /
+ &material region=1 name='Si' vsurf=1,1,0 wafer=0,0,1 xtal='yes' /
+ &damage   ldam=t ldet=t fracspl=1.0 wcol=40,40,8000 /
+ &geometry posif=0,10000 /
+ &output   lrbs=t lhis=t ldef=t wboxei=6000. tilta=10. /
+\end{verbatim}
+
+As discussed in Chapter \ref{k:input}, the first two lines are comments and
+have no further meaning. The third line
+%
+\begin{verbatim}
+ &setup    nr=1 natom=2 usehis=t hisfile='profile.his' 
+           atom1=2 atom2=2 / 
+\end{verbatim}
+%
+specifies that there is 1 region and a total of 2 atom species (the He ion
+plus the Si target atoms, see below).  The damage profile is read from the
+histogram file \texttt{profile.his} (\texttt{usehis=t, hisfile='profile.his'}.
+The histogram file can be the output of a previous simulation or can be
+created separately, with a format defined in Chapter \ref{k:files}. The atom
+index \texttt{ATOM1=2} (column number three) corresponds to atom index in the
+histogram file which will be used to initialize atom index index 2
+\texttt{ATOM2=2}, which is in this case silicon. The next line
+%
+\begin{verbatim}
+ &ions     name='He' energy=3000 dose=1e14 ranrot=t
+           nion=100000 /
+\end{verbatim}
+%
+defines the properties of the ions: The ion species is He, the energy
+3000~keV, the dose $10^{14}~$cm$^{-2}$, the tilt angle is $0^\circ$ (default
+value) and random rotation of ions is used. 100000 projectiles are requested
+to be simulated.  The next record
+%
+\begin{verbatim}
+ &material region=1 name='Si' vsurf=1,1,0 wafer=0,0,1 xtal='yes' /
+\end{verbatim}
+%
+specifies the material of the target region as single-crystal (100)-Si 
+(\texttt{wafer=0,0,1}).
+
+The next record,
+%
+\begin{verbatim}
+ &damage   ldam=t ldet=t fracspl=1.0 wcol=40,40,8000 /
+\end{verbatim}
+%
+specifies that damage in the crystalline region shall be taken into account
+dynamically for the simulation of subsequent trajectories, that the
+deterministic model of damage is used, and that the defect type is always
+split-$\langle 110 \rangle$ interstitials (\texttt{FRACSPL=1.0}). Since we use
+the histogram damage profile \texttt{USEHIS=T} the simulation cell with size
+of 10x10x2000 unit cells (notice that the input units for \texttt{WCOL} are a
+quarter of the lattice constant) will be populated with
+split-$\langle110\rangle$ interstitials \texttt{FRACSPL=1} according to
+concentration profile specified with atom index 2 \texttt{ATOM1=2} in
+histogram file \texttt{'profile.his'}.
+
+Since there are no \texttt{\&xtal} \texttt{\&snpar}, or \texttt{\&separ}
+records, the default parameters for the crystal, nuclear, and electronic
+stopping are used.
+
+The next input record
+%
+\begin{verbatim}
+ &geometry posif=0,10000 /
+\end{verbatim}
+%
+specifies that the target geometry is a 1-D layered structure (the default value
+of \texttt{ndim} in the \texttt{\&setup} record is \texttt{1}). The Si layer (as
+specified in the \texttt{\&material} record) extends from $z=0$ to
+$z=10000$\AA\ ($=1~\mu$m). Finally,
+%
+\begin{verbatim}
+ &output lrbs=t lhis=t ldef=t wboxei=6000. tilta=10. /
+\end{verbatim}
+%
+specifies the RBS energy spectrum box width wboxei=6000.\texttt{eV}. The RBS
+backscattering angle is $170^\circ$. Notice that when \texttt{LRBS=T} is set the
+angle is calculated as $\texttt{$180^\circ$} - \texttt{TILTA}$ which gives
+$180^\circ - 10^\circ = 170^\circ$). Requested output files are: 1-D
+histograms of the dopants and the damage into the \texttt{HIS} file,
+RBS/S spectra into the \texttt{RBS} file and deterministic defects into the
+\texttt{DEF} file.
+
+If the script delivered with the program is used, the input file could be
+named \texttt{he3mev.inp}. IMSIL would produce the files \texttt{he3mev.out},
+\texttt{he3mev.his}, \texttt{he3mev.rbs}, and \texttt{he3mev.def}.
+

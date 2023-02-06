@@ -1,0 +1,128 @@
+This record is used to set the wafer orientation and the parameters for 
+the search procedure of collision partners in the crystalline region. 
+
+\begin{keydescription}{\texttt{FFOLDM} --- Maximum flight path to record old 
+lattice sites}
+%
+This parameter specifies the flight path within which lattice sites may be 
+recorded to be excluded from the list of potential collision partners.
+Units are \AA.
+\begin{keytab}
+   Type:    \> real \\
+   Default: \> 0.5 \\
+   Range:   \> $> 0$
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FFPMAX} --- Maximum free flight path}
+%
+This parameter specifies the maximum free flight path between collisions.
+The purpose of the maximum free flight path is to avoid skipping of 
+scattering events due to the finite range of the lattice site list. The 
+units are a quarter of the lattice constant for the default diamond lattice,
+and the minimum of the lattice constants otherwise.
+\begin{keytab}
+   Type:    \> real \\
+   Default: \> 1.0 for default diamond lattice \\
+            \> 0.25 otherwise \\
+   Range:   \> $\ge 0$
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LVIB2} --- 2-D lattice vibrations flag}
+%
+This parameter specifies whether the lattice vibrations are assumed 2-D
+within the plane perpendicular to the ion's direction of motion, or
+3-D. \texttt{LVIB2=T} reduces the execution time.
+\begin{keytab}
+   Type:    \> logical \\
+   Default: \> \texttt{F} \\
+   Range:   \> \texttt{T}, \texttt{F} 
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NAME} --- Name of crystal lattice}
+%
+This parameter specifies the name of the crystal lattice and thus the
+crystal lattice system. Note that the hexagonal lattice structures use
+orthogonal non-primitive unit cells, the edges of which are reported
+in the output file. Among the diamond lattices the optimized version
+(\texttt{' '}) is the most efficient implementation. For the other lattices the
+alterative names all refer to the same implementation. Alternatively,
+\texttt{NAME} may specify the name of a file containing the unit cell definition
+(see Chapter \ref{k:files} for details).
+\begin{keytab}
+   Type:    \> character string \\
+   Default: \> \texttt{' '} ... (optimized) diamond \\
+   Range:   \> \texttt{' '}, \texttt{'diamond'}, \texttt{'diamond2'} ... diamond \\
+            \> \texttt{'sc'} ... simple cubic \\
+            \> \texttt{'bcc'} ... body centered cubic \\
+            \> \texttt{'fcc'} ... face centered cubic \\
+            \> \texttt{'zincblende'}, \texttt{'3C'} ... zincblende \\
+            \> \texttt{'wurtzite'}, \texttt{'wurzite'}, \texttt{'2H'}
+            ... wurtzite \\
+            \> \texttt{'4H'} \\
+            \> \texttt{'6H'} \\
+            \> Any name ($\le 80$ characters) of an IMSIL unit cell file \\
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NLOLDM} --- Maximum number of old lattice sites}
+%
+This parameter specifies the maximum number of old lattice sites to be 
+excluded from the list of potential collision partners.
+\begin{keytab}
+   Type:    \> integer \\
+   Default: \> 6 \\
+   Range:   \> $0 \le \texttt{NLOLDM} \le 20$
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NRAD2} --- Search radius squared}
+%
+\texttt{NRAD2+1} is the square of the radius of a sphere around the ion 
+position which is assumed to contain the lattice sites of all potential 
+collision partners. \texttt{NRAD2} may only be specified for the default
+diamond lattice. The units are a quarter lattice constant.
+\begin{keytab}
+   Type:    \> integer \\
+   Default: \> $\texttt{PMAX}^2 + \texttt{FFPMAX}^2$ \\
+   Range:   \> $0 \le \texttt{NRAD2} \le 32$
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{PMAX} --- Maximum impact parameter}
+%
+This parameter specifies the maximum impact parameter in the crystalline
+layer. The units are a quarter of the lattice
+constant for the default diamond lattice, and the minimum of the lattice
+constants otherwise. 
+\begin{keytab}
+   Type:    \> real \\
+   Default: \> for default diamond lattice: \\
+            \>$(\pi~L~\texttt{DENS})^{-1/2}$ if \texttt{NRAD2} is undefined, with\\
+            \> $L = 0.43~\texttt{DENS}^{-1/3}$ for $E>10~$keV \\
+            \> $L = (0.3+0.7~\texttt{E0}/10~$keV$)~0.43~\texttt{DENS}^{-1/3}$
+               for $E<10~$keV; \\
+            \> $[\texttt{NRAD2}+1-\texttt{FFPMAX}^2)]^{1/2}$ 
+               otherwise \\
+            \> for \texttt{NAME='diamond'}: 0.43 \\
+            \> for other lattice structures: ~ -- ~~~ (obligatory) \\
+   Range:   \> $>0$
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{PSOLDM} --- Maximum scattering angle to record 
+old lattice sites}
+%
+Lattice sites are excluded from the sites of potential collision 
+partners only if no collision with a scattering angle larger than 
+\texttt{PSOLDM} has occurred meanwhile. \texttt{PSOLDM} has to be specified in 
+degrees.
+\begin{keytab}
+   Type:    \> real \\
+   Default: \> $30^\circ$ \\
+   Range:   \> $\ge 0$
+\end{keytab}
+\end{keydescription}
+

@@ -1,0 +1,127 @@
+Ion implantation has traditionally been the most important doping technique in
+semiconductor technology. One-dimensional doping profiles of the most common ion species 
+implanted into (100) Si at 7$^\circ$ tilt angle have accurately and extensively 
+been measured and parameterized.  On the other hand, physics-based simulations 
+may be invaluable if less common implant parameters are used (such as large tilt
+angles or different materials), if the dopant profiles are difficult to
+measure (such as at ultra-low energies or in two dimensions), or if
+information on implant damage is desired. 
+
+Another related phenomenon is sputtering. Sputtering can occur unintentionally
+during high-dose ion implantation or intentionally to remove material, possibly
+in a local manner using a focused ion beam. Other related phenomena occur in
+nuclear technology such as defect creation in fission and plasma--wall 
+interaction in fusion technology. In all these situations the binary
+collision (Monte Carlo) IMplant and Sputter sImuLator IMSIL\footnote{earlier,
+``IMSIL'' was considered an abbreviation of IMplant simulator for SILicon
+technology. The new interpretation reflects the evolution of IMSIL, covering
+sputtering as well as implantation.} may be the tool of choice.
+
+
+This manual describes IMSIL as of \today. 
+\ifprivate
+This manual describes IMSIL as of December 2003.  IMSIL was converted from
+FORTRAN77 to FORTRAN90 over the years, and this is the first full FORTRAN90
+version.  In this transition, almost all of the code was changed.  Most
+features have thoroughly been tested, but some still await testing, in
+particular the molecular dynamics mode is temporarily disabled.  If this
+feature is needed, use of IMSIL 2002 is recommended.
+\fi 
+
+IMSIL allows targets composed of a crystalline region with a lattice structure
+that can be described by a cubic unit cell, and an arbitrary number regions of
+arbitrary amorphous material \cite{hobler_monte_1995}. The target may either be
+a 1-D layered structure defined by the interface positions of the materials
+\cite{hobler_effect_1992,hobler_channeling_1999}, or a 2-D structure composed of
+regions defined by arbitrary polygons \cite{hobler_monte_1989,
+hobler_simulation_2003}. For 1-D targets, geometry and material changes may be
+simulated in a dynamic manner. For all target geometries, damage produced by
+the ions in the crystalline layer may dynamically be taken into account for the
+simulation of subsequent ion trajectories
+\cite{simionescu_two-dimensional_1993}, which can have a profound effect on the
+distribution of the implanted ions due to the suppression of the channeling
+effect. The motion of recoils may be followed in order to obtain a more accurate
+distribution of the damage \cite{hobler_two-dimensional_1988}, to obtain the
+distribution of atoms recoiled from one target region into another
+\cite{Moe85}, and must be followed to simulate sputtering. The ions may either
+be atoms (B, P, As, ...) or molecules composed of an arbitrary number of atoms
+(BF$_2$, ...).
+
+The models implemented in IMSIL have been carefully calibrated against
+experimental data for conditions commonly found in semiconductor industry.  In
+particular, electronic stopping is well described in silicon both under random
+and channeling conditions for all implant species.\footnote{Nuclear stopping is
+generally considered accurate under most conditions anyway. This should be taken
+for granted for any binary collision simulator.}  Damage generation in silicon
+has been calibrated for B, BF$_2$, Si, P, and As, and can be interpolated for
+any ion species.  In order to deal with special conditions such as different
+materials, target temperatures different from room temperature, or high dose
+rates, the user is given access to all model parameters via the input file.
+
+IMSIL was first released in 1993. Until 2003, it was mainly developed as an
+implant simulator. Apart from the carefully calibrated models for silicon
+technology \cite{hobler_monte_1995, simionescu_model_1995, hobler_towards_2000,
+hobler_status_2003}, another unique feature of IMSIL is its physics-based model
+of extended free flight paths in amorphous targets
+\cite{hobler_acceleration_1995}, which promote computational efficiency at high
+ion energies.
+
+Two major extensions of IMSIL 2005 were the possibility to calculate RBS/C
+energy and depth spectra \cite{kovac_investigation_2006}, and to use a
+deterministic model of damage as an alternative to the standard statistic model
+\cite{hobler_multiscale_2005,otto_coupled_2005}. The deterministic defect model
+was used for coupling IMSIL with kinetic Monte Carlo simulations. It has
+been disabled, because it has not been used since then. 
+
+The major extension of IMSIL 2007 was the capability to use crystal structures 
+different from diamond, namely wurtzite, zincblende, and the 4H and 6H
+polytypes of SiC \cite{g._hobler_simulation_2018}. More recently the
+possibility to read in arbitrary orthogonal unit cells and the fcc, bcc, and sc lattice
+were implemented \cite{schlueter_absence_2020}. Also, a polycrystalline mode has 
+been implemented \cite{schlueter_absence_2020} where the crystal lattice is
+randomly rotated before each ion impact.
+
+Starting 2008, various extensions for more accurate sputtering simulations have 
+been implemented. These include the implementation of a surface binding energy
+(planar, isotropic and intermediate models) \cite{ebm_assessment_2009,
+hobler_assessment_2013} and of a surface roughness model that provides more
+realistic sputter yields for glancing incidence of the ions
+\cite{lindsey_simple_2017}. The introduction of ``virtual recoils''
+\cite{hobler_dynamic_2011} promotes computational efficiency by following
+recoils down to the surface binding energy only near the surface, so that both
+sputtering and displacement statistics are correctly obtained, while unnecessary
+trajectory simulations down to the surface binding energy in the bulk are
+avoided. Targets with rotational and spherical symmetry have been implemented in
+2016 \cite{urbassek_sputtering_2018,bradley_second_2021}.
+Arbitrary 3-D geometries still wait for implementation, although the 
+geometry-related code has been written with the extension to 3-D in mind.
+Some activities on 2-D dynamic target relaxation have been started
+\cite{hobler_dynamic_2011,hobler_combined_2015}, and some traces can be found in
+the code. It is planned to separate this feature from IMSIL into a separate code
+with some coupling to IMSIL. 
+
+As a beam model, traditionally a punctiform beam and a homogeneous windowed beam
+had been available with an optional simple beam divergence model (isotropic up
+to a maximum angle). The beam divergence model has recently (2021) been
+extended to include superpositions of Gaussian distributions with different
+standard deviation in $x$ and $y$ direction for both the position and the
+direction of the incident ions. The former allows to describe quite general
+focused ion beams, while the latter is relevant to channeling if the beam is
+close to a low-index crystallographic direction. 
+
+IMSIL provides a multitude of options for writing spatial, angular, and energy 
+distributions to output files (``histogram files''). These include the 1-D, 2-D,
+and 3-D spatial distributions of stopped ions, vacancies, and recoils as well as
+nuclear and electronic energy deposition. In addition, 1-D and 2-D angular and
+1-D energy distributions of backscattered or transmitted ions and recoils can be
+written to files. Also, ion and recoil trajectories or just their initial and/or
+final states can be saved to a file.
+
+The remainder of this manual is organized as follows: After an introduction to
+the options for the specification of the ions and the target in Chapter~2, the
+physical models implemented in IMSIL are described in Chapter~3. The formats of
+the input and output files are given in Chapter~4. Chapter~5 describes all the
+parameters that may be specified in the input file.  After a description of
+Python scripts that facilitate the running of IMSIL and the plotting of results
+in Chapter~6, typical examples of input files are presented in Chapter~7. 
+

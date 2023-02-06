@@ -1,0 +1,433 @@
+This record is used to describe the ions. It has to appear in each input file. 
+It has the index variable \texttt{ATOM1} corresponding to the index of the atom
+in the ion. The index is increasing from left to right in the ion name as
+specified by the \texttt{NAME} parameter. E.g., for \texttt{NAME='BF2'},
+\texttt{ATOM1=1} corresponds to B and \texttt{ATOM1=2} to F. 
+
+Another index variable is \texttt{BEAM}. It allows to specify the beam as a
+superposition of partial beams. Ions are chosen from each of the partial beams
+with a probability proportional to \texttt{WEIGHT}, see Section~\ref{s:beam}.
+
+\ifprivate
+\begin{keydescription}{\texttt{DINIT} --- Initial square edge length}
+%
+  This parameter specifies the edge length of the square within the
+  plane defined by \texttt{XINIT(1)}, \texttt{YINIT(1)}, \texttt{RINIT} and
+  \texttt{ROTATE}, within which the starting points of the ions are
+  selected if \texttt{LPINIT=T}.
+%
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 5.43 \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{DIVERG} --- Beam divergence}
+%
+  This parameter specifies the beam divergence in degrees. For
+  \texttt{MODDIV=1}, the initial ion direction will be distributed
+  isotropically within an elliptical cone of apertures \texttt{2*DIVERG(1)}
+  and \texttt{2*DIVERG(2)} in $x$ and $y$ direction of the beam coordinate
+  system. For \texttt{MODDIV=2}, the initial ion direction will be
+  Gaussian distributed with standard deviations \texttt{DIVERG(1)}
+  and \texttt{DIVERG(2)} in $x$ and $y$ direction of the beam coordinate
+  system. The ion direction will be rotated into the target coordinate
+  system according to \texttt{TILT} and \texttt{ROTATE}.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{BEAM}) of simple arrays (2) of
+                real \\
+    Default: \> 0, \texttt{DIVERG(1)} \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DOSE} --- Implantation dose}
+%
+  This parameter specifies the implantation dose in units defined by 
+  \texttt{DOSEUNITS}. If \texttt{DOSEUNITS='cm-2'}, the dose is defined as
+  the number of incident ions per area in the $x$-$y$ plane (not perpendicular
+  to the beam if there is a tilt angle). If \texttt{DOSEUNITS='cm-1'}, the dose
+  is defined as the number of incident ions per length in $y$ direction. For
+  \texttt{DOSEUNITS='1'}, \texttt{DOSE} refers to the number of incident ions.
+%
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> corresponding to 1 ion per \AA$^2$,  \AA, or 1 ion
+                depending on \texttt{DOSEUNITS} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DOSEUNITS} --- Units of dose}
+%
+  This parameter specifies the units of the implantation dose specified by
+  \texttt{DOSE}. See the description of \texttt{DOSE} for the meaning of
+  possible units.
+%
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> \texttt{'cm-2'} \\
+    Range:   \> \texttt{'cm-2'}, \texttt{'cm-1'}, \texttt{'1'}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ENERGY} --- Initial ion energy}
+%
+  This parameter specifies the initial ion energy in keV.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> ~ -- ~~~(obligatory) \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FWHM} --- Full width at half maximum}
+%
+  This parameter specifies the full width at half maximum of the blur of the
+  ion beam. A Gaussian distribution function with the given FWHM is superposed
+  to the initial positions of the ions.  The two values of \texttt{FWHM}
+  correspond to the $x$ and $y$ direction in the beam coordinate system. The
+  units of \texttt{FWHM} are \AA.
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> 0., \texttt{FWHM(1)} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LIINIT} --- Internal starting point flag}
+%
+  This parameter specifies whether the starting points of the ion
+  trajectories shall be chosen at the coordinates given by \texttt{XINIT},
+  \texttt{YINIT}, \texttt{ZINIT} ({\tt LIINIT=T}), or by a projection of 
+  these points to the surface along the incidence direction of the ion 
+  ({\tt LIINIT=F}).  For \texttt{LIINIT=T}, when the starting point is inside
+  the target, the first free flight path starts there. When it is outside 
+  the target, the point of entrance into the target is searched for in the 
+  forward direction only (this makes possible to start trajectories inside a 
+  hollow cylinder or sphere). For \texttt{LIINIT=F} the entrance into the 
+  target is searched for also in the backward direction.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LLINIT} --- Start as lattice atom flag}
+%
+  This parameter specifies whether in the case of an internal starting
+  point (\texttt{LIINIT=T}) the starting point shall be the position
+  of a lattice atom.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{LPINIT} --- Plane implantation flag}
+%
+  This parameter specifies whether the starting point of the ion has to
+  be chosen along a line parallel to \texttt{ROTATE} at the distance
+  \texttt{RINIT} from (\texttt{XINIT(1)},\texttt{YINIT(1)}). The initial
+  direction is parallel to this plane.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T} if \texttt{LRINIT=F}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\ifprivate
+\begin{keydescription}{\texttt{LRINIT} --- Circle implantation flag}
+%
+  This parameter specifies whether the starting point of the ion has to
+  be chosen along a circle with radius \texttt{RINIT} around
+  (\texttt{XINIT(1)},\texttt{YINIT(1)}).
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T} if \texttt{LPINIT=F}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LTINIT} --- Start as target atom flag}
+%
+  This parameter specifies whether the ion shall be considered
+  indistinguishable from a target atom if they have the same atomic
+  number.  If \texttt{LTINIT=t} and the ion has the same atomic number
+  as a target atom, replacement collisions are allowed and the ion is
+  counted as damage.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{MASS} --- Ion mass}
+%
+  This parameter specifies the mass of the ion atoms in units of the
+  atomic mass unit.  It overwrites the default values determined by
+  the atom names.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM1}) of real \\
+    Default: \> determined from \texttt{NAME} \\
+    Range: \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{MODDIV} --- Beam divergence model}
+%
+  This parameter specifies the distribution function of the ion's
+  incidence direction around the nominal beam direction given by
+  \texttt{TILT} and \texttt{ROTATE}. \texttt{MODDIV=1} means that the
+  actual incidence direction is isotropically distributed within the
+  angle \texttt{DIVERG} from the nominal incidence direction.
+  \texttt{MODDIV=2} means a Gaussian weighted isotropic distribution 
+  with standard deviation \texttt{DIVERG}. While the isotropic distribution 
+  (\texttt{MODDIV=1}) is exact for all values of \texttt{DIVERG}, the Gaussian
+  weighted distribution is exact only in the limit of small \texttt{DIVERG}.
+  Note that for small \texttt{DIVERG} the root mean square value of the angle
+  between actual and nominal incidence angle is \texttt{DIVERG}$/\sqrt{2}$ in 
+  case of an isotropical distribution (\texttt{MODDIV=1}).
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{BEAM}) of integer \\
+    Default: \> 1 \\
+    Range:   \> 1, 2
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NAME} --- Name of ion species}
+%
+  This parameter specifies the chemical formula of the ion molecule.
+  E.g. \texttt{NAME='B'} for B implantation, \texttt{NAME='BF2'} for
+  BF$_2$ implantation, etc.  The number of atom species (2 in the case
+  of BF$_2$), the atom names (B and F), the atomic numbers (5 and 9,
+  respectively), default values of the atom masses (11.009 and 18.998,
+  respectively), and the number of atoms of each atom species in the
+  molecule (1 and 2, respectively) are extracted automatically.
+%
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> ~ -- ~~~ (obligatory) \\
+    Range:   \> any chemical name of a molecule ($\le$ 80 characters)
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NION} --- Number of simulated ions}
+%
+  This parameter specifies the number of ions to be simulated. The
+  simulation time will be roughly proportional to \texttt{NION} while
+  statistical errors decrease with the square root of \texttt{NION}.
+  In case of the continuation of a previous run (\texttt{USEBK=T}),
+  \texttt{NION} specifies the total number of ions including those
+  simulated in the previous run.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> ~ -- ~~~(obligatory) \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{RANROT} --- Random rotation angle flag}
+%
+  This parameter is a flag indicating that the rotation angle has to be
+  selected randomly, simulating a continuously varying rotation angle.
+  If \texttt{RANROT=T}, \texttt{ROTATE} must not be specified at the
+  same time.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{REENTER} --- Reenter flag}
+%
+  This parameter specifies whether ions are allowed to traverse 
+  vacuum regions and to reenter the target somewhere else. If
+  \texttt{REENTER=F}, the ion trajectories are terminated as soon
+  as they leave the target, and the ions are counted as backscattered or
+  transmitted depending on their direction of motion. \texttt{REENTER=T} 
+  must not be specified in a 1-D layer simulation (\texttt{NDIM=1},
+  \texttt{LCYLX=LCYLY=LCYLZ=LSPHER=F}).
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \>
+    \texttt{NDIM>1.OR.LCYLX.OR.LCYLY.OR.LCYLZ.OR.LSPHER} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{RINIT} --- Radius/distance for starting point}
+%
+  This parameter specifies the radius of the circle around
+  (\texttt{XINIT(1)},\texttt{YINIT(1)}) along which the starting point is
+  chosen if \texttt{LRINIT=T}. It specifies the distance from
+  (\texttt{XINIT(1)},\texttt{YINIT(1)}) of the line along which the starting
+  points are chosen if \texttt{LPINIT=T}. The units of \texttt{RINIT}
+  are \AA.
+%
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{ROTATE} --- Rotation angle}
+%
+  This parameter specifies the rotation angle in degrees, i.e. the
+  azimuthal orientation of the initial ion direction with respect to
+  the the surface vector \texttt{VSURF} (see \texttt{\&MATERIAL} record).
+\begin{keytab}
+   Type:    \> real \\
+   Default: \> 0 \\
+   Range:   \> arbitrary
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{TILT} --- Tilt angle}
+%
+  This parameter specifies the tilt angle in degrees, i.e. the angle
+  between the initial ion direction and the wafer normal (defined by
+  \texttt{WAFER} in the \texttt{\&MATERIAL} record).
+%
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{TILT} < 90$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{TRAFILE} --- Trajectory file}
+%
+  This parameter specifies the name of a trajectory file used to set the
+  initial conditions of the ions. The format of the trajectory file
+  is described in file in Chapter~\ref{k:files}). Lines with
+  \texttt{IFLAG=2} are ignored. Lines with \texttt{IFLAG=1} are used to
+  mark lattice atoms that are initially excluded from being a collision
+  partner. The parameters \texttt{ENERGY} and \texttt{NION} of the
+  \texttt{\&ION} record still must be specified, but it is sufficient to use
+  upper bounds to the actual values. Normally, one may want to set
+  \texttt{LIINIT=T}. Relevant only if \texttt{USETRA=T}.
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{USETRA=T}) \\
+    Range:   \> Any name ($\le 80$ characters) of an IMSIL trajectory file
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{USETRA} --- Use-trajectory-file flag}
+%
+  This variable specifies whether the ions are initialized with data from a
+  trajectory file. If \texttt{USETRA=T}, the trajectory file specified by
+  \texttt{TRAFILE} must exist.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WEIGHT} --- Beam weight}
+%
+  This parameter specifies the weight of each partial beam. Ions will be chosen
+  from the partial beams with probability proportional to \texttt{WEIGHT}. The
+  weights will internally be normalized to unity, i.e., as specified they need
+  not sum up to unity.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{BEAM}) of real \\
+    Default: \> 1 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{XINIT} --- Initial x value}
+%
+  This parameter specifies the $x$ coordinate in \AA\ of the starting point of
+  the simulated ion trajectories (\texttt{LIINIT=T}) or of the focal point of the
+  beam (\texttt{LIINIT=F}). If \texttt{LIINIT=F}, the starting point is obtained
+  by projection of the focal point to slightly outside the surface. The starting
+  point or focal point is slightly modified in a crystalline target. If
+  two values are given for \texttt{XINIT}, the starting or focal point is
+  generated randomly with uniform distribution between the two values.
+  \ifprivate 
+    \texttt{XINIT(1)} specifies a reference point for determining the
+    starting point in case of \texttt{LRINIT=T} or \texttt{LPINIT=T}.
+    See these keys for further information.
+  \fi
+%
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> 0, \texttt{XINIT(1)} \\
+    Range:   \> \texttt{XINIT(2)} $\ge$ \texttt{XINIT(1)}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{YINIT} --- Initial y value}
+%
+  This parameter specifies the $y$ coordinate in \AA\ of the starting point of
+  the simulated ion trajectories (\texttt{LIINIT=T}) or of the focal point of the
+  beam (\texttt{LIINIT=F}). If \texttt{LIINIT=F}, the starting point is obtained
+  by projection of the focal point to slightly outside the surface. The starting
+  point or focal point is slightly modified in a crystalline target. If
+  two values are given for \texttt{YINIT}, the starting or focal point is
+  generated randomly with uniform distribution between the two values.
+  \ifprivate 
+    \texttt{YINIT(1)} specifies a reference point for determining the
+    starting point in case of \texttt{LRINIT=T} or \texttt{LPINIT=T}.
+    See these keys for further information.
+  \fi
+%
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> 0, \texttt{YINIT(1)} \\
+    Range:   \> \texttt{YINIT(2)} $\ge$ \texttt{YINIT(1)}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ZINIT} --- Initial z value}
+%
+  This parameter specifies the $z$ coordinate in \AA\ of the starting point of
+  the simulated ion trajectories (\texttt{LIINIT=T}) or of the focal point of the
+  beam (\texttt{LIINIT=F}). If \texttt{LIINIT=F}, the starting point is obtained
+  by projection of the focal point to slightly outside the surface. The starting
+  point or focal point is slightly modified in a crystalline target. If
+  two values are given for \texttt{ZINIT}, the starting or focal point is
+  generated randomly with uniform distribution between the two values.
+  \ifprivate 
+    \texttt{ZINIT(1)} specifies a reference point for determining the
+    starting point in case of \texttt{LRINIT=T} or \texttt{LPINIT=T}.
+    See these keys for further information.
+  \fi
+%
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> 0, \texttt{ZINIT(1)} \\
+    Range:   \> \texttt{ZINIT(2)} $\ge$ \texttt{ZINIT(1)}
+  \end{keytab}
+\end{keydescription}
+

@@ -1,0 +1,56 @@
+This example shows the simulation of an ideally focused ion beam on a
+crystalline Si target covered by a thin SiO$_2$ layer.
+
+The input file reads:
+
+\begin{verbatim}
+B spot burn in 100-Si, 2 keV, 7 tilt, dose=1
+ &setup    natom=3 nr=2 / 
+ &ions     name='B' energy=2 dose=1 doseunits='1'
+           tilt=7 diverg=0.3 nion=1000000 /
+ &material region=1 name='SiO2' xtal='no' /
+ &material region=2 name='Si' xtal='yes' wafer=0,0,1 vsurf=1,0,0 /
+ &snpar    lstffp=f /
+ &damage   ldam=t lrcoil=t frec=0.3 ndim=3 /
+ &geometry posif=0,10,10000 /
+ &output   lmom=t lhis=t lhis2=t lhis3=t 
+           nbox=200 wbox=10
+           nbox2=100,50 wbox2=20,20 
+           nbox3=0,0,0 wbox3=20,20,20 /
+\end{verbatim}
+
+The dose is specified as one ion (\texttt{dose=1 doseunits='1'} on the
+\texttt{\&setup} record). This means that the 3-D histograms will represent the
+probability density functions for the stop position of the ions, and for the
+positions of the vacancies and interstitials. Since \texttt{xinit},
+\texttt{yinit}, and \texttt{zinit} are not specified, these parameters assume
+their default value \texttt{0}, so the reference point will be the origin of the
+coordinate system for all ions.
+
+Note that in this example the $x$ axis is parallel to the [100] crystal axis
+(\texttt{vsurf=1,0,0} on the second \texttt{\&material} record).
+\texttt{ndim=3} on the \texttt{\&damage} record means that for dynamic damage
+consideration the 3-D damage distribution will be taken into account (``damage
+consideration'' means that atoms in the crystalline region are randomly
+displaced, which normally results in a reduction of the channeling effect).
+This corresponds to the actual situation in a spot burn. If \texttt{ndim=1} were
+specified, a 1-D damage distribution would be taken into account derived from
+the implant simulation. Damage-wise this would correspond to an implantation
+with a homogeneous beam. The 3-D histograms would then correspond to the
+probability density functions for one ion in a homogeneous beam.
+
+On the \texttt{\&output} record, output of 1-D, 2-D, and 3-D histograms are
+requested. Only the 3-D histogram corresponds to the actual physical situation,
+since the 3-D damage distribution is taken into account. The 1-D and 2-D
+histograms are just convolutions of the 3-D histogram and do not correspond to
+line or area implantations.
+
+On the \texttt{\&output} record, also the two possibilities for specifying the
+box sizes of the histograms are demonstrated. For the 1-D and 2-D histograms,
+\texttt{nbox} and \texttt{nbox2} are nonzero. This means that the number of
+histogram boxes will never exceed the specified values. The box widths are
+initialized with the values given by the \texttt{wbox} and \texttt{wbox}
+parameter, respectively. The histogram is moved and/or the box widths are
+doubled so that all entries are captured. In contrast, \texttt{nbox3=0}, which
+means the histgram will always have the box widths specified by \texttt{wbox3},
+and boxes will be added as to cover all entries.

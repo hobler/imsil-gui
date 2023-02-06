@@ -1,0 +1,414 @@
+The geometry of the target is either described in terms of regions or in terms 
+of cells. In 1-D, the geometry is simply defined by the positions of the surfaces
+and the interfaces between the regions (\texttt{POSIF}), e.g.,
+%
+\begin{verbatim}
+ &geometry posif=-10,0,10000 /
+\end{verbatim}
+%
+Cells are usually finer-grained than regions. Only regions are specified on the
+\texttt{\&GEOMETRY} record. Cells are either defined by reading a \texttt{CELL}
+file, or they are internally generated from regions in case of a dynamic
+simulation (\texttt{LDYN=T}).
+
+In 2-D, the geometry of each region is specified by a closed polygon. To define
+the polygons, it is first necessary to specify the coordinates of the vertices
+(corner points) using the \texttt{POINT} index variable, e.g.,
+%
+\begin{verbatim}
+ &geometry point=1 pos=0,0 /
+ &geometry point=2 pos=-5000,0 /
+ ...
+\end{verbatim}
+%
+and then to specify the polygons by listing the point indices in the desired
+sequence, using the \texttt{REGION} index variable:
+%
+\begin{verbatim}
+ &geometry region=0 points=1,2,3,4,5,6,7,8 /
+ &geometry region=1 points=1,4,5,6 /
+ ...
+\end{verbatim}
+%
+Note that the circumference of the complete simulation area can be specified as
+region 0. If it is not specified, it is determined by IMSIL. There must not be
+undefined areas within the circumference, and no regions may overlap.
+
+For 2-D geometries, IMSIL uses an internal mesh containing the minimum distance
+of each cell from the boundary. It is used to reduce the number of checks that
+are necessary to determine whether the ion leaves a region.
+
+It is possible to impose cylindrical (\texttt{LCYLX=T}, \texttt{LCYLY=T}, or
+\texttt{LCYLZ=T}) or spherical (\texttt{LSPHER=T}) symmetry. For cylindrical
+geometry, the distance along the axis of symmetry replaces the $x$ coordinate,
+while the distance from the axis replaces the $z$ coordinate. For spherical
+symmetry, the distance from the center of symmetry replaces the $z$ coordinate. 
+
+\begin{keydescription}{\texttt{CENTER} --- Center of cylindrical and spherical 
+regions}
+%
+  This parameter specifies the center of the cylindrical or spherical regions,
+  if \texttt{LCYLX=T} or \texttt{LCYLY=T} or \texttt{LCYLZ=T} or 
+  \texttt{LSPHER=T}. The three components of \texttt{CENTER} correspond to $x$, 
+  $y$, and $z$ coordinate of the center. For cylindrical symmetries, the
+  symmetry line passes through the position specified by \texttt{CENTER} and is
+  parallel to the $x$, $y$, or $z$ axis depending on whether the \texttt{LCYLX},
+  \texttt{LCYLY}, or \texttt{LCYLZ} flag is set.
+  \begin{keytab}
+    Type:    \> simple array (3) of real \\
+    Default: \> 0., 0., 0. \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FRACUPD} --- Minimum fractional density
+change for cell update}
+%
+  A mesh update is triggered in a 1-D dynamic simulation if the change of the
+  cell width relative to the nominal cell width (\texttt{WBOX} of the
+  \texttt{\&OUTPUT} record) would exceed \texttt{FRACUPD} in any cell. The cell
+  widths change due to relaxation of density changes. The condition is only
+  checked every \texttt{NIONUPD} ions. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 0.1 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{FREEX} --- Free boundaries in x-direction}
+%
+  This parameter specifies whether the left/right boundary of the
+  simulation domain is free to move during relaxation steps. The simulation
+  domain is the smallest possible rectangle, consistent with the grid spacings,
+  containing the target. Therefore, this boundary condition only applies to
+  target boundaries with (close to) the smallest/largest coordinates.
+  \begin{keytab}
+    Type:    \> simple array (2) of logical \\
+    Default: \> \texttt{(F,F)} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FREEZ} --- Free boundaries in z-direction}
+%
+  This parameter specifies whether the top/bottom boundary of the
+  simulation domain is free to move during relaxation steps. The simulation
+  domain is the smallest possible rectangle, consistent with the grid spacings,
+  containing the target. Therefore, this boundary condition only applies to
+  target boundaries with (close to) the smallest/largest coordinates.
+  \begin{keytab}
+    Type:    \> simple array (2) of logical \\
+    Default: \> \texttt{(T,F)} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{GEOMFILE} --- Geometry file}
+%
+  This parameter specifies the name of a geometry file, which contains further 
+  \texttt{\&GEOMETRY} records with \texttt{POINT} and \texttt{REGION}
+  definitions. This has the same effect as if the contents of the geometry file
+  was inserted before the first \texttt{\&GEOMETRY} record of the input file.
+  As a consequence, any specifications in the input file will overwrite
+  corresponding specifications in the geometry file. Any other content of the
+  geometry file other than \texttt{\&GEOMETRY} records is ignored. If multiple
+  geometry files are specified, only the last one will be included. The geometry
+  file is intended for the specification of 2-D geometries (points and regions),
+  so one geometry file can be used for multiple input files. If a geometry file
+  is specified, the geometry points and regions are not written to the output
+  file.
+  \texttt{GEOMFILE} is ignored for 1-D geometries (\texttt{NDIM=1}).
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> -- \\
+    Range:   \> Any valid file name ($\le 80$ characters)
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{GRID} --- Grid type}
+%
+  This parameter specifies the type of the grid defining the cells for a
+  2-D dynamic simulation (\texttt{LDYN=T}).
+  \begin{keytab}
+    Type:    \> character(80) \\
+    Default: \> \texttt{'Cartesian'} \\
+    Range:   \> \texttt{'Cartesian'}, \texttt{'curvilinear'}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LPERX} --- Periodic x-boundary conditions flag}
+%
+  This parameter specifies whether periodic boundary conditions should be
+  used in x-direction in a 2-D simulation. \texttt{LPERX=T} requires
+  specification of \texttt{XPER}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LCYLX} --- Cylinder region flag, axis parallel $x$}
+%
+  This parameter specifies that the target should be considered cylindrical 
+  symmetric. The axis of rotation is parallel to the $x$ axis and goes through 
+  \texttt{CENTER}. For \texttt{NDIM=1} the radii of the 
+  cylindrical regions are specified by \texttt{POSIF}. For \texttt{NDIM=2}
+  the polygon defined by \texttt{POS} and \texttt{POINTS} is rotated around 
+  the axis. \texttt{POS(1)} is considered the coordinate along the axis, 
+  \texttt{POS(2)} the distance from the axis (radius). Any combination of two
+  or more of \texttt{LCYLX=T}, \texttt{LCYLY=T}, \texttt{LCYLZ=T}, 
+  \texttt{LSPHER=T}, and \texttt{LROBIN=T} is illegal. \texttt{LCYLX=T} can 
+  only be specified for \texttt{LDYN=F}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LCYLY} --- Cylinder region flag, axis parallel $y$}
+%
+  This parameter specifies that the target should be considered cylindrical 
+  symmetric. The axis of rotation is parallel to the $x$ axis and goes through 
+  \texttt{CENTER}. For \texttt{NDIM=1} the radii of the 
+  cylindrical regions are specified by \texttt{POSIF}. For \texttt{NDIM=2}
+  the polygon defined by \texttt{POS} and \texttt{POINTS} is rotated around 
+  the axis. \texttt{POS(1)} is considered the coordinate along the axis, 
+  \texttt{POS(2)} the distance from the axis (radius). Any combination of two
+  or more of \texttt{LCYLX=T}, \texttt{LCYLY=T}, \texttt{LCYLZ=T}, 
+  \texttt{LSPHER=T}, and \texttt{LROBIN=T} is illegal. 
+  \texttt{LCYLY=T} can only be specified for \texttt{LDYN=F}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LCYLZ} --- Cylinder region flag, axis parallel $z$}
+%
+  This parameter specifies that the target should be considered cylindrical 
+  symmetric. The axis of rotation is parallel to the $x$ axis and goes through 
+  \texttt{CENTER}. For \texttt{NDIM=1} the radii of the 
+  cylindrical regions are specified by \texttt{POSIF}. For \texttt{NDIM=2}
+  the polygon defined by \texttt{POS} and \texttt{POINTS} is rotated around 
+  the axis. \texttt{POS(1)} is considered the coordinate along the axis, 
+  \texttt{POS(2)} the distance from the axis (radius). Any combination of two
+  or more of \texttt{LCYLX=T}, \texttt{LCYLY=T}, \texttt{LCYLZ=T}, 
+  \texttt{LSPHER=T}, and \texttt{LROBIN=T} is illegal. 
+  \texttt{LCYLZ=T} can only be specified for \texttt{LDYN=F}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LSPHER} --- Spherical region flag}
+%
+  This parameter specifies that the target regions should be
+  considered spherical around the center given by \texttt{CENTER} rather than 
+  planar. The radii of the spherical regions are specified by \texttt{POSIF}. 
+  Any combinations of \texttt{LCYLX=T}, \texttt{LCYLY=T}, \texttt{LCYLZ=T}, 
+  \texttt{LSPHER=T}, and \texttt{LROBIN=T} must not be specified. 
+  \texttt{LSPHER=T} can only be specified for \texttt{NDIM=1}, \texttt{LDYN=F}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NBOX2} --- Maximum number of mesh boxes}
+%
+  This parameter specifies the maximum number of boxes in each direction 
+  of the internal mesh. Geometry checks are performed by interpolation of the 
+  distance function stored on the internal mesh. Therefore, a finer mesh means 
+  a finer resolution of the geometry. The first value of \texttt{NBOX2} 
+  corresponds to the number of boxes in x-direction, the second value 
+  corresponds to the number of boxes in z-direction. Each of the values of 
+  \texttt{NBOX2} is effective only if the number of boxes necessary to cover 
+  the geometry with a box width of the respective value of \texttt{WBOX2} 
+  would exceed \texttt{NBOX2}. In this case the box width is adjusted so that 
+  the number of boxes equals \texttt{NBOX2}. Thus, \texttt{NBOX2} sets upper 
+  limits to the number of boxes used in the simulation. The first (x) value of 
+  \texttt{NBOX2} is ignored if \texttt{LPERX=T}.
+  \begin{keytab}
+    Type:    \> simple array (2) of integer \\
+    Default: \> 1000, \texttt{NBOX2(1)} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONUPD} --- Number of ions for mesh update}
+%
+  This parameter specifies the number of implanted ions after which the
+  cell sizes are updated in a 1-D dynamic simulation, see \texttt{FRACUPD}). 
+  Note that too infrequent mesh updates affect the simulation results.
+  \texttt{NIONUPD} must not appear on \texttt{POINT} or \texttt{REGION} records.  
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 1 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POINT} --- Point index}
+%
+  This parameter specifies the index of a point whose coordinates are specified
+  on the same record by \texttt{POS}. The point indices are referred to by the
+  \texttt{POINTS} arrays. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> -- \\
+    Range:   \> $>0$ 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POINTS} --- Points defining a region polygon}
+%
+  This parameter specifies the indices of the points (as defined by
+  \texttt{POINT}) defining the region polygon.  Specification of
+  \texttt{POINTS} requires the index variable \texttt{REGION} on the same
+  record. A maximum of 20 points may be specified on one record.
+  Specifications of \texttt{POINTS} on different records for the same
+  \texttt{REGION} are joined together.  In this way, larger arrays of points 
+  may be split to several records.  
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{REGION}) of simple array
+    (arbitrary size) of integer \\
+    Default: \> -- \\
+    Range:   \> point indices defined by \texttt{POINT} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POS} --- Position of an interface point}
+%
+  This parameter specifies the position of an interface point. The
+  position is a simple array of size 2, consisting of the $x$ and $z$
+  coordinate in case of Cartesian coordinates. In case of cylindrical
+  coordinates \texttt{POS(1)} refers to the distance along the axis of
+  symmetry, and \texttt{POS(2)} to the distance from the axis of symmetry.
+  The units of the coordinates are \AA.  Specification of \texttt{POS} 
+  requires the index variable \texttt{POINT} on the same record. 
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{POINT}) of simple array
+                (2) of real \\
+    Default: \> -- \\
+   Range:    \> arbitrary
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POSFIX} --- Fixed target position}
+%
+  This parameter specifies the position which remains fixed during
+  target relaxation in a 1-D dynamic simulation (\texttt{NDIM=1},
+  \texttt{LDYN=T}) or during the initial relaxation when the geometry is read 
+  from a \texttt{CELL} file (\texttt{NDIM=1}, \texttt{USECELL=T}).  If 
+  \texttt{POSFIX} is unspecified, it is assumed in the center of the target.
+  The center position is updated during a dynamic simulation. \texttt{POSFIX}
+  also falls back to the target center if it happens to fall outside the target
+  in the course of a dynamic simulation.  The units of \texttt{POSFIX} are \AA.
+  \begin{keytab}
+    Type:    \> real \\
+   Default:  \> center of simulation domain \\
+   Range:    \> arbitrary
+\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{POSIF} --- Positions of the interfaces}
+%
+  This parameter specifies the positions of the interfaces between
+  neighboring regions in case of a 1-D simulation (\texttt{NDIM=1} on
+  the \texttt{\&SETUP} record). The first value of \texttt{POSIF}
+  defines the front surface of the target, the last value the back
+  surface.  A maximum of 20 positions may be specified on one record.
+  Specifications of \texttt{POSIF} on different records are joined together.  In
+  this way, larger arrays of positions may be split to several records.  The
+  units of \texttt{POSIF} are \AA. 
+  \begin{keytab}
+    Type:    \> simple array (\texttt{NR+1}) of real \\
+    Default: \> 0., 10$^{30}$ if only one region, \\
+             \> required otherwise \\
+    Range:   \> values must be increasing
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WBOX2} --- 2-D box width}
+%
+  This parameter specifies the box width of the internal mesh. The first 
+  value corresponds to the cell width in x-direction, the second value 
+  corresponds to the cell width in z-direction. The values of 
+  \texttt{WBOX2} might be adjusted by IMSIL if the maximum number of boxes
+  \texttt{NBOX2} were exceeded, or in case of periodic boundary conditions
+  to fit an integer number of intervals between the boundaries. The units 
+  are \AA.  Geometry checks are performed by interpolation of the distance
+  function stored on the internal mesh. Therefore, a finer mesh means a finer
+  resolution of the geometry.
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> 1.0, \texttt{WBOX2(1)} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WROUGH} --- Thickness of roughness layer}
+%
+  This parameter specifies the thickness of the surface roughness layer.
+  Within the roughness layer, the density is assumed to increase linearly
+  from 0 (at the surface) to its nominal value (at the other bound of the
+  roughness layer). The units are \AA. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{XPER} --- x-positions of periodic boundaries}
+%
+  This parameter specifies the positions of the boundaries in case of 
+  periodic boundary conditions (\texttt{LPERX=T}). No points (\texttt{POS}) 
+  must be outside these boundaries. In general, some points will be on the
+  boudaries. These points will be snapped to the boundary with a tolerance 
+  corresponding to the accuracy of single precision floating point data.
+  The units are \AA. 
+  \begin{keytab}
+    Type:    \> simple array (2) of real \\
+    Default: \> -- \\
+    Range:   \> $\texttt{XPER(2)} > \texttt{XPER(1)}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{XSCALE} --- Scaling factor in x-direction}
+%
+  This parameter specifies a scaling factor for the $x$ coordinates of the
+  polygon points as specified by \texttt{POS}. All values \texttt{POS(1)} will
+  be multiplied by \texttt{XSCALE}. Note that \texttt{XPER} and
+  \texttt{WBOX2(1)} will not be scaled. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 1 \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ZSCALE} --- Scaling factor in z-direction}
+%
+  This parameter specifies a scaling factor for the $z$ coordinates of the
+  polygon points as specified by \texttt{POS}. All values \texttt{POS(2)}
+  will be multiplied by \texttt{ZSCALE}. Note that \texttt{WBOX2(2)} will not be
+  scaled.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 1 \\
+    Range:   \> arbitrary
+  \end{keytab}
+\end{keydescription}
+

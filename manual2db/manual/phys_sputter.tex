@@ -1,0 +1,61 @@
+Ions leaving the target on the same side as they entered it, are called
+\textbf{backscattered} or reflected. Ions leaving a membrane on the opposite
+side of where they entered it, are called transmitted. In a conventional 1-D
+membrane setup, the ions impinge on the top surface (lowest $z$ coordinate of the
+target) and may be emitted from that surface with a negative $z$ component of
+their direction of motion. Conversely, if they are emitted from the bottom
+surface, they have a positive $z$ component of their direction of motion. IMSIL
+takes the sign of the $z$ component of the direction of motion as the criterion
+for distinguishing between ``backscattered'' and ``transmitted'' atoms. Note
+that this distinction may not always make sense, e.g., when ions can be emitted
+from the sides of a 2-D or 3-D target. In those cases it might be more
+reasonable to just add backscattered and transmitted ions.
+
+Target atoms that are followed as recoils and leave the target, are called
+\textbf{sputtered}. They are also classified into backscattered and transmitted
+recoils, which corresponds to backward and forward sputtered atoms. There is no
+difference in treating ions and recoils with respect to their leaving the
+target. Therefore, their statistics is alway reported alongside.
+
+When accurate sputtering characteristics are desired, the ``accurate sputtering
+flag'' should be set. Then recoils are followed down to the surface binding
+energy $E_\mathrm{surf}$ rather than down to the displacement energy
+$E_\mathrm{d}$, if they are closer to the surface than some distance
+$d_\mathrm{near}$. Within this distance, recoils with energies less than the
+displacement energy are followed as ``virtual'' recoils. Virtual recoils deposit
+energy like real recoils and are counted as sputtered when they leave the
+target, but they generate defects (vacancies at the starting point, and
+interstitials at the end point if the recoil reenters the target) only when they
+leave the target.
+  
+With the accurate sputtering flag set, also the maximum impact parameter
+$p_\mathrm{max}$ is adjusted in the near-surface zone such that no collisions
+with energy transfer larger than the surface binding energy are missed.
+
+When the ions enter the target, they gain the surface binding energy, and ions
+and recoils loose the surface binding energy when they are emitted. Depending on
+the model of the potential barrier, they may also be refracted. A planar
+potential barrier \cite{I6909} is usually a good choice and is therefore the
+default. The potential barrier model can be changed to isotropic, where there is
+no refraction, or to an intermediate model \cite{hobler_assessment_2013} using a
+``nonplanarity parameter''.
+
+When a recoil reaches the surface with an energy not sufficient to surmount the
+potential barrier, it is reflected. With the planar potential model, it may
+happen that the recoil bounces back and forth beween the barrier (which is
+at $p_\mathrm{max}$ outside the target) and the target. The number of
+reflections may be limited.
+
+\begin{center}
+\begin{tabular}{lll}
+   parameter \quad          & IMSIL name & to be specified in record \\
+   \hline
+   accurate sputtering flag                 & {\tt LSPUT}   & {\tt \&SETUP} \\
+   surface binding energy $E_\mathrm{surf}$ & {\tt ESURF}   & {\tt \&DAMAGE} \\
+   displacement energy $E_\mathrm{d}$       & {\tt ESURF}   & {\tt \&DAMAGE} \\
+   $d_\mathrm{near}$                        & {\tt DNEAR}   & {\tt \&DAMAGE} \\
+   nonplanarity parameter                   & {\tt KSURF}   & {\tt \&DAMAGE} \\
+   maximum number of reflections         & {\tt REFLECTMAX} & {\tt \&DAMAGE} \\
+\end{tabular}
+\end{center}
+

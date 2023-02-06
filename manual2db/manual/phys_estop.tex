@@ -1,0 +1,159 @@
+The electonic stopping of channeled ions is reduced as compared with ions 
+moving in a random direction. This may be taken into account by an impact 
+parameter dependent model. The model implemented in IMSIL is composed of a part
+which is proportional to the path length $L$
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{nl} = 
+      N \cdot S_\mathrm{e} \cdot L \cdot
+      \left[ x^\mathrm{nl} + x^\mathrm{loc} \cdot 
+      \left( 1 + \frac{p_\mathrm{max}}{a} \right)
+             \cdot \exp \left\{ - \frac{p_\mathrm{max}}{a} \right\} \right]
+   \label{eq1}
+\end{equation}
+%
+and a part which depends on the impact parameter $p$ 
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{loc} = 
+      x^\mathrm{loc} \cdot \frac{S_\mathrm{e}}{2 \pi a^2} \cdot
+      \exp \left\{ - \frac{p}{a} \right\}
+   \label{eq2}
+\end{equation}
+%
+$N$ denotes the atomic density of the target. The impact parameter dependence
+is according to Oen and Robinson \cite{I7607}. Alternatively, the impact 
+parameter dependence can be chosen by a generalized Firsov model \cite{I5901}, 
+in which case the model reads
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{nl} = 
+      N \cdot S_\mathrm{e} \cdot L \cdot
+      \left[ x^\mathrm{nl} + x^\mathrm{loc} \cdot \frac{
+      1 + (d-1) \frac{p_\mathrm{max}}{a}}{
+      \left( 1 + \frac{p_\mathrm{max}}{a} \right) ^ {d-1}} \right]
+   \label{eq1a}
+\end{equation}
+%
+and
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{loc} = 
+      x^\mathrm{loc} \cdot \frac{S_\mathrm{e}}{2 \pi a^2} \cdot
+      (d-1) (d-2) \left( 1 + \frac{p}{a} \right) ^ {-d}
+   \label{eq2a}
+\end{equation}
+%
+In the original Firsov model $d=5$. We do not use Firsov's prefactor and
+screening length. If desired, Firsov's values can be set by appropriate values
+of $k/k_\mathrm{L}$ and $f$ (see below).
+
+In Eqs.~(\ref{eq2}) and~(\ref{eq2a}), the distance of closest approach $r_0$ 
+in the collision (apsis of the collision) may be used instead of the impact
+parameter $p$. The most significant effect of this choice is a reduction in
+electronic stopping at low energies.
+
+$a$ is the screening length of the impact parameter dependent part, which 
+is expressed by the value $a_\mathrm{OR}=a_\mathrm{ZBL}/0.3$ proposed by Oen and
+Robinson \cite{I7607} with $a_\mathrm{ZBL}$ the screening length of the ZBL
+interatomic potential \cite{I8512}.
+%
+\begin{equation}
+   a = f \cdot a_\mathrm{OR} ~( = f \cdot a_{12} / 0.3 )
+   \label{eq5}
+\end{equation}
+%
+
+The random electronic stopping power $S_\mathrm{e}$ may be calculated in either
+of two ways. In the first case (models \# 1 or \#3) it is assumed to be a power
+of the ion energy
+%
+\begin{equation}
+   S_\mathrm{e} = S_\mathrm{eL} = k \cdot E^p
+   \label{eq3}
+\end{equation}
+%
+With $p = 0.5$ this is Lindhard's model \cite{I6101}, where electronic stopping
+is proportional to the ion velocity. In order to describe the electronic stopping
+power for high-energy ions, in model \# 3 a formula similar to that of Biersack
+\cite{I8001} is used \cite{simionescu_model_1995} 
+%
+\begin{equation}
+   S_\mathrm{e} = \left( {S_\mathrm{eL}}^{-c} + 
+                         {S_\mathrm{eB}}^{-c} \right) ^ {-1/c}
+\end{equation}
+%
+where $S_\mathrm{eL}$ denotes the Lindhard like stopping power according to
+Eq.~(\ref{eq3}) and $S_\mathrm{eB}$ the slightly modified Bethe Bloch stopping
+power as described in \cite{I8001}:
+%
+\begin{equation}
+   S_\mathrm{eB} = \frac{B}{E_\mathrm{b}} \cdot
+      \ln \left( {E_\mathrm{b} + c_0 + \frac{c_1}{E_\mathrm{b}}}\right)
+   \label{eq3a}
+\end{equation}
+%
+where $B$ and $E_\mathrm{b}$ denote ion-target dependent prefactors. (For
+details see \cite{I8001}).  In the second case (models \# 2 or \# 4) the ZBL
+electronic stopping power \cite{I8512} is used. Alternatively, the random
+electronic stopping power may also be read from a file.
+
+$x^\mathrm{nl}$ and $x^\mathrm{loc}$ denote the nonlocal ($L$ dependent) and the
+local ($p$ dependent) fraction of $S_\mathrm{e}$, respectively.
+%
+\begin{equation}
+   x^\mathrm{nl} + x^\mathrm{loc} = 1
+   \label{eq4}
+\end{equation}
+%
+It has been found that the nonlocal fraction $x^\mathrm{nl}$ is energy
+dependent. The energy dependence can be specified by specifying $x^\mathrm{nl}$
+at different energies $E^\mathrm{nl}$. The actual values are interpolated
+according to
+%
+\begin{equation}
+   x^\mathrm{nl} \sim E^q
+   \label{eq6a}
+\end{equation}
+%
+(models \#1 and \#2), or
+%
+\begin{equation}
+   x^\mathrm{nl} \sim S_\mathrm{e}(E) ^{2q}
+   \label{eq6}
+\end{equation}
+%
+(models \#3 and \#4) where $q$ is determined by the program from
+$x^\mathrm{nl}$ values at two energies. Note that Eq.~(\ref{eq6}) reduces to
+Eq.~(\ref{eq6a}) when the Lindhard like stopping power Eq.~(\ref{eq3}) is used. 
+Default values of the parameters are provided by the program for all ions in
+silicon \cite{hobler_monte_1995, hobler_towards_2000, hobler_boron_1995,
+simionescu_modeling_1995, hobler_electronic_1993, hobler_random_2006}.
+The value of $k$ is specified by a correction factor $k/k_\mathrm{L}$ to the
+Lindhard stopping power. 
+
+Electronic energy loss straggling may be considered according to Konac, Klatt,
+and Kalbitzer \cite{hobler_random_2006, I9848}.
+
+\begin{center}
+\begin{tabular}{lll}
+   parameter \quad & IMSIL name & to be specified in record \\
+   \hline
+   target density $N$                      & {\tt DENSITY} & {\tt \&MATERIAL} \\
+   model number                               & {\tt MODEL}   & {\tt \&SEPAR} \\
+   Lindhard correction factor $k/k_\mathrm{L}$ & {\tt CORLIN} & {\tt \&SEPAR} \\
+   power $p$ in Lindhard stopping             & {\tt POWLIN}  & {\tt \&SEPAR} \\
+   interpolation power $c$                    & {\tt POWINT}  & {\tt \&SEPAR} \\
+   Bethe stopping constant $c_0$              & {\tt C0BETHE} & {\tt \&SEPAR} \\
+   Bethe stopping constant $c_1$              & {\tt C1BETHE} & {\tt \&SEPAR} \\
+   random electronic stopping file            & {\tt SEFILE}  & {\tt \&SEPAR} \\
+   nonlocal fraction $x^\mathrm{nl}$          & {\tt XNL}     & {\tt \&SEPAR} \\
+   energy for $x^\mathrm{nl}$, $E^\mathrm{nl}$  & {\tt ENL}   & {\tt \&SEPAR} \\
+   screening length factor $f$                & {\tt FACSCR}  & {\tt \&SEPAR} \\
+   Firsov $p$ dependence flag                 & {\tt FIRSOV}  & {\tt \&SEPAR} \\
+   Firsov $p$ dependence power $d$            & {\tt POWFIRS} & {\tt \&SEPAR} \\
+   apsis flag                                 & {\tt LAPSIS}  & {\tt \&SEPAR} \\
+   electronic straggling flag                & {\tt STRAGGLE} & {\tt \&SEPAR} \\
+   electronic straggling kink energy          & {\tt ESTRAG}  & {\tt \&SEPAR} \\
+\end{tabular}
+\end{center}

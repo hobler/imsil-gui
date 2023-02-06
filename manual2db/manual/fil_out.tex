@@ -1,0 +1,62 @@
+In the first part of the \texttt{OUT} file, most of the input parameters,
+including those which have not been specified in the \texttt{INP} file and
+therefore assume their default values, and some internal parameters are listed.
+In the second part, after the header ``\texttt{SIMULATION RESULTS}'',
+statistical output data are listed. This starts with energy deposition and
+energy transfer statistic. Energy \textbf{transfer} means energy transfers from
+a projectile to a recoil that is set into motion. \textbf{Deposition} denotes
+all other kinds of energy transfer or loss by a projectile. This includes
+electronic energy loss (``\texttt{Electrons}'', called ``ionization'' in TRIM
+\cite{SRIM}), nuclear energy deposition (``\texttt{Phonons+Potential}'', called
+``phonons'' in TRIM), and the total energy of backscattered and transmitted
+projectiles.
+
+For the purpose of this manual, we define \textbf{yield} as the average amount
+of the quantity of interest for one impinging ion. ``Yield'' is commonly used in
+``sputtering yield'', which means the number of sputtered atoms per incident
+ion. Similarly, we define the yield of stopped atoms (ions or recoils) and
+vacancies, of energy deposition, and of backscattered and transmitted
+projectiles. The yield of deposited energy, e.g., is the total deposited energy
+per ion.
+
+Normally, one is interested only in the mean value $\langle Y \rangle$ of the
+yield. However, the yields $Y_i$ are different for each impinging ion $i$, so
+there is a yield distribution, which can be described by \textbf{moments}. The
+moments are defined by
+%
+\begin{eqnarray}
+    \mathrm{mean\ value}: & 
+        \langle Y \rangle = \frac{1}{N} \sum_{i=1}^N Y_i \label{eq:mom1} \\
+    \mathrm{standard\ deviation}: & 
+        \sigma_\mathrm{Y} = \left[ \frac{1}{N} \sum_{i=1}^N (Y_i-\langle Y \rangle)^2  
+        \right] ^ {1/2} \label{eq:mom2} \\
+    \mathrm{skewness}: &
+        \gamma_\mathrm{Y} = \frac{1}{N} \sum_{i=1}^N (Y_i-\langle Y \rangle)^3 / 
+        \sigma_\mathrm{Y}^3 \label{eq:mom3} \\
+    \mathrm{kurtosis}: &
+        \beta_\mathrm{Y} = \frac{1}{N} \sum_{i=1}^N (Y_i-\langle Y \rangle)^4 / 
+        \sigma_\mathrm{Y}^4 \label{eq:mom4}
+\end{eqnarray}
+%
+These moments are listed in the first four lines following a header. In the
+following four lines, the 1-$\sigma$ standard deviations (corresponding to the
+statistical uncertainties) of the moments are listed.
+
+The energy statistics and the yield moments are always written to the
+\texttt{OUT} file. Other moments are written if requested in the input file,
+see the \texttt{LMOM**} parameters of the \texttt{\&OUTPUT} record. In the
+moment definitions for other quantities than the sputter yield, $Y$ has to be
+replaced in Eqs.~(\ref{eq:mom1})--(\ref{eq:mom4}) by the quantity of interest.
+E.g., for the moments of a ``vertical'' distribution, $Y_i$ has to be replaced
+by the coordinate $z_i$ of the stopped projectile. Note that what is commonly
+called the projected range of the implanted ions, is listed under 
+\texttt{Spatial moments of stopped atoms and vacancies}/%
+\texttt{Vertical moments}/\texttt{mean value}, the longitudinal straggling
+under \texttt{Spatial moments of stopped atoms and vacancies}/%
+\texttt{Vertical moments}/\texttt{std.dev.}, and the lateral straggling under 
+\texttt{Spatial moments of stopped atoms and vacancies}/%
+\texttt{Lateral x-moments}/\texttt{std.dev.\ }and/or
+\texttt{Spatial moments of stopped atoms and vacancies}/%
+\texttt{Lateral y-moments}/\texttt{std.dev.}. These and other parameters can be
+extracted using the \texttt{read\_out} function of the \texttt{read\_output.py}
+module provided with IMSIL (see Section~\ref{k:scripts}).

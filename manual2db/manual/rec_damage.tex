@@ -1,0 +1,887 @@
+This record is used to describe damage related parameters. For a description of
+many of the parameters see Section~\ref{s:dam}. The \texttt{\&DAMAGE} record has
+the index variables \texttt{REGION}, \texttt{ATOM1}, and \texttt{ATOM2}.
+\texttt{ATOM1} is the atom index of a projectile, \texttt{ATOM2} the index of the target atom
+(recoil). Regarding the definition of atom indices, see Section~\ref{s:atom}.
+
+\ifprivate
+\begin{keydescription}{\texttt{AFTERMD} --- Read the displacement of atoms
+after MD simulations}
+%
+  This parameter specifies that the deterministic defects file will be read 
+  in format which contain displacement of atoms extracted after MD simulations. 
+  Cell size  is limited on 10*10*2000 unit cells. Relevant only if  (\texttt{ldet=T}).
+ 
+ \begin{keytab} 
+ Type: \> logical \\ 
+ Default: \> \texttt{F} \\ 
+ Range: \>  \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{DAMAMO} --- Amorphization damage 
+    concentration}
+%
+  This parameter specifies the threshold damage concentration for
+  amorphization of the crystalline layer. If the damage concentration
+  exceeds \texttt{DAMAMO} locally, every collision is treated as in an
+  amorphous target. The units are cm$^{-3}$.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $2.7 \times 10^{22}$ in Si unless target is read from a \texttt{CELL} file, 
+                \texttt{DENSITY} otherwise \\
+    Range:   \> $\texttt{DAMAMO} \ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DAMSAT} --- Damage saturation concentration}
+%
+  This parameter specifies the damage saturation concentration. The damage
+  concentrations may not exceed \texttt{DAMSAT} unless 
+  $\texttt{DAMAMO} < \texttt{DAMSAT}$. The units are cm$^{-3}$.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $\infty$ \\
+    Range:   \> $> 0$ 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DENSITY} --- Reference atom density}
+%
+  This parameter specifies the number of target atoms (irrespective of
+  their species) per cm$^3$ to be used as a reference density for damage
+  saturation and amorphization.  This means that in a monatomic target the
+  interstitial and vacancy concentrations will asymptotically approach
+  \texttt{DAMSAT} if the density equals \texttt{DENSITY}.  Likewise, if the
+  interstitial or vacancy density exceeds \texttt{DAMAMO}, it will be set to
+  \texttt{DENSITY}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> density of the crystalline region if defined \\ 
+             \> density of the only region if only one region is defined \\
+             \> density of silicon, otherwise \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DIBIIA} --- interval of energy
+    deposition for IBIIA effect}
+%
+  This parameter specifies the size of the interval around an
+  amorphous/crystalline interface which the energy deposition is
+  averaged over. The units are \AA.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 10 \\
+    Range:   \> $> 0$ 
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{DIFFUSIVITY} --- radiation induced diffusivity}
+%
+  This parameter specifies the radiation induced diffusivity in units of 
+  [cm$^2$/dpa]. The number of displacements per atom (dpa) is calculated from 
+  the damage energy using the modified Kinchin-Pease model. Diffusivity is 
+  only considered for the implanted species and only in dynamic simulations. 
+  The radiation induced diffusivity equals $\frac{1}{6}\lambda^2 k$ 
+  where $\lambda$ is the jump distance and $k$ the number of jumps per dpa.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0. \\
+    Range:   \> $\ge 0$ 
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{DNEAR} --- maximum near distance from the
+    surface}
+%
+  This parameter specifies the maximum distance from the surface where recoils
+  are followed down to energies lower than \texttt{EF} when \texttt{LSPUT=T}. 
+  For distances from the surface less than \texttt{DNEAR}/2, they are followed 
+  down to \texttt{ESURF}. For distances between \texttt{DNEAR}/2 and
+  \texttt{DNEAR} the cutoff energy is interpolated linearly. Also, within 
+  \texttt{DNEAR} from the surface virtual recoils are generated
+  (see Section~\ref{s:sput}). Smaller values of \texttt{DNEAR} speed up
+  the simulation, but too small values artificially reduce the sputtering 
+  yield if $\texttt{ESURF} < \texttt{EF}$. The units are \AA.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 30 \\
+    Range: \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{DPARELAX} --- Critical number of displacements 
+per target atom for cell relaxation}
+%
+  This parameter specifies the minimum number of displacements per target atom  
+  between cell relaxations which is required so that any of the cell
+  corners may be moved during relaxation. In converting damage energy into 
+  displacements per atom the modified Kinchin-Pease model is used. The units of 
+  \texttt{DPARELAX} are 1. Note that the energy density accumulated depends on 
+  the implanted dose between relaxations. This dose equals 
+  \texttt{DOSE*NIONUPD/NION} with \texttt{DOSE} and \texttt{NION} from the 
+  \texttt{IONS} record and \texttt{NIONUPD} from the \texttt{GEOM} record. 
+  \texttt{DPARELAX} is only effective for \texttt{RELAXMODEL=1}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $10^{-3}$ \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DRDEFLOW} --- Flow coefficient}
+%
+  This parameter specifies the flow coefficient. An additional displacement
+  of size $\texttt{DRDEFLOW}(E_\texttt{EMIN})$ along the final direction of motion 
+  is added to the trajectory end point. Here $E$ denotes the final projectile 
+  energy. Only effective if \texttt{LFLOW=T}. The units of \texttt{DRDEFLOW} are
+  \AA/eV.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0.2 \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{ED} --- Displacement energy}
+%
+  This parameter specifies the displacement energy of atom
+  \texttt{ATOM1} in pure material \texttt{ATOM2}.  The displacement energy
+  of \texttt{ATOM1} in each region will be calculated by linear superposition
+  with weights according to the abundance of each atom in the region. The
+  units are eV. 
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of real \\
+    Default: \> 15 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ELIMKP} --- Energy limit for Kinchin
+    Pease model} 
+%
+  This parameter specifies the energy limit in eV below which the
+  recoil trajectories are terminated and damage is calculated according to the 
+  modified Kinchin Pease model. As a cutoff energy, \texttt{ELIMKP} operates 
+  in addition to \texttt{EF},
+  i.e., trajectories are terminated if their energy is either less than 
+  \texttt{ELIMKP} or \texttt{EF}. The default value of 0 thus means that 
+  recoils are followed down to \texttt{EF}. \texttt{ELIMKP} is not applied to 
+  externally started ions. It is set to zero if \texttt{LCAP=T} or 
+  \texttt{LPOCK=T}. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{EMELT} --- Heat of melting}
+%
+  This parameter specifies the energy per target atom in eV needed to
+  melt the target. \texttt{EMELT} is only effective if
+  \texttt{LPOCK=T}. The actual value to be used will usually be larger
+  than the theoretical one since some energy will dissipate without
+  generating a molten zone.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0.52 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{EMINFLOW} --- Minimum energy for flow}
+%
+  This parameter specifies the energy in eV below which no motion of the 
+  projectiles as a result of ``flow'' is possible. It is only eefective if
+  \texttt{LFLOW=T}. The units of \texttt{EMINFLOW} are eV. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 5 \\
+    Range:   \> $0 < \texttt{EMINFLOW} \le \texttt{EF}$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{ESURF} --- Surface binding energy}
+%
+  This parameter specifies the surface binding energy of atom
+  \texttt{ATOM1} in pure material \texttt{ATOM2}.  The surface binding energy
+  of \texttt{ATOM1} in each region will be calculated by linear superposition
+  with weights according to the abundance of each atom in the region. The
+  units are eV.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) of real \\
+    Default: \> \texttt{ESURF(ATOM1,ATOM1)}: heat of sublimation \\
+             \> \texttt{ESURF(ATOM1,ATOM2)} = mean value of
+                \texttt{ESURF(ATOM1,ATOM1)} and \\
+             \> \texttt{ESURF(ATOM2,ATOM2)} \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{FACFLOW} --- Flow factor for deposited energy}
+%
+  This parameter specifies a factor that determines an additional displacement
+  along the final projectile direction. It is applied to the total energy
+  deposited within a sphere of radius \texttt{RCAP}, to obtain the additional
+  displacement. Only effective if \texttt{LFLOW=T} on the \texttt{\&SNPAR}
+  record. The units of \texttt{FACFLOW} are \AA/eV.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0. \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+\fi 
+
+\begin{keydescription}{\texttt{FPOCK} --- Factor for amorphous pocket 
+    recrystallization}
+%
+  This parameter specifies a factor used to calculate the reduction in
+  amorphous pocket size due to athermal recrystallization during quenching of 
+  the cascade.  It is related to a shrinking radius $\Delta r$ according to 
+  $\texttt{FPOCK} = (4 \pi \texttt{DENS(IR)} / 3) ^ {1/3} \Delta r$, if it is 
+  assumed that the amorphous pocket is spherical and shrinks by $\Delta r$
+  independent of the pocket size.  \texttt{FPOCK} is only effective if
+  \texttt{LPOCK=T}.
+
+  \begin{keytab} 
+     Type:    \> real \\ 
+     Default: \> 1 \\ 
+     Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\iffalse           % abandoned
+\begin{keydescription}{\texttt{FRAC110} --- Split $\langle 110 \rangle$
+    interstitial fraction}
+%
+  This parameter specifies the fraction of split $\langle 110 \rangle$
+  interstitials among the interstitials. The fraction of split
+  $\langle 110 \rangle$ interstitials among all displaced atoms is
+  \texttt{FRAC110*FRACI}. The ramaining fraction \texttt{1-FRAC110} of
+  interstitials is assumed at tetrahedral interstitial lattice sites
+  during damage consideration in the crystalline layer.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{FRAC110} \le 1$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\iffalse %abandoned
+\begin{keydescription}{\texttt{FRACI} --- Interstitial fraction}
+%
+  This parameter specifies the fraction of interstitials among the
+  displaced atoms. The interstitials are assumed at tetrahedral
+  interstitial lattice sites during damage consideration in the
+  crystalline layer, or they are assumed to be split $\langle 110
+  \rangle$ interstitials (see \texttt{FRAC110}). All other displaced
+  atoms are assumed at random locations (``amorphous'' atoms, see also
+  \texttt{LAMO2}).
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{FRACI} \le 1$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\ifprivate
+\begin{keydescription}{\texttt{FRACDI} --- Di-interstitial fraction}
+%
+  This parameter specifies the fraction of di-interstitials among the
+  displaced atoms. It will be used for the population of the cell during the
+  simulation of deterministic defects. Relevant only if
+  \texttt{LDET=T}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{FRACDI} \le 1$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FRACFOUR} --- Tetra-interstitial fraction}
+%
+  This parameter specifies the fraction of tetra-interstitials among
+  the displaced atoms. It will be used for the population of the cell during
+  the simulation of deterministic defects. Relevant only if
+  \texttt{LDET=T}. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{FRACFOUR} \le 1$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FRACHEX} --- Hexagonal interstitial fraction}
+%
+  This parameter specifies the fraction of hexagonal interstitials
+  among the displaced atoms. It will be used for the population of the cell
+  during the simulation of deterministic defects. Relevant only if
+  \texttt{LDET=T}. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{FRACHEX} \le 1$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{FRACRG} --- Fraction of \texttt{FREC-1}
+    generated during recoil generation}
+%
+  This parameter specifies the fraction of the additional Frenkel pairs
+  generated due to \texttt{FREC} at the position of recoil generation
+  with respect to the additional Frenkel pairs generated at both the
+  position of recoil generation and at the position where the recoil
+  comes to rest.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 1 \\
+    Range:   \> $0 \le \texttt{FRACRG} \le 1$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{FRACSPL} --- Split-$\langle 110 \rangle$ interstitial fraction}
+%
+  This parameter specifies the fraction of split-$\langle 110 \rangle$
+  interstitials among the displaced atoms. It will be used for
+  the population of the cell during the simulation of deterministic defects.
+  Relevant only if \texttt{LDET=T}. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 1 \\
+    Range:   \> $0 \le \texttt{FRACSPL} \le 1$
+  \end{keytab}
+\end{keydescription}
+
+
+\begin{keydescription}{\texttt{FRACTET} --- Tetragonal interstitial fraction}
+%
+  This parameter specifies the fraction of tetragonal interstitials among
+  the displaced atoms. It will be used for the population of the cell during
+  the simulation of deterministic defects. Relevant only if
+  \texttt{LDET=T}. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{FRACTET} \le 1$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FRACTRI} --- Tri-interstitial fraction}
+%
+  This parameter specifies the fraction of tri-interstitials among the
+  displaced atoms. It will be used for the population of the cell during the
+  simulation of deterministic defects. Relevant only if
+  \texttt{LDET=T}. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{FRACTRI} \le 1$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{FREC} --- Recombination factor within
+    recoil cascade}
+%
+  This parameter specifies a factor to be applied to the generated damage 
+  concentrations.  It is the ratio of the number of stable defects to
+  the number of defects calculated with the displacement energy before
+  any recombination with defects from previous ions is taken into
+  account.  Is set to unity if \texttt{LCAP=T} or \texttt{LPOCK=T}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> \texttt{SPEC='B'}: 0.3 \\
+             \> \texttt{SPEC='BF2'}: 1.2 \\
+             \> \texttt{SPEC='SI','P'}: 0.8 \\
+             \> \texttt{SPEC='AS'}: 2. \\
+             \> otherwise: $0.0264 \times M_\mathrm{Ion}$ \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{KSURF} --- Nonplanarity parameter of surface
+potential}
+%
+  This parameter specifies the nonplanarity parameter of the surface
+  potential. \texttt{KSURF=0} corresponds to a planar surface potential,
+  \texttt{KSURF=1} to an isotropic potential. \texttt{KSURF$<$1} means
+  refraction away from the surface normal, \texttt{KSURF$>$1} towards the
+  surface normal. \texttt{KSURF$>$0} corresponds to refraction at an ellipsoidal
+  surface, while \texttt{KSURF$<$0} corresponds to refraction at a hyperboloidal
+  surface. For projectiles entering the target, currently any value other than
+  \texttt{KSURF=0} is treated like \texttt{KSURF=1}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0. \\
+    Range:   \> any real number
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LAMO2} --- 2-D amorphization flag}
+%
+  This parameter specifies how the positions of ``amorphous'' displaced atoms
+  are calculated. If \texttt{LAMO2=T} an amorphous displaced atom is generated
+  from a regular lattice atom by displacing it perpendicularly to the ion
+  trajectory with a uniform probability distribution within the radius
+  \texttt{PMAX} of the \texttt{\&CRYSTAL} record from the undeflected ion 
+  trajectory. If \texttt{LAMO2=F} amorphous displaced atoms are generated at 
+  random positions uniformly distributed in the lattice.
+
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LAMZON} --- amorphous zone model flag}
+%
+  This parameter specifies whether the displaced atoms are combined into
+  amorphous zones of the size of a histogram box (\texttt{LAMZON=T}), or
+  considered individually (\texttt{LAMZON=F}). If the amorphous zone
+  model is used, the probability of the occurence of an amorphous zone
+  is chosen such that displaced atoms are encountered with the same
+  overall probability as in the \texttt{LAMZON=F} case.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LCAP} --- Capture radius flag}
+%
+  This parameter specifies whether damage recombination within a recoil
+  cascade is performed by recording the positions of all vacancies and
+  interstitials and recombining those which are closer to each other
+  than the capture radius \texttt{RCAP}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LDAM} --- Damage flag}
+%
+  This parameter specifies whether a refined damage model is used, and whether
+  damage is considered in the crystalline layer (if any) for the trajectories 
+  of subsequent ions and recoils.  For \texttt{LDAM=F} and \texttt{LRCOIL=F}
+  no damage is recorded. For \texttt{LDAM=F} and \texttt{LRCOIL=T} interstitial 
+  and vacancy distributions are recorded, where one interstitial is generated 
+  when and where a projectile stops and one vacancy is generated when and where
+  a target atom is recoiled. For \texttt{LDAM=T} and \texttt{LRCOIL=F} the 
+  amount of damage is calculated according to the modified Kinchin Pease model, 
+  it can be considered as the density of dispaced atoms or Frenkel pairs. For 
+  \texttt{LDAM=T} and \texttt{LRCOIL=T} one of the refined damage models is
+  used: Default is the model described in Section~\ref{s:dam}, while when
+  \texttt{LCAP=T}\ifprivate or \texttt{LDET=T} \fi, the capture radius model
+  \ifprivate or the deterministic defect model (see Section~\ref{s:det}) \fi
+  is invoked\ifprivate, respectively\fi. For \texttt{LDAM=T}, damage is
+  considered in the selection of collision partners in a crystalline layer.  Note that it is not possible to 
+  use one of the refined damage models without considering damage for
+  subsequent trajectories in a crystalline layer. If this is desired, use a
+  very small implantation dose (\texttt{DOSE} of the \texttt{\&ION} record).
+  Note that moments and histograms of the damage distributions are only output
+  if the appropriate flags are set on the \texttt{\&OUTPUT} record.  Nuclear
+  energy deposition is calculated independent of \texttt{LDAM}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{.NOT.LDYN} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{LDET} --- Deterministic defects flag}
+%
+  This parameter specifies whether damage is considered deterministically as
+  given by atom coordinates specified in a column defined by \texttt{WCOL},
+  using periodic boundary conditions outside the column.  If \texttt{LDET=F},
+  defects are generated statistically using the damage histograms.  The
+  deterministic defects may either be read from the file \texttt{DEFFILE} or
+  generated from damage profiles read from the \texttt{HISFILE} and
+  \texttt{BKFILE} files. See also \texttt{USEHIS}, \texttt{USEBK} and
+  \texttt{USEDEF} in the \texttt{\&SETUP} record.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LFLOW} --- Recoil flow flag}
+%
+  This parameter specifies whether additional recoil flow is considered for
+  projectile energies between \texttt{EF} and \texttt{EMIN}. See also 
+  \texttt{DRDE}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LIBIIA} --- IBIIA flag}
+%
+  This parameter specifies whether amorphous zones may grow according
+  ion beam induced interfacial amorphization (IBIIA).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LPOCK} --- Amorphous pocket flag}
+%
+  This parameter specifies whether amorphous pockets are formed based on
+  the parameters \texttt{EMELT} and \texttt{EPOCK}. Currently amorphous
+  pockets are not used in subsequent trajectory simulations, but have
+  only the effect of increased damage. Currently \texttt{LPOCK=T} must not
+  be specified at the same time as \texttt{LVAC=T}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LRCOIL} --- Recoil cascade flag}
+%
+  This parameter specifies whether the recoil trajectories are to be
+  simulated. Is set true if \texttt{LCAP=T} or \texttt{LPOCK=T}. \texttt{LRCOIL}
+  also determines how damage is calculated (see \texttt{LDAM}). Note that
+  \texttt{LRCOIL} overwrites both \texttt{LRCOIL1} and \texttt{LRCOIL2} with its
+  value if specified in the input file.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LRCOIL1} --- Recoil cascade before reentering
+flag}
+%
+  This parameter specifies whether projectiles with the reentered flag unset can
+  generate recoils whose trajectories are followed. The reentered flag is
+  set if a projectile or one of its parents has been emitted from a surface
+  and has reentered the target at a different point in space. The reentered flag
+  is always unset in a cartesian 1D simulation. Note that for recoils to be
+  followed at all, also \texttt{LRCOIL=T} is required. The purpose of
+  \texttt{LRCOIL1} is to provide the possibility of switching off recoil
+  generation before reentering while keeping recoil generation after by setting
+  \texttt{LRCOIL=T}, \texttt{LRCOIL1=F}, \texttt{LRCOIL2=T}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LRCOIL2} --- Recoil cascade after reentering
+flag}
+%
+  This parameter specifies whether projectiles with the reentered flag set can
+  generate recoils whose trajectories are followed. The reentered flag is
+  set if a projectile or one of its parents has been emitted from a surface
+  and has reentered the target at a different point in space. The reentered flag
+  is always unset in a cartesian 1D simulation. Note that for recoils to be
+  followed at all, also \texttt{LRCOIL=T} is required. The purpose of
+  \texttt{LRCOIL2} is to provide the possibility of switching off recoil
+  generation after reentering while keeping recoil generation before by
+  setting \texttt{LRCOIL=T}, \texttt{LRCOIL1=T}, \texttt{LRCOIL2=F}.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LREPL} --- Replacement collision flag}
+%
+  This parameter specifies whether replacement collisions are allowed.
+  Replacement collision are collisions where the projectile stops and the 
+  recoil moves on, provided projectile and recoil are the same species. In
+  a replacement collision no defects are generated, while if the same collision
+  is treated without replacement, a Frenkel pair is created.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{LSTRMD} --- Molecular dynamics strain}
+%
+  This parameter specifies whether the coordinates of defects and strained
+  regions extracted from molecular dynamics simulations to be used.  It will
+  be used for the population of the cell during the simulation of deterministic
+  defects. Relevant only if \texttt{LDET=T}.
+
+  \begin{keytab} 
+    Type: \> logical \\ 
+    Default: \> \texttt{F} \\ 
+    Range: \>  \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\iffalse                       % eliminated
+\begin{keydescription}{\texttt{LVAC} --- Vacancy flag}
+%
+  This parameter specifies whether vacancy distributions have to be
+  recorded.  If \texttt{LVAC=F} no vacancy distributions are provided,
+  and the vacancy distribution is assumed to be identical to the
+  interstitial distribution for internal damage consideration.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\ifprivate
+\begin{keydescription}{\texttt{MODBULK} --- Bulk modulus}
+%
+  This parameter specifies the bulk modulus used in the 
+  viscoelastic relaxation model. The units of \texttt{MODBULK} are Pa.
+  Ignored unless \texttt{RELAXMODEL='viscoelastic'}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $4.8 \times 10^{10}$ \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{MODSHEAR} --- Shear modulus}
+%
+  This parameter specifies the shear modulus used in the 
+  viscoelastic relaxation model. The units of \texttt{MODSHEAR} are Pa.
+  Ignored unless \texttt{RELAXMODEL='viscoelastic'}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $3.3 \times 10^{10}$ \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\iffalse                       % this was never completed and thus abandoned
+\begin{keydescription}{\texttt{NCLUS} --- Cluster size}
+%
+  This parameter specifies the number of atoms per cluster.
+  \texttt{NCLUS} random interstitials are assumed to be clustered to
+  one cluster each. The cluster is assumed to be a cylinder around the
+  ion trajectory with radius \texttt{PMAX}. \texttt{NCLUS} may only be
+  specified with \texttt{LAMO2=T}.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 1 \\
+    Range:   \> $\ge 1$ \\
+    Remark:  \> not yet implemented
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{NDIM} --- Dimensionality of damage histogram}
+%
+  This parameter specifies the dimensionality of the histogram from which
+  the damage concentration is read for consideration in the crystalline 
+  layer (if defined) for the trajectories of subsequent ions and recoils.
+  Note that not all dimensionalites are possible depending on the choices 
+  of \texttt{DOSEUNITS} and \texttt{XINIT} and \texttt{YINIT} of the
+  \texttt{\&IONS} record (see Section XXX). The default values represent the
+  largest values possible. It is necessary to demand output of the respective
+  damage histogram by setting \texttt{LHIS=T}, \texttt{LHIS2=T}, or
+  \texttt{LHIS3=T} on the \texttt{\&OUTPUT} record, depending on \texttt{NDIM}. 
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 1 for \texttt{DOSEUNITS='cm-2'} and 
+                      \texttt{XINIT(1)=XINIT(2)}, \\
+             \> 2 for \texttt{DOSEUNITS='cm-2'} and \\
+             \> \ \ \ \ \ \ \ \ \ \texttt{XINIT(1)>XINIT(2)} and 
+                        \texttt{YINIT(1)=YINIT(2)}, \\
+            \> \ \ \ \ or \texttt{DOSEUNITS='cm-1'} and
+                      \texttt{YINIT(1)=YINIT(2)}, \\
+             \> 3 otherwise \\
+    Range:   \> $1 \le \texttt{NDIM} \le 3$ and not larger than the default
+                values
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NPOCKMIN} --- Minimum number of atoms
+    in pocket}
+%
+  This parameter specifies the minimum number of atoms in an amorphous
+  pocket.  If the energy of a tentative amorphous pocket is such that
+  less than \texttt{NPOCKMIN} atoms are contained after quenching,
+  separated point defects are assumed to be generated instead.
+  \texttt{NPOCKMIN} is only effective if \texttt{LPOCK=T}.
+  \begin{keytab}
+     Type:    \> integer \\
+     Default: \> 10 \\
+     Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{PFACFLOW} --- Flow factor for deposited momentum}
+%
+  This parameter specifies a factor that determines an additional displacement
+  proportional to the total momentum deposited within a sphere of radius 
+  \texttt{RCAP}. Only effective if \texttt{LFLOW=T} on the \texttt{\&SNPAR}
+  record. The units of \texttt{FACFLOW} are \AA/$\sqrt{\mathrm{eV}}$.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0. \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{PSI110} --- Critical angle around
+    $\langle 110 \rangle$}
+%
+  This parameter specifies a critical angle with respect to 
+  $\langle 110 \rangle$ directions for application of the modified Kinchin-Pease
+  model.  The modified Kinchin-Pease model is not applied if the angle between 
+  the direction of motion and a $\langle 110 \rangle$ direction is less than 
+  \texttt{PSI110}.  The units of \texttt{PSI110} are
+  degrees.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{PSI110} \le 180$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{RCAP} --- Capture radius}
+%
+  This parameter specifies the capture radius to be used if \texttt{LCAP=T}
+  or \texttt{LFLOW=T}.
+  The units of \texttt{RCAP} are \AA.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $(3/8 \pi \texttt{DAMSAT})^{1/3}$ \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{REENTER} --- Reenter flag for recoils}
+%
+  This parameter specifies whether recoils are allowed to traverse 
+  vacuum regions and to reenter the target somewhere else. If
+  \texttt{REENTER=F}, the recoil trajectories are terminated as soon
+  as they leave the target, and the recoils are counted as backscattered or
+  transmitted depending on their direction of motion. \texttt{REENTER=T} 
+  must not be specified in a 1-D layer simulation (\texttt{NDIM=1},
+  \texttt{LCYLX=LCYLY=LCYLZ=LSPHER=F}).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{NDIM>1.OR.LCYLX.OR.LCYLY.OR.LCYLZ.OR.LSPHER} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{RELAXMODEL} --- Relaxation model}
+%
+  This parameter specifies the model used for target relaxation in a
+  dynamic simulation. \texttt{RELAXMODEL='full'} specifies full relaxation
+  of the target densities along a steepest descent path of the square of the 
+  deviation of cell volumes from the ideal values. 
+  \texttt{RELAXMODEL='viscoelastic'} specifies a viscoelastic model with
+  radiation induced viscosity.
+  \begin{keytab}
+    Type:    \> character(80) \\
+    Default: \> \texttt{'none'} \\
+    Range:   \> \texttt{'none'}, \texttt{'full'}, \texttt{'viscoelastic'}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{RIBIIA} --- IBIIA growth rate constant}
+%
+  This parameter specifies the displacement of the
+  amorphous/crystalline interface per deposited nuclear energy
+  density for the IBIIA effect. Its units are \AA /(eV/\AA $^3$).
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 100 \\
+    Range:   \> $> 0$ 
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{VISCOSITY} --- Radiation induced viscosity}
+%
+  This parameter specifies the radiation induced viscosity used in the 
+  viscoelastic relaxation model. The units of \texttt{VISCOSITY} are Pa dpa.
+  The number of displacements per atom (dpa) is calculated from the damage 
+  energy using the modified Kinchin-Pease model. Ignored unless 
+  \texttt{RELAXMODEL='viscoelastic'}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $0.966 \times 10^9$ \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{WCOL} --- Column width}
+%
+  This parameter specifies the column width to be used with
+  determinstic defects \texttt{LDET=T}. The defects are restricted to a
+  columnar domain with dimensions \texttt{WCOL(1)*WCOL(2)}. The starting
+  points of the ion trajectories are randomly distributed in the intersection
+  of the surface with the column, but the collision cascade is allowed to
+  develop in the target. Defects around the ions and recoil trajectories are
+  generated by assuming periodicity in lateral dimensions.  If
+  \texttt{USEHIS=T} or \texttt{USEBK=T} in the \texttt{\&SETUP} record the
+  column will be populated with defects placed at the random positions
+  according to histograms defined in the \texttt{HISFILE} or \texttt{BKFILE} file.
+  Otherwise the column width, together with the defect positions is to be defined
+  in \texttt{DEFFILE} of the \texttt{\&SETUP} record. The units are a quarter
+  lattice constant.
+  \begin{keytab} 
+    Type: \> simple array (3) of integer \\ 
+    Default: \> 40,40,8000 \\
+    Range: \> $(4i,4j,4k)>0$, where $i$, $j$, $k$ are integers \\ 
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{ZMAXKP} --- Maximum depth for Kinchin
+    Pease model}
+%
+  This parameter specifies a maximum depth at which the modified
+  Kinchin Pease model is invoked. For depth larger than
+  \texttt{ZMAXKP} the Kinchin Pease model is not applied.  The units
+  of \texttt{PSI110} are degrees.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $\infty$ \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+

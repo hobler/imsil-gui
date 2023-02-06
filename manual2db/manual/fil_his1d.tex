@@ -1,0 +1,271 @@
+For the purpose of this manual we define the term \textbf{distribution} as the
+probability density function times the yield times the implantation dose. As an
+example, the nuclear energy deposition distribution $f_\mathrm{NE}(z)$ is the
+probability density function of nuclear energy deposition times the total
+nuclear energy deposited in the target per ion, $Y_\mathrm{NE}$, times the area
+dose \texttt{DOSE} as specified on the \texttt{\&IONS} record. Since probability
+density functions are normalized, 
+%
+\begin{equation}
+    \int_{-\infty}^{\infty} f_\mathrm{NE}(z)\,\mathrm{d}z
+    = Y_\mathrm{NE} \times \texttt{DOSE}
+    \label{eq:distr1d}
+\end{equation}
+%
+Internally, IMSIL's length units are {\AA}ngstr{\o}ms. Thus, an area dose
+\texttt{DOSE} as specified in the \texttt{INP} file is converted to
+{\AA}$^{-2}$, and the units of $f_\mathrm{NE}(z)$ are eV/{\AA}$^3$. Note that
+the units of $Y_\mathrm{NE}$ are eV. eV and {\AA}ngstr{\o}ms, as well as degrees
+for angular distributions, are generally used for the units of the histograms.
+There is one exception to this rule, spatial atom distributions in the
+\texttt{HIS} file (also known as atom concentrations) are converted to cm$^{-3}$
+when written to the file. 
+
+Eq.~(\ref{eq:distr1d}) can also be written
+%
+\begin{equation}
+    \int_{-\infty}^{\infty} 
+    \frac{ f_\mathrm{NE}(z) }{ \texttt{DOSE} } \, \mathrm{d}z
+    = Y_\mathrm{NE}
+    \label{eq:distr1d_a}
+\end{equation}
+%
+When the default implantation dose of $\texttt{DOSE} =
+10^{16}$~cm$^{-2} = 1$~{\AA}$^{-2}$ is used, $f_\mathrm{NE}(z) =
+f_\mathrm{NE}(z) / \texttt{DOSE}$ numerically. Therefore, with the default
+dose the distributions, except for the atom concentrations on the \texttt{HIS}
+file, may also be considered the probability density functions times the yield.
+E.g., in the case of nuclear energy deposition, $f_\mathrm{NE}(z)$ may be
+interpreted as the nuclear energy deposition per ion and width $\Delta z$ of the
+depth interval (units: eV/{\AA}).
+
+The above desciption is valid if \texttt{DOSE} refers to an area dose. With
+\texttt{DOSEUNITS} one may also demand \texttt{DOSE} to be interpreted as a line
+dose (\texttt{DOSEUNITS='cm-1'}) or an ion number count
+(\texttt{DOSEUNITS='1'}). In these cases, the area dose is calculated using the
+extent of the implant area as defined by \texttt{XINIT} and \texttt{YINIT} on
+the \texttt{\&IONS} record. If the extent of the implant area in one of the
+directions is zero, it is replaced by unity. As a consequence, the units of
+$f_\mathrm{NE}(z)$ will be different. For instance, when a line dose is
+specified and \texttt{XINIT(1)=XINIT(2)}, the area dose cannot be calculated and
+the line dose substituted in Eq.~(\ref{eq:distr1d}) for \texttt{DOSE} will have
+units {\AA}$^{-1}$. As a result, the units of $f_\mathrm{NE}(z)$ will be 
+eV/{\AA}$^2$. If the energy density per {\AA}$^3$ is to be calculated
+a-posteriori, it is obtained by dividing $f_\mathrm{NE}(z)$ by the extent of the
+implant area in $x$ direction. However, these values will represent only the
+deposited energy or concentration inside the implant area sufficiently far from
+the edges. \textbf{It is therefore generally not recommended to record 1-D
+histograms when the dose is not specified as an area dose.} For completeness we
+mention that in case of atoms densities, the units will be {\AA}/cm$^3$ in the
+above example. 
+
+
+IMSIL produces the following 1-D histogram files if the respective flag listed
+in the last column of the following table is set on the \texttt{\&OUTPUT} record:
+\bigskip
+%
+\begin{center}
+\begin{tabular}{|l|p{0.65\textwidth}|l|}
+\hline
+Name       & File content                                           & flag \\
+\hline
+\tt HIS    & Spatial distribution of stopped atoms                  & \tt LHIS \\
+\tt CELL   & Cell-based target description file                     & \tt LCELL \\
+\tt HISEE  & Spatial distribution of deposited electronic energy    & \tt LHISEE \\
+\tt HISNE  & Spatial distribution of deposited nuclear energy       & \tt LHISNE \\
+\tt HISM   & Spatial distribution of displacement moments           & \tt LHISM \\
+\tt HISP   & Spatial distribution of deposited momentum             & \tt LHISP \\
+\tt HISD   & Displacement distribution                              & \tt LHISD \\
+\tt HISIV  & I--V pair distance distribution                        & \tt LHISIV \\
+\tt HISB   & Spatial distribution of backscattered atoms            & \tt LHISB \\
+\tt HISEB  & Energy distribution of backscattered atoms             & \tt LHISEB \\
+\tt HISAB  & Angular distribution of backscattered atoms (2-D angle)& \tt LHISAB \\
+\tt HISAAB & Angular distribution of backscattered atoms (3-D angle)& \tt LHISAAB \\
+\tt HIST   & Spatial distribution of transmitted atoms              & \tt LHIST \\
+\tt HISET  & Energy distribution of transmitted atoms               & \tt LHISET \\
+\tt HISAT  & Angular distribution of transmitted atoms (2-D angle)  & \tt LHISAT \\
+\tt HISAAT & Angular distribution of transmitted atoms (3-D angle)  & \tt HISAAT \\
+\tt RBS    & RBS spectra                                            & \tt LRBS \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+
+The histogram files are generally written at the end of the simulation. They are
+written by the following FORTRAN statements:
+%
+\begin{verbatim}
+      WRITE (22,*) 1+NSPEC,2*NBOX+2
+      WRITE (22,*) NINT(E0),(NINT(Z1(I)),I=1,NSPEC)
+      WRITE (22,*) Z(1),(1E-4*HISMIN,I=1,NSPEC)
+      DO, IBOX=1,NBOX
+         WRITE (22,*) Z(IBOX),(HIST(I,IBOX),I=1,NSPEC)
+         WRITE (22,*) Z(IBOX+1),(HIST(I,IBOX),I=1,NSPEC)
+      ENDDO
+      WRITE (22,*) Z(NBOX+1),(1E-4*HISMIN,I=1,NSPEC)
+\end{verbatim}
+%
+where the meaning of the variables is detailed below.
+
+\texttt{NSPEC} denotes the number of atom species to be recorded, which depends
+on the type of the histogram and \texttt{LDYN}. Let \texttt{N1} denote the
+number of atom species in the ion (\texttt{N1=1} for atomic ions) and
+\texttt{N2} the number of recoil species to be considered in the statistics. For
+\texttt{LDYN=T}, all atom species may become recoils and must be kept track off,
+so \texttt{N2=NATOM}, where \texttt{NATOM} is the number of atom species
+specified on the \texttt{\&SETUP} record. For \texttt{LDYN=F}, only the atoms of
+the materials may become recoils, thus \texttt{N2=NATOM-N1}. Note that for
+\texttt{LDYN=T}, ion atoms are contained in both \texttt{N1} and \texttt{N2}, so
+one can distinguish the properties of implanted ions from those previously
+implanted. 
+
+\texttt{NSPEC} now depends on \texttt{N1} and \texttt{N2}: In addition, for the
+\texttt{HIS} file, \texttt{NSPEC} depends on two parameters of the
+\texttt{\&DAMAGE} record: If \texttt{LRCOIL=T}, \texttt{NSPEC=N1+2*N2}.
+Otherwise, if \texttt{LDAM=T}, \texttt{NSPEC=N1+N2}. Else \texttt{NSPEC=N1}. For
+the \texttt{HISEE}, \texttt{HISNE}, and \texttt{HISD} file,
+\texttt{NSPEC=N1+N2}. For the \texttt{HISM} and \texttt{HISP} file,
+\texttt{NSPEC=3*(N1+N2)}. For the \texttt{HISIV} file \texttt{NSPEC=N2}, and for
+the \texttt{CELL} file \texttt{NSPEC=NATOM}.
+
+From line 2 on, the 1-D histogram files contain \texttt{NSPEC+1} columns. In
+the first column, the independent variable \texttt{Z} (depth, energy, angle) is 
+listed, in the other columns the histogram values for the \texttt{NSPEC} atom
+species. They correspond from left to right to the ion atoms, atoms that may
+become recoils (and thus interstitials), and vacancies left behind by recoils.
+The atom species are ordered according to their occurrence in the ion and
+material names: First the ion, and then the materials from region 1 to how many
+regions are defined. Within the ion and material names from left to right. 
+E.g., if the ion and 3 materials are defined by 
+%
+\begin{verbatim}
+ &IONS NAME='B' ... /
+ &MATERIAL REGION=2 NAME='SI3N4' ... /
+ &MATERIAL REGION=1 NAME='SIO2' ... /
+ &MATERIAL REGION=3 NAME='SI' ... /
+\end{verbatim}
+%
+B is defined first, Si second, O third, and N fourth. Therefore, column 2 of the
+\texttt{HIS} file corresponds B. If \texttt{LDAM=T} or \texttt{LRCOIL=T}, column
+3 corresponds to Si, column 4 to O, and column 5 to N. If \texttt{LRCOIL=T},
+column 6 corresponds to Si vacancies, column 7 to O vacancies, and column 8 to N
+vacancies. To help identify the atom species, their atomic numbers are given in
+line 2 of the file. Atomic numbers of vacancies are given a negative sign.%
+\footnote{The columns 2 to \texttt{N1}$+$\texttt{N2}$+$1 in the histogram files
+correspond to the atom indices as defined in Section~\ref{s:atom}.}
+
+\texttt{NBOX} denotes the number of histogram boxes (bins) and correspond to
+\texttt{NBOX}, \texttt{NBOXA}, \texttt{NBOXD}, or \texttt{NBOXE} of the
+\texttt{\&OUTPUT} record (\texttt{NBOX*} for short). The user may choose between
+two options regarding how histograms evolve during the simulation. In both
+cases, the histograms are initialized with a box width of \texttt{WBOX*} of the
+\texttt{\&OUTPUT} record, and are then adapted as to include all data points.
+When \texttt{NBOX*} is specified as a positive number on the \texttt{\&OUTPUT}
+record (or its default value is being used), the histogram is adjusted by
+doubling the box width as required, while leaving the number of boxes the same.
+Only nonzero histogram values are written to the histogram file at the edges, so
+the number of boxes written to the file may be smaller than \texttt{NBOX}
+specified on the \texttt{\&OUTPUT} record. On the other hand, if
+\texttt{NBOX*=0} is specified on the \texttt{\&OUTPUT} record, the box widths
+are kept constant equal to \texttt{WBOX*}, while the number of boxes is
+increased as required.
+
+From line 3 on, there are \texttt{2*NBOX+2} rows. \texttt{Z(IBOX)} and
+\texttt{Z(IBOX+1)} are the lower and the upper boundary of histogram box
+\texttt{IBOX}, respectively, and \texttt{HIST(I,IBOX)} denotes the distribution
+function $f$. The physical meaning of \texttt{Z} and \texttt{HIST} depends on
+the file. As apparent from the code, the file contains duplicate information.
+This is to facilitate plotting by allowing for simply connecting the data points
+to draw the histogram. The first and last data point are added to provide a
+visual closure of the first and last box.
+
+\texttt{HIS}, \texttt{CELL}, \texttt{HISEE}, \texttt{HISNE}, \texttt{HISM}, and
+\texttt{HISP} contain spatial histograms with \texttt{Z} denoting the depth
+coordinate. 
+
+In the \texttt{HIS} and \texttt{CELL} file, \texttt{HIST(I,IBOX)} denotes the
+concentration [cm$^{-3}$] of atom species \texttt{I} in histogram box
+\texttt{IBOX}. As described above, the \texttt{HIS} and \texttt{CELL} files
+differ in the atom species recorded. E.g., the \texttt{CELL} file never contains
+vacancy concentrations. In addition, \texttt{HIS} and \texttt{CELL} files differ
+in that the atom concentrations in the \texttt{CELL} file include all target
+atoms, while in the \texttt{HIS} file they include only atoms added in the
+implant step plus, optionally, those read in from a \texttt{HIS} file at the
+beginning of the simulation (see the \texttt{USEHIS} and related parameters of
+the \texttt{\&SETUP} record). 
+
+In the \texttt{HISEE} and \texttt{HISNE} files, \texttt{HIST(I,IBOX)} 
+contains the distributions of electronic and nuclear energy deposition,
+respectively. The units are [eV/\AA$^3$]. 
+
+The \texttt{HISM} file contains the histogram of the first redistributive moment
+as a function of depth. The first redistributive moment is the sum of the
+differences between end-point and initial coordinates over all recoil
+trajectories that start and end inside the target \cite{hobler_crater_2018}.
+Since it is a vector quantity, three columns are stored in the \texttt{HISM}
+file for each atom type in adjacent columns (x, y, and z component of the
+moment). The units of \texttt{HIST} are \AA. 
+
+The \texttt{HISP} file contains the histogram of the deposited momentum as a
+function of depth. Deposited momentum is the momentum of the ions and recoils
+when their simulated trajectories are terminated. Since it is a vector quantity,
+three columns are stored in the \texttt{HISP} file for each atom type in
+adjacent columns (x, y, and z component of the momentum). The units of
+\texttt{HIST} are $(m_0 \, \mathrm{eV})^{1/2}/$\AA$^3$, where $m_0$ denotes the
+atomic mass unit. To obtain the momentum in SI units (kg$\,$m/s), one has to
+multiply with $(m_0 \, \mathrm{eV/J})^{1/2} = 1.6311 \times 10^{-23}$.
+
+The \texttt{HISD} file contains the displacement distribution, where \texttt{Z}
+denotes the distance between origin and end point of recoil trajectories.
+Similarly, the \texttt{HISIV} file contains the I-V pair distance distribution
+of a cascade, where \texttt{Z} denotes the distance between interstitial and
+vacancy \cite{hobler_continuum_1999}. The histogram is obtained by looping over
+both the interstitials and vacancies of each cascade and collecting the
+distances between them in a histogram. The I-V pair distribution function is a
+probability density function. The positions of the vacancies may be restricted
+to certain depth intervals (\texttt{POSIVMIN} and \texttt{POSIVMAX} of the
+\texttt{OUTPUT} record). \texttt{NHISIV} such intervals may be specified.
+\texttt{NHISIV} data blocks corresponding to the code snippet given above are
+written to the \texttt{HISIV} file.  
+
+The \texttt{HIS*B} and \texttt{HIS*T} files contain distributions of
+backscattered and transmitted atoms, respectively. \texttt{HISB} and
+\texttt{HIST} contain the spatial distributions of the ejected atoms as a
+function of the lateral coordinate $x$ (i.e., in the code snippet given above,
+\texttt{Z} has to be replaced by \texttt{X}). The number of species listed,
+\texttt{NSPEC}, is the same as for the spatial atom distributions inside the
+target, stored in the \texttt{HIS} file. For the first \texttt{N1+N2} columns,
+the coordinate $x$ refers to the position where the atom leaves the surface
+boundary layer, which normally is a few {\AA}ngstr{\o}ms above the surface. For
+the last \texttt{N2} columns, $x$ refers to the position where the ejected atoms
+originate from.  
+
+The \texttt{HISAB}, \texttt{HISAAB}, \texttt{HISAT}, and \texttt{HISAAT} files
+contain angular distributions of ejected atoms. In the \texttt{HISAB} and
+\texttt{HISAT} file, the angle is between the projection of the atom's direction
+of motion to the $x$-$z$ plane and the negative and positive $z$ axis,
+respectively. In the \texttt{HISAAB} and \texttt{HISAAT} file, the angle is
+taken between the direction of motion and the analyzer direction defined by
+\texttt{TILTA} and \texttt{ROTATA} of the \texttt{\&OUTPUT} record. The units of
+the angles are degrees. Depending on the \texttt{LRCOIL} parameter of the
+\texttt{\&DAMAGE} record, data for \texttt{NSPEC=N1} or \texttt{NSPEC=N1+N2}
+atom species are written to the files.  
+
+The \texttt{HISEB} and \texttt{HISET} files contain the energy distributions of
+the ejected atoms. The units of the energies are eV. Depending on the
+\texttt{LRCOIL} parameter of the \texttt{\&DAMAGE} record, data for
+\texttt{NSPEC=N1} or \texttt{NSPEC=N1+N2} atom species are written to the files.
+
+Finally, the \texttt{RBS} file contains the energy and depth spectra of a
+Rutherford backscattering simulation (\texttt{LRBS=T} on the \texttt{\&OUTPUT}
+record). If the target contains only one atom species (\texttt{N2=1}), then two
+blocks according to the code snippet at the beginning of this section are
+written, first the energy and then the depth distribution. While in these two
+blocks the contributions from all target atoms are added, thus each one
+containing two columns of data (energy/depth and the distribution,
+\texttt{NSPEC=1}), for \texttt{N2>1} two other blocks are written where the
+contributions of different target atom species are separated
+(\texttt{NSPEC=N2}). The units of energy and depth are eV and \AA, respectively.
+The units of the distribution functions are eV$^{-1}$cm$^{-2}$sr$^{-1}$ and
+\AA$^{-1}$cm$^{-2}$sr$^{-1}$, respectively.  

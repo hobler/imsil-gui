@@ -1,0 +1,83 @@
+This example demonstrates a dynamic sputtering simulation of Si by Kr ions. In
+this simulation, the target is modified as the ions bombard the target. To store
+the state of the target at intermediate times, simulations are run repeatedly,
+each simulation reading in the output of the previous one. When starting the
+simulations with \texttt{mimsil.py}, the \texttt{-p} option must specify the
+number of parallel processes to equal \texttt{1} (which is the default) in
+order that the simulations run in sequence. Note that the order of the
+simulations as specified in the parameters file is followed for \texttt{-p 1}.
+
+The template file reads:
+
+\begin{verbatim}
+2 keV Kr in Si, tilt=60
+ &setup    ndim=1 natom=2 nr=1 ldyn=t lsput=t
+           usecell=#usecell# cellfile='#cellfile#' /
+ &ions     name='Kr' energy=2 dose=1e15 tilt=60 diverg=0 nion=#nion# /
+ &material region=1 name='Si' xtal='no' /
+ &snpar    ef=4.7 denffp=4.7 /
+ &damage   lrcoil=t ldam=f ed=15. frec=1 /
+ &damage   atom1=1 esurf=0.1 /
+ &separ    xnl=0. corlin=1. facscr=1. /
+ &geometry posif=0,200 wrough=2 nionupd=100 posfix=190 fracupd=0. /
+ &output   lhis=t lmomne=t lmomb=t lmomt=f lcell=t wbox=1 nbox=205 /
+\end{verbatim}
+
+Here we demand dynamic simulation by setting \texttt{ldyn=t} on the
+\texttt{\&setup} record. As in the static sputtering simulation,
+\texttt{lsput=t} is set to invoke accurate models for sputtering.
+
+In order to read the results of the previous simulation, the \texttt{usecell}
+and \texttt{cellfile} parameters are used on the \texttt{\&setup} record. The
+value of \texttt{usecell} must be a variable, since in the first simulation
+there is no cell file to be read, so \texttt{usecell=f} has to be used, while
+\texttt{usecell=t} must be specified for the subsequent simulations. The value
+of \texttt{cellfile} must be a variable, too, since the name of the cell file to
+be read changes from simulation to simulation.
+
+In order that the cell file is written, \texttt{lcell=t} is specified on the
+\texttt{\&output} record.
+
+There are two \texttt{\&damage} records. The first applies to all atoms. It is
+important to specify \texttt{lrcoil=t} here in order to allow a sputtering
+simulation. The second \texttt{\&damage} record applies only to atom 1, i.e.,
+the first (and only) ion atom, Ar. Its surface binding energy is set to
+0.1~eV. Such a low value leads to slow simulations, since all recoils down to
+0.1~eV must be simulated; very short free flight paths and large impact
+parameters must therefore be used. The motivation of this setting is that Ar
+atoms close to the surface may leave the target easily.
+
+On the \texttt{\&geometry} record, \texttt{wrough=2} specifies a 2~\AA\ thick
+roughness layer. \texttt{nionupd=100} specifies that after every 100 simulated
+ions relaxation of the target densities is attempted (an actual update is made
+only if the relative change in any cell density exceeds \texttt{FRACUPD}).
+
+\begin{verbatim}
+def get_params(param):
+    fname = 'krdyn_1e15'
+    param[fname] = {}
+    param[fname]['usecell'] = 'f'
+    param[fname]['cellfile'] = ''
+    param[fname]['nion'] = '1000'
+    
+    for dose in range(2,10):
+        fname = 'krdyn_' + str(dose) + 'e15'
+        param[fname] = {}
+        param[fname]['usecell'] = 't'
+        param[fname]['cellfile'] = 'krdyn_' + str(dose-1) + 'e15.cell'
+        param[fname]['nion'] = '1000'
+    
+    fname = 'krdyn_10e15'
+    param[fname] = {}
+    param[fname]['usecell'] = 't'
+    param[fname]['cellfile'] = 'krdyn_9e15.cell'
+    param[fname]['nion'] = '10000'
+\end{verbatim}
+
+The parameters file is written as a Python function in order to allow a Python
+loop to implement the loop over the simulations. The first simulation must be
+kept separate as there is no cell file to be read. The last simulation is also
+kept separate in order to obtain better statistics for the final results
+(assuming sputter equilibirium has been reached). Note that \texttt{fname}
+defines the file names of the input and output files (without extension). It is
+made different for each simulation by the inclusion of the cumulated ion dose.

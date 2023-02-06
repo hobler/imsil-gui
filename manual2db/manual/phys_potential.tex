@@ -1,0 +1,61 @@
+The standard model of the interatomic potential used in IMSIL is the 
+universal ZBL potential \cite{I8512}. It reads 
+%
+\begin{equation}
+   V(r) = \frac{Z_1 Z_2 e^2}{r} \cdot \Phi(\frac{r}{a_{12}}), \qquad
+   \Phi(R) = \sum_{i=1}^4 a_i \cdot \exp(-b_i R)
+   \label{eq:ZBLfun}
+\end{equation}
+%
+$Z_1$ and $Z_2$ denote the atomic numbers of the ion and the target atom, 
+respectively, $r$ the interatomic separation, and $a_{12}$ the screening length
+%
+\begin{equation}
+   a_{12} = \frac{0.468~\mbox{\AA}}{Z_1^{0.23} + Z_2^{0.23}}
+   \label{eq:ZBLscr}
+\end{equation}
+%
+The coefficients of the screening function $\Phi$ are given by 
+$a_i =~$\{0.1818, 0.5099, 0.2802, 0.02817\} and   
+$b_i =~$\{3.2,    0.9423, 0.4029, 0.2016\} \cite{I8512}. The scattering angles
+and the energy transfer from projectile to recoil are calculated, as usual, from
+the scattering angle in the center-of-mass system $\theta$. In the default
+model, $\theta$ is calculated by bicubic interpolation in tables of
+$\cot(\theta/2)$ \cite{I8730}. Such tables may be set up, in principle, for any
+interatomic potential. However, the screening length is assumed according to
+Eq.~\ref{eq:ZBLscr} in any case. The scattering table file corresponding to the
+universal ZBL potential is called \texttt{SCATTAB}.
+
+The universal ZBL screening function has been obtained by averaging a large 
+number of ``pair-specific'' interatomic potentials (i.e. for specific
+projectile-recoil atom combinations) \cite{I8512}. Tables for some of the
+pair-specific potentials are also provided with the program.
+
+Alternatively, the scattering angle $\theta$ in the center-of-mass system can be 
+determined by numerical integration using Gauss-Legendre or Gauss-Mehler
+quadrature. The screening function may either be assumed as a sum of
+exponentials (Eq.~\ref{eq:ZBLfun}) or may be defined by a table. Tables for the
+screening functions of all pair-specific potentials are provided.
+
+\begin{center}
+\begin{tabular}{lll}
+   parameter \quad & IMSIL name \qquad\qquad & to be specified in record \\
+   \hline
+   $Z_1$           & derived from ion name      & -- \\
+   $M_1$           & derived from ion name or 
+                     \texttt{MASS}              & \texttt{\&ATOMS} \\
+   $Z_2$           & derived from material name & -- \\
+   $M_2$           & derived from material name or
+                     \texttt{MASS}              & \texttt{\&ATOMS} \\
+   scattering 
+   table file      & \texttt{SCATFILE}          & \texttt{\&SNPAR} \\
+   screening
+   coefficients    & \texttt{COEFFILE}          & \texttt{\&SNPAR} \\
+   screening 
+   function table  & \texttt{SCRFILE}           & \texttt{\&SNPAR} \\
+\end{tabular}
+\end{center}
+
+The format of the files \texttt{SCATFILE}, \texttt{COEFFILE}, and 
+\texttt{SCRFILE} is described in Section~\ref{s:input}. 
+

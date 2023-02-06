@@ -1,0 +1,237 @@
+\begin{thebibliography}{10}
+
+\bibitem{Bal02}
+S.~Balboni, E.~Albertazzi, M.~Bianconi, and G.~Lulli.
+\newblock Atomistic modeling of ion channeling in {Si} with point defects: The
+  role of lattice relaxation.
+\newblock {\em Phys. Rev.}, B~66:045202--, 2002.
+
+\bibitem{I7102}
+J.~H. Barrett.
+\newblock {M}onte {C}arlo channeling calculations.
+\newblock {\em Phys. Rev.}, B~3(5):1527--1547, 1971.
+
+\bibitem{I8001}
+J.~P. Biersack and L.~G. Haggmark.
+\newblock A {M}onte {C}arlo computer program for the transport of energetic
+  ions in amorphous targets.
+\newblock {\em Nucl. Instr. Meth.}, 174:257--269, 1980.
+
+\bibitem{I9502}
+K.~G\"artner, D.~Stock, B.~Weber, G.~Betz, M.~Hautala, G.~Hobler, M.~Hou,
+  S.~Sarite, W.~Eckstein, J.~J. Jimenez-Rodriguez, A.~M.~C. Perez-Martin, E.~P.
+  Andribet, V.~Konoplev, A.~Gras-Marti, M.~Posselt, M.~H. Shapiro, T.~A.
+  Tombrello, H.~M. Urbassek, H.~Hensel, Y.~Yamamura, and W.~Takeuchi.
+\newblock Round robin computer simulation of ion transmission through thin
+  crystalline layers.
+\newblock {\em Nucl. Instr. Meth.}, B~102:183--197, 1995.
+
+\bibitem{I7403}
+D.~S. Gemmell.
+\newblock Channeling and related effects in the motion of charged particles
+  through crystals.
+\newblock {\em Rev. Mod. Phys.}, 46(1):129--227, 1974.
+
+\bibitem{I9520}
+S.~Herzog, A.~Simionescu, G.~Hobler, L.~Palmetshofer, K.~Piplits, and
+  M.~Grasserbauer.
+\newblock Monte {C}arlo simulation of channeled phosphorus implantations in
+  silicon.
+\newblock In H.~C. de~Graaff and H.~van Kranenburg, editors, {\em ESSDERC 95},
+  pages 187--190. Editions Frontieres, Gif sur Yvette Cedex, 1995.
+
+\bibitem{I9372}
+G.~Hobler.
+\newblock The role of lattice vibrations and interatomic potentials in the
+  simulation of ion implantation.
+\newblock In J.~J.~H. Miller, editor, {\em NASECODE IX}, pages 55--56. Front
+  Range Press, Boulder, Colorado, 1993.
+
+\bibitem{I9506}
+G.~Hobler.
+\newblock {M}onte {C}arlo simulation of two-dimensional implanted dopant
+  distributions at mask edges.
+\newblock {\em Nucl. Instr. Meth.}, B~96:155--162, 1995.
+
+\bibitem{I9603}
+G.~Hobler.
+\newblock Net point defect concentrations after ion implantation in silicon.
+\newblock In G.~R. Srinivasan, C.~S. Murthy, and S.~T. Dunham, editors, {\em
+  Process Physics and Modeling in Semiconductor Technology}, pages 509--521.
+  The Electrochem. Soc., Pennington, 1996.
+
+\bibitem{I0101}
+G.~Hobler and G.~Betz.
+\newblock On the useful range of application of molecular dynamics simulations
+  in the recoil interaction approximation.
+\newblock {\em Nucl. Instr. Meth.}, B~180:203--208, 2001.
+
+\bibitem{I9901}
+G.~Hobler, J.~Bevk, and A.~Agarwal.
+\newblock Channeling of low-energy implanted ions through the poly-{Si} gate.
+\newblock {\em IEEE Electron Dev. Lett.}, 20(7):357--359, 1999.
+
+\bibitem{Hob05a}
+G.~Hobler, K.~K. Bourdelle, and T.~Akatsu.
+\newblock Random and channeling stopping power of {H} in {Si} below 100~{keV}.
+\newblock {\em Nucl. Instr. Meth.}, B~242:617--619, 2006.
+
+\bibitem{I9701}
+G.~Hobler and G.~Fehlmann.
+\newblock A study of ultra-shallow implanted dopant profiles in silicon using
+  {BC} and {MD} simulations.
+\newblock {\em Radiat. Eff. Def. Sol.}, 141:113--125, 1997.
+
+\bibitem{I0104}
+G.~Hobler and C.~S. Murthy.
+\newblock Towards a comprehensive model of electronic stopping in amorphous and
+  crystalline silicon.
+\newblock In {\em Ion Implantation Technology---2000}, pages 209--212. IEEE,
+  2000.
+
+\bibitem{A9903}
+G.~Hobler, L.~Pelaz, and C.~S. Rafferty.
+\newblock Dose, energy, and ion species dependence of the effective plusfactor
+  for transient enhanced diffusion.
+\newblock In G.~R. Srinivasan, C.~S. Murthy, and S.~T. Dunham, editors, {\em
+  Process Physics and Modeling in Semiconductor Technology}, pages 75--86. The
+  Electrochem. Soc., Pennington, 1999.
+
+\bibitem{I9370}
+G.~Hobler and H.~P\"otzl.
+\newblock Electronic stopping of channeled ions in silicon.
+\newblock In {\em Mat. Res. Soc. Symp. Proc.}, volume 279, pages 165--170. MRS,
+  Pittsburgh, 1993.
+
+\bibitem{I8730}
+G.~Hobler and S.~Selberherr.
+\newblock Efficient two-dimensional {M}onte {C}arlo simulation of ion
+  implantation.
+\newblock In J.~J.~H. Miller, editor, {\em NASECODE V}, pages 225--230. Boole
+  Press, Dublin, 1987.
+
+\bibitem{I9505}
+G.~Hobler and A.~Simionescu.
+\newblock Acceleration of binary collision simulations in crystalline targets
+  using critical angles for ion channeling.
+\newblock {\em Nucl. Instr. Meth.}, B~102:24--28, 1995.
+
+\bibitem{I9610}
+G.~Hobler, A.~Simionescu, L.~Palmetshofer, F.~Jahnel, R.~von Criegern, C.~Tian,
+  and G.~Stingeder.
+\newblock Verification of models for the simulation of boron implantation into
+  crystalline silicon.
+\newblock {\em J. Vac. Sci. Technol.}, B~14(1):272--277, 1996.
+
+\bibitem{I9504}
+G.~Hobler, A.~Simionescu, L.~Palmetshofer, C.~Tian, and G.~Stingeder.
+\newblock Boron channeling implantations in silicon: Modeling of electronic
+  stopping and damage accumulation.
+\newblock {\em J. Appl. Phys.}, 77(8):3697--3703, 1995.
+
+\bibitem{I9761}
+G.~Hobler, H.-H. Vuong, J.~Bevk, A.~Agarwal, H.-J. Gossmann, D.~C. Jacobson,
+  M.~Foad, A.~Murrell, and Y.~Erokhin.
+\newblock Modeling of ultra-low energy boron implantation in silicon.
+\newblock In {\em 1997 IEDM Techn. Dig.}, pages 489--492. IEEE, Piscataway,
+  1997.
+
+\bibitem{Koh99}
+M.~Kohyama and S.~Takeda.
+\newblock First-principle calculations of the self-interstitial cluster
+  {{I}$_{4}$ in {Si}}.
+\newblock {\em Phys. Rev.}, B~60(11):8075--8080, 1999.
+
+\bibitem{Kre96}
+G.~Kresse and J.~Furthm\"{u}ller.
+\newblock Efficiency of ab-initio total energy calculations for metals and
+  semiconductors using a plane-wave basis set.
+\newblock {\em Comput. Mater. Sci.}, 6:15--50, 1996.
+
+\bibitem{Leu99}
+W.~K. Leung, R.~J. Needs, G.~Rajagopal, S.~Itoh, and S.~Ihara.
+\newblock Calculations of silicon self-interstitial defects.
+\newblock {\em Phys. Rev. Lett.}, 83(12):2351--2354, 1999.
+
+\bibitem{Lul04}
+G.~Lulli, M.~Bianconi, A.~Parisini, and E.~Napolitani.
+\newblock Structural characterization and modeling of damage accumulation in
+  {In} implanted {Si}.
+\newblock {\em J. Appl. Phys.}, 95(1):150--155, 2004.
+
+\bibitem{I7504}
+M.~J. Norgett, M.~T. Robinson, and I.~M. Torrens.
+\newblock A proposed method of calculating displacement dose rates.
+\newblock {\em Nucl. Eng. Des.}, 33:50--54, 1975.
+
+\bibitem{I7607}
+O.~S. Oen and M.~T. Robinson.
+\newblock Computer studies of the reflection of light ions from solids.
+\newblock {\em Nucl. Instr. Meth.}, 132:647--653, 1976.
+
+\bibitem{Ric04}
+D.~A. Richie, J.~Kim, S.~A. Barr, K.~R.~A. Hazzard, R.~Hennig, and J.~W.
+  Wilkins.
+\newblock Complexity of small silicon self-interstitial defects.
+\newblock {\em Phys. Rev. Lett.}, 92(4):045501, 2004.
+
+\bibitem{I7401}
+M.~T. Robinson and I.~M. Torrens.
+\newblock Computer simulation of atomic-displacement cascades in solids in the
+  binary-collision approximation.
+\newblock {\em Phys. Rev.}, B~9(12):5008--5024, 1974.
+
+\bibitem{I6902}
+P.~Sigmund.
+\newblock On the number of atoms displaced by implanted ions or energetic
+  recoil atoms.
+\newblock {\em Appl. Phys. Lett.}, 14(3):114--117, 1969.
+
+\bibitem{I9507}
+A.~Simionescu, S.~Herzog, G.~Hobler, R.~Schork, J.~Lorenz, C.~Tian, and
+  G.~Stingeder.
+\newblock Modeling of electronic stopping and damage accumulation during
+  arsenic implantation in silicon.
+\newblock {\em Nucl. Instr. Meth.}, B~100:483--489, 1995.
+
+\bibitem{I9509}
+A.~Simionescu and G.~Hobler.
+\newblock Comparison of damage accumulation models for boron implantation in
+  silicon.
+\newblock In {\em Mat. Res. Soc. Symp. Proc.}, volume 389, pages 221--226. MRS,
+  Pittsburgh, 1995.
+
+\bibitem{I9511}
+A.~Simionescu, G.~Hobler, S.~Bogen, L.~Frey, and H.~Ryssel.
+\newblock Model for the electronic stopping of channeled ions in silicon around
+  the stopping power maximum.
+\newblock {\em Nucl. Instr. Meth.}, B~106:47--50, 1995.
+
+\bibitem{I9521}
+A.~Simionescu, G.~Hobler, and F.~Lau.
+\newblock {M}onte {C}arlo simulation of multiple-species ion implantation and
+  its application to the modeling of 0.1~$\mu$ {PMOS} devices.
+\newblock In H.~Ryssel and P.~Pichler, editors, {\em Simulation of
+  Semiconductor Devices and Processes, Vol.~6}, pages 484--487. Springer, Wien,
+  1995.
+
+\bibitem{I8848}
+J.~Tersoff.
+\newblock Empirical interatomic potential for silicon with improved elastic
+  properties.
+\newblock {\em Phys. Rev.}, B~38(14):9902--9905, 1988.
+
+\bibitem{I9808}
+R.~von Criegern, F.~Jahnel, R.~Lange-Gieseler, P.~Pearson, G.~Hobler, and
+  A.~Simionescu.
+\newblock Verification of ``lateral secondary ion mass spectrometry'' as a
+  method for measuring lateral dopant dose distributions in microelectronics
+  test structures.
+\newblock {\em J. Vac. Sci. Technol.}, B~16(1):386--393, 1998.
+
+\bibitem{I8512}
+J.~F. Ziegler, J.~P. Biersack, and U.~Littmark.
+\newblock {\em The Stopping and Range of Ions in Solids}.
+\newblock Pergamon Press, New York, 1985.
+
+\end{thebibliography}

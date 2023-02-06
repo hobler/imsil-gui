@@ -1,0 +1,5 @@
+A general parser tool can be obtained by
+
+git clone https://gitlab.lrz.de/badw-it/DHParser
+
+See the examples/LaTeX folder for the LaTeX to UTF-8 converter.

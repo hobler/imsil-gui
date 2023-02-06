@@ -1,0 +1,39 @@
+This example shows the input file for the simulation of an RBS/C spectrum
+of a 1 $\mu$m thick (100) crystalline silicon membrane with a damage profile
+defined in a histogram input file. 3~MeV He ions aligned with the [001]
+direction are used.
+
+\begin{verbatim}
+RBS/C spectrum calculation  
+He in <100> Si, 3000 keV, 0 Tilt, 3D interstitial
+ &setup    nr=1 natom=2 
+           atom1=2 atom2=2 ndim=1 usehis=t hisfile='dam2percent.his' /  
+ &ions     name='He' energy=3000 dose=1e14 tilt=0.0 nion=10000 /
+ &material region=1 name='Si' xtal='on' /
+ &damage   ldam=t lamo2=f /
+ &geometry posif=0,10000 /
+ &output   lhis=t lrbs=t wboxe=6000. nboxe=0 tilta=10. / 
+\end{verbatim}
+
+The histogram file is read on the \texttt{\&setup} record (\texttt{usehis=t
+hisfile='dam2percent.his'}). The \texttt{.his} file must conform to the format
+of a 1-D histogram file (see Section~\ref{s:his1d}), and can of course be an
+output histogram of another IMSIL run. In this case it has been created by hand
+with a constant damage concentration of 2\% (not shown). Note that
+\texttt{hisfile} must refer to the parent directory if IMSIL is run with the
+\texttt{imsil.py} script, since this file is not copied into the subdirectory
+where IMSIL is run. \texttt{atom1=2} indicates that the second atom stored in
+the histogram file is to be read. \texttt{atom2=2} indicates that the damage
+concentrations of atom 2 of the simulation are to be initialized with these
+values.
+
+\texttt{lamo2=f} on the \texttt{\&damage} record specifies that the 3-D random
+interstitial model be used. In this model, the target atoms are displaced due to
+lattice vibration according to a 3-D Gaussian probability density function. The
+default is displacement in the plane perpendicular to the direction of motion
+according to a 2-D Gaussian probability density function (\texttt{lamo2=f}),
+which is computationally slightly more efficient.
+
+Finally, \texttt{lrbs=t} on the \texttt{\&output} record causes an RBS file to
+be written, see Section~\ref{s:his1d}. The energy box widths are 6000\AA. The
+backscattering angle is specified as 170\textdegree\ (\texttt{tilta=10.}).
