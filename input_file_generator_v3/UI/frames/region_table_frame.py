@@ -124,7 +124,9 @@ class RegionTableFrame(ttk.Frame):
         if posif.startswith("- POSIF"):
             posif = '0,'
         posif = posif.split(",")
-        surface_pos = posif[0]
+        surface_pos = 0
+        if posif[0] != "":
+            surface_pos = posif[0]
         self.set_surface_pos(surface_pos)
 
         thicknesses = []
