@@ -30,10 +30,11 @@ def create_nml(parameter_data):
 
     # for each tab in the parameter data.
     for tab_name in parameter_data:
-        # create a list which will store the normal Parameters as a single
+        # create a cogroup which will store the normal Parameters as a single
         # Namelist and then other Namelists depending on the amount and
         # size of the IVArrays.
-        nml[tab_name] = []
+        # A cogroup consists of namelist entries that have the same key.
+        nml.create_cogroup(tab_name)
         # tab namelist for only the normal parameters
         tab_nml = f90nml.namelist.Namelist()
 
@@ -60,7 +61,6 @@ def create_nml(parameter_data):
                 # before writing them into the file
                 if tab_name not in iva_nml_dict:
                     iva_nml_dict[tab_name] = dict()
-                    nml[tab_name] = []
 
                 # to determine the correct indexing of all
                 # values inside the IVArray
@@ -85,11 +85,11 @@ def create_nml(parameter_data):
                         for i in range(rang):
                             temp = f90nml.namelist.Namelist()
                             temp[index_vars[0]] = i+1
-                            # save the Namelist in the nml_list for for
+                            # save the Namelist in the nml_list for
                             # accessing and indexing it later
                             # also write it into the actual nml object
                             nml_list.append(temp)
-                            nml[tab_name].append(temp)
+                            nml.add_cogroup(tab_name, temp)
                     # same as 1D but with extra loop and nested lists
                     elif len(array_size) == 2:
                         for m in range(array_size[0]):
@@ -111,14 +111,14 @@ def create_nml(parameter_data):
                                     if array_size[0] == 1 and array_size[1] == 1:
                                         temp[index_vars[0]] = 1
                                 nml_sub_list.append(temp)
-                                nml[tab_name].append(temp)
+                                nml.add_cogroup(tab_name, temp)
                             nml_list.append(nml_sub_list)
 
                     # store the nml_list in the temporary ivarray dict
                     # so that it can be accessed later
                     iva_nml_dict[tab_name][size_string] = nml_list
 
-                # Here the values of the IVArray are written into the Namelists
+                # Here the values of the IVArray are written into the Namelists.
                 # The Namelists are accessed by indexing into the ivarray dict.
                 # The values are accessed by the same index via the
                 # get_value method from IVData
@@ -206,7 +206,7 @@ def create_nml(parameter_data):
             # write the parsed parameter value into the Namelist for this tab
             tab_nml[p_name] = p_value
         if tab_nml:
-            nml[tab_name].append(tab_nml)
+            nml.add_cogroup(tab_name, tab_nml)
 
     # delete empty namelists
     for tab_name in parameter_data:
@@ -282,8 +282,8 @@ def load_nml_to_parameter_data(parameter_data, nml):
     # parameters to ParameterData
     for tab_name in parameter_data:
         if tab_name in nml:
-            # list of namelists
-            if type(nml[tab_name]) == list:
+            # cogroup of namelists with same name
+            if type(nml[tab_name]) == f90nml.namelist.Cogroup:
                 for sub_nml in nml[tab_name]:
                     load_tab_nml_to_parameter_data(parameter_data,
                                                    sub_nml,
@@ -407,6 +407,7 @@ def convert_nml_value_to_string(p_type, value):
     elif p_type.startswith("index variable"):
         if "simple array" in p_type:
             values = value
+            print(values)
             string = ", ".join([str(value) for value in values])
         elif p_type.endswith("logical"):
             string = ("T" if value else "F")
