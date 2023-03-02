@@ -15,6 +15,12 @@ The files in the directory `input_file_generator_v3` represent the current
 state of the project (Author: Florian Asperger).
 
 ## How to start `IMSIL-GUI`
+### Used libraries
+The following libraries need to be installed in order to run the application.
+-	`Pmw`: used to create tooltips
+-	`f90nml` **(Version &ge; 1.4.0)**: used to load and save IMSIL input files.
+
+### Running the program
 The main script of the IMSIL input file generator is `main.py` 
 (https://github.com/hobler/imsil-gui/blob/master/input_file_generator_v3/main.py). 
 The only functionality of the `main.py` script is to generate the Welcome 
