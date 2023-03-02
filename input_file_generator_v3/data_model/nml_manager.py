@@ -407,7 +407,6 @@ def convert_nml_value_to_string(p_type, value):
     elif p_type.startswith("index variable"):
         if "simple array" in p_type:
             values = value
-            print(values)
             string = ", ".join([str(value) for value in values])
         elif p_type.endswith("logical"):
             string = ("T" if value else "F")
