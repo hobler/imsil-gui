@@ -3,10 +3,12 @@
 """
 from main_window import MainWindow
 from welcome_window import WelcomeWindow
+import tkinter as tk
+
 
 if __name__ == '__main__':
-    # old welcome window
-    # welcome_window = WelcomeWindow()
+    """Create the Tkinter root, attach the MainWindow to it and then start the application loop."""
+    root = tk.Tk()
+    main_window = MainWindow(root)
+    root.mainloop()
 
-    # new welcome window
-    main_window = MainWindow()

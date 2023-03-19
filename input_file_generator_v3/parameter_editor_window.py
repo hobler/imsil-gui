@@ -35,7 +35,7 @@ def read_existing_input_file(file_path):
         return None
 
 
-class ImsilInputParameterEditor:
+class ImsilInputParameterEditor(tk.Toplevel):
     """
     This is the class for the Imsil Input Parameter Editor.
 
@@ -44,7 +44,7 @@ class ImsilInputParameterEditor:
     """
 
     def __init__(self, type_of_simulation, input_file_path,
-                 parameter_data, region_names, on_close):
+                 parameter_data, region_names, on_close, master=None):
         """
         In the initialization of the IMSIL Input Parameter Editor a
         notebook is added to the window. For each table of the database
@@ -61,22 +61,25 @@ class ImsilInputParameterEditor:
 
         # Create the root window, adjust its title, make it non-resizable and
         # center it
-        self.root = tk.Toplevel()
-        self.root.title('IMSIL Input Parameter Editor')
-        self.root.resizable(False, False)
-        self.root.protocol("WM_DELETE_WINDOW", self.on_btn_quit)
-        center_window(self.root)
+        tk.Toplevel.__init__(self, master)
+        self.title('IMSIL Advanced Input Parameter Editor')
+        self.resizable(False, False)
+        self.protocol("WM_DELETE_WINDOW", self.on_btn_quit)
+        # Make the advanced parameter editor window modal
+        self.transient(master)
+        self.grab_set()
+        center_window(self)
 
         self.on_close = on_close
         self.quit = False
 
         # Add a loading message (becomes visible after the user presses the
         # button to open the IMSIL Input Parameter Editor in the Welcome Window)
-        label = tk.Label(self.root, text="Loading data...")
+        label = tk.Label(self, text="Loading data...")
         label.pack()
 
         # Create the Notebook
-        self.nb = ttk.Notebook(self.root, width=900, height=600)
+        self.nb = ttk.Notebook(self, width=900, height=600)
 
         # convert nr and natom into int if they are string
         # if the values aren't set, use the minimum values
@@ -117,8 +120,8 @@ class ImsilInputParameterEditor:
         self.nb.grid(row=0, column=0, sticky="NESW")
 
         # Center the window again, since it has changed size, and show it
-        center_window(self.root)
-        self.root.mainloop()
+        center_window(self)
+        master.wait_window(self)
 
     def set_parameter_value(self, tab_name, parameter_name, parameter_value):
         """
@@ -183,4 +186,4 @@ class ImsilInputParameterEditor:
 
         # mb_result is true if yes was selected
         self.on_close(apply=mb_result)
-        self.root.destroy()
+        self.destroy()

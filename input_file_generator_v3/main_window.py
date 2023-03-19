@@ -1,7 +1,6 @@
 """
-Classes:
-    :WelcomeWindow: The main window, where the user can configure the
-                    Input Parameter Editor settings.
+Specifies the MainWindow class which offers an GUI to handle IMSIL input files
+and their parameters.
 """
 import os, sys
 import tkinter as tk
@@ -20,9 +19,9 @@ from data_model.parameter_data import ParameterData
 DATABASE_FILE = "parameters.db"
 
 
-class MainWindow(tk.Tk):
+class MainWindow(tk.Toplevel):
     """
-    This is the class for the Welcome Window.
+    Creates and set-ups and shows the MainWindow class.
 
     The window contains a header text, a welcome message, a combobox
     where the user can select a specific type of simulation, an option
@@ -36,10 +35,14 @@ class MainWindow(tk.Tk):
     implemented).
     """
 
-    def __init__(self):
-        super().__init__()
-        self.title("IMSIL GUI")
+    def __init__(self, master=None, loaded_file_path=None):
+        tk.Toplevel.__init__(self, master)
+        self.master = master
+        self.title("IMSIL Parameter Editor")
         self.resizable(False, False)
+        # Make the parameter editor modal
+        self.transient(master)
+        self.grab_set()
         self.window_width = 500
         font.Font(name="TkCaptionFont", exists=True).config(weight="normal")
 
@@ -102,7 +105,13 @@ class MainWindow(tk.Tk):
 
         # Center the window and show it
         center_window(self)
-        self.mainloop()
+        # Check if file was loaded from Project Explorer
+        self.loaded_file_path = None
+        if loaded_file_path is not None:
+            self.loaded_file_path = loaded_file_path
+            self.on_open_file()
+        # Block actions on master until this window is closed
+        master.wait_window(self)
 
     def load_edit_frames(self):
         self.load_ions_frame(row=1)
@@ -563,7 +572,8 @@ class MainWindow(tk.Tk):
             input_file_path="",
             parameter_data=self.parameter_data,
             region_names=region_names,
-            on_close=self.on_close_parameter_editor)
+            on_close=self.on_close_parameter_editor,
+            master=self.master)
 
     def on_close_parameter_editor(self, apply=False):
         """
@@ -597,9 +607,12 @@ class MainWindow(tk.Tk):
         """
         Opens a File Dialog to open an existing file.
         """
-        loaded_file = filedialog.askopenfile(
-                initialdir=self.statusbar_entry_var.get(),
-                title="Select IMSIL input file")
+        if self.loaded_file_path is None:
+            loaded_file = filedialog.askopenfile(
+                    initialdir=self.statusbar_entry_var.get(),
+                    title="Select IMSIL input file")
+        else:
+            loaded_file = open(self.loaded_file_path, 'r')
         if loaded_file:
             # set filename in main window
             self.statusbar_entry_var.set(loaded_file.name)
@@ -608,8 +621,12 @@ class MainWindow(tk.Tk):
 
             # load Namelist and write values to ParameterData
             nml = load_nml(loaded_file.name)
-            load_nml_to_parameter_data(self.parameter_data, nml)
-
+            try:
+                load_nml_to_parameter_data(self.parameter_data, nml)
+            except AttributeError as e:
+                # TODO: Handle case when in line 377 in nml_manager
+                # TODO: p_entry is None and raises AttributeError no get_type
+                print(e)
             # reload the UI to display everything correctly
             self.load_edit_frames()
             #self.load_regions_frame()
@@ -621,6 +638,7 @@ class MainWindow(tk.Tk):
             ion_energy = self.parameter_data.get_entry_value("ions", "ENERGY")
             self.ion_name_entry_var.set(ions)
             self.ion_energy_entry_var.set(ion_energy)
+            self.loaded_file_path = None  # Enable using load button as normal
 
     def on_save(self):
         filename = self.statusbar_entry_var.get()
