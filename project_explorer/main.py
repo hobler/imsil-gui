@@ -30,6 +30,7 @@ from tkinter.ttk import Frame
 from typing import Union
 
 # Append working directory of IMSIL Parameter Editor to handle imports
+sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append("../input_file_generator_v3//")
 from input_file_generator_v3 import main_window
 from project_explorer.dialogs import NewButtonDialog
@@ -74,10 +75,10 @@ class ProjectExplorer(Frame):
         self.tree: Union[ttk.Treeview, None] = None
         self.root_directory: Union[PurePath, None] = None
         self.root_node = None
-        self.logo_image: tk.PhotoImage = tk.PhotoImage(
-            file="resources/logo1.png",
-            width=400,
-            name="photo_image")
+        # self.logo_image: tk.PhotoImage = tk.PhotoImage(
+        #    file="resources/logo1.png",
+        #    width=400,
+        #    name="photo_image")
         # Setup sub-frames
         body_frame: Frame = Frame(self, name="body_frame",
                                   height=200, width=200)
