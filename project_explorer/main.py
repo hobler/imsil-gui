@@ -30,6 +30,7 @@ from tkinter.ttk import Frame
 from typing import Union
 
 # Append working directory of IMSIL Parameter Editor to handle imports
+sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append("../input_file_generator_v3//")
 from input_file_generator_v3 import main_window
 from project_explorer.dialogs import NewButtonDialog
@@ -87,26 +88,26 @@ class ProjectExplorer(Frame):
                                      height=200, width=200)
         # Setup Header Frame
         self.setup_header_frame(header_frame)
-        header_frame.grid(column=0, row=0, sticky="nswe")
+        header_frame.grid(column=0, row=0, columnspan=2, sticky="nwe")
         # Header-Body frame separator
         top_separator = ttk.Separator(self, orient="horizontal",
                                       name="top_separator")
-        top_separator.grid(column=0, row=1, sticky="we")
+        top_separator.grid(column=0, columnspan=2, row=1, sticky="we")
         # Setup Body Frame
         self.setup_body_frame(body_frame)
         body_frame.grid(row=3, column=0, columnspan=2, sticky="nswe")
         # Body-Buttons frame separator
         bottom_separator = ttk.Separator(self, orient="horizontal",
                                          name="bottom_separator")
-        bottom_separator.grid(column=0, columnspan=2, row=4, sticky="nswe")
+        bottom_separator.grid(column=0, columnspan=2, row=4, sticky="swe")
         # Setup Buttons Frame
         self.setup_buttons_frame(buttons_frame)
-        buttons_frame.grid(column=0, row=5)
-        self.grid(column=0, row=0)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        buttons_frame.grid(column=0, row=5, columnspan=2)
+        self.grid(column=0, row=0, sticky="snwe")
+        self.columnconfigure("all", weight=1)
+        self.rowconfigure(3, weight=10)
+        self.rowconfigure([0, 5], minsize=30, weight=0)
+        self.rowconfigure([1, 2, 4], weight=0)
 
     # Gui Setup Methods
     def setup_header_frame(self, header_frame: Frame) -> None:
@@ -129,9 +130,10 @@ class ProjectExplorer(Frame):
             width=22, style="ProjectExplorer.TButton",
             command=self.change_root)
         # image_label.grid(column=0, row=0, columnspan=2, sticky="nswe")
-        path_label.grid(column=0, row=2, sticky="nswe", columnspan=2)
-        root_button.grid(column=2, row=2, sticky="nswe", ipadx=2)
-        header_frame.columnconfigure(1, weight=3)
+        path_label.grid(column=0, row=2, sticky="nswe")
+        root_button.grid(column=2, row=2, sticky="nswe")
+        header_frame.columnconfigure("all", weight=1)
+        header_frame.rowconfigure("all", weight=1)
 
     def setup_body_frame(self, body_frame: Frame) -> None:
         """Sets up the body frame of the application's main window with a
@@ -148,28 +150,32 @@ class ProjectExplorer(Frame):
             columns=("filename", "project", "date", "status", "filepath"),
             displaycolumns=["project", "date", "status"],
             yscrollcommand=lambda f, l: pb.autoscroll(
-                vertical_scroll_bar, f, l),
-            xscrollcommand=lambda f, l: pb.autoscroll(
-                horizontal_scroll_bar, f, l))
+                vertical_scroll_bar, f, l))
+            # xscrollcommand=lambda f, l: pb.autoscroll(
+            #    horizontal_scroll_bar, f, l))
         vertical_scroll_bar = ttk.Scrollbar(
             master=body_frame, orient="vertical", command=self.tree.yview)
-        horizontal_scroll_bar = ttk.Scrollbar(
-            master=body_frame, orient="horizontal", command=self.tree.xview)
+        # Horizontal scroll bar is currently nonsensical to include since
+        # resizing has been implemented
+        # horizontal_scroll_bar = ttk.Scrollbar(
+        #     master=body_frame, orient="horizontal", command=self.tree.xview)
 
         self.tree.heading("#0", text="Filename", anchor="w")
         self.tree.heading("project", text="Project Name", anchor="w")
         self.tree.heading("date", text="Modification Date", anchor="w")
         self.tree.heading("status", text="Status", anchor="w")
-        self.tree.column("#0", stretch=True, width=250)
-        self.tree.column("project", stretch=True, width=180)
-        self.tree.column("status", stretch=True, width=70)
-        self.tree.column("date", stretch=True, width=100)
+        self.tree.column("#0", stretch=True, width=350)
+        # project column is hidden but used for the explorer view
+        self.tree.column("project", stretch=False, width=0)
+        self.tree.column("status", stretch=True, width=80)
+        self.tree.column("date", stretch=True, width=80)
         self.tree.bind("<<TreeviewOpen>>", pb.update_tree)
         self.tree.bind("<<TreeviewSelect>>", self.check_selection)
-        self.tree.grid(column=0, row=0, sticky="nswe", columnspan=4, padx=3)
-        vertical_scroll_bar.grid(column=5, row=0, sticky="ns")
-        horizontal_scroll_bar.grid(column=0, row=1, sticky="we")
-        body_frame.columnconfigure(0, weight=1)
+        self.tree.grid(column=0, row=0, sticky="nswe", columnspan=2)
+        vertical_scroll_bar.grid(column=1, rowspan=1, row=0, sticky="nse")
+        # horizontal_scroll_bar.grid(column=0, row=0, sticky="swe")
+        body_frame.columnconfigure("all", weight=1)
+        body_frame.rowconfigure("all", weight=1)
 
     def setup_buttons_frame(self, buttons_frame: Frame) -> None:
         """
@@ -186,23 +192,23 @@ class ProjectExplorer(Frame):
         buttons_font_style.configure("ProjectExplorer.TButton",
                                      font=("Helvetica", 15, "bold"))
         new_button = ttk.Button(
-            buttons_frame, name="new_button", text="New", width=11,
+            buttons_frame, name="new_button", text="New", #width=11,
             state="disabled", command=self.new_clicked,
             style="ProjectExplorer.TButton")
         edit_button = ttk.Button(
-            buttons_frame, name="edit_button", text="Edit", width=11,
+            buttons_frame, name="edit_button", text="Edit", #width=11,
             state="disabled", command=self.edit_clicked,
             style="ProjectExplorer.TButton")
         view_button = ttk.Button(
-            buttons_frame, name="view_button", text="View", width=11,
+            buttons_frame, name="view_button", text="View", #width=11,
             state="disabled", command=self.view_clicked,
             style="ProjectExplorer.TButton")
         run_button = ttk.Button(
-            buttons_frame, name="run_button", text="Run", width=11,
+            buttons_frame, name="run_button", text="Run",# width=11,
             state="disabled", command=self.run_clicked,
             style="ProjectExplorer.TButton")
         plot_button = ttk.Button(
-            buttons_frame, name="plot_button", text="Plot", width=11,
+            buttons_frame, name="plot_button", text="Plot",# width=11,
             state="disabled", command=self.plot_clicked,
             style="ProjectExplorer.TButton")
 
@@ -211,6 +217,8 @@ class ProjectExplorer(Frame):
         view_button.grid(column=2, row=2)
         run_button.grid(column=3, row=2)
         plot_button.grid(column=4, row=2)
+        buttons_frame.columnconfigure("all", weight=1)
+        buttons_frame.rowconfigure("all", weight=1)
 
     # Bindings Methods
     def change_root(self, path_to_root=None) -> None:
@@ -228,7 +236,8 @@ class ProjectExplorer(Frame):
         else:
             new_path = path_to_root
         self.root_directory = new_path
-        path_label.configure(text=str(new_path))
+        # no reason to repeat root directory, label is free for any other use
+        # path_label.configure(text=str(new_path))
         self.tree.delete(*self.tree.get_children(""))
         self.root_node = pb.populate_roots(self.tree, new_path)
         new_button = self.nametowidget("buttons_frame.new_button")
@@ -347,10 +356,31 @@ class ProjectExplorer(Frame):
         self.change_root(path_to_root=self.root_directory)
 
 
+def make_flexible(obj, row=0, column=0, row_weight=1, column_weight=1):
+    """Allows the top-level window to be flexible when using .grid()"""
+    if row is not None:
+        obj.rowconfigure(row, weight=row_weight)
+    if column is not None:
+        obj.columnconfigure(column, weight=column_weight)
+
+def on_closing():
+    if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
+        for item in app.tree.get_children():
+            app.tree.delete(item)
+    root.destroy()
+
+
+
 if __name__ == "__main__":
     # Creates the application loop and attach the Project Explorer to it
     root = tk.Tk()
     root.title("IMSIL Project Explorer")
-    root.resizable(width=False, height=False)
+    root.resizable(width=True, height=True)
+    root.rowconfigure("all", weight=1, minsize=500)
+    root.columnconfigure("all", weight=1, minsize=500)
+    root.minsize(500, 300)
+    root.config(background="LightBlue4")
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+    make_flexible(root)
     app = ProjectExplorer(root)
     app.mainloop()
