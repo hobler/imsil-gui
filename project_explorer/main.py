@@ -75,10 +75,10 @@ class ProjectExplorer(Frame):
         self.tree: Union[ttk.Treeview, None] = None
         self.root_directory: Union[PurePath, None] = None
         self.root_node = None
-        self.logo_image: tk.PhotoImage = tk.PhotoImage(
-            file="resources/logo1.png",
-            width=400,
-            name="photo_image")
+        # self.logo_image: tk.PhotoImage = tk.PhotoImage(
+        #    file="resources/logo1.png",
+        #    width=400,
+        #    name="photo_image")
         # Setup sub-frames
         body_frame: Frame = Frame(self, name="body_frame",
                                   height=200, width=200)
