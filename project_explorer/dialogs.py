@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-"""Provides simple dialogs that are required from the
-ProjectExplorer class.
+"""
+Provide simple dialogs that are required for the ProjectExplorer class.
 
-The dialog implementations was not subclassed from Dialog but rather
+The dialog implementations were not subclassed from Dialog but rather
 re-implemented to provide specific appearance and functionality that was
 different from the one forced from the superclass.
 """
@@ -15,18 +15,26 @@ from pathlib import PurePath, Path
 
 
 class NewButtonDialog(tk.Toplevel):
-    """Creates and shows a simple two-button dialog so that the user can
-    choose the requested functionality."""
+    """
+    Simple two-button dialog for creating a new .inp file.
 
-    def __init__(self, master, new_file_dir):
+    The dialog provides two button for either creating a new empty .inp
+    file or for copying an existing .inp file.
+    """
+
+    def __init__(self, master, new_file_dir: Path):
         """
         Initializes a simple two_button dialog that is shown when the user
         clicks the "New" button on the project explorer.
 
         Args:
-            master: The master of the dialog, here the project explorer window.
+            master:
+                Parent of the dialog, here the project explorer window.
+            new_file_dir:
+                Path of the directory for the new .inp file
+
         """
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
         self.master = master
         self.new_file_dir = new_file_dir
         self.withdraw()
@@ -57,9 +65,10 @@ class NewButtonDialog(tk.Toplevel):
         self.wait_window(self)
 
     def destroy(self):
-        """Destroys the window"""
+        """Destroys the window."""
         self.initial_focus = None
-        tk.Toplevel.destroy(self)
+        super().destroy()
+        #tk.Toplevel.destroy(self)
 
     def body(self):
         """Creates the dialog's body."""
@@ -111,7 +120,7 @@ class NewButtonDialog(tk.Toplevel):
         name_string = ""
         while name_string is not None:
             name_string = askstring(title="New Project",
-                                    prompt=" Please type the new filename:")
+                                    prompt=" Enter the new .inp filename:")
             if (name_string is not None and
                     name_string.lower().endswith(".inp")):
                 if Path(self.new_file_dir, name_string).is_file():

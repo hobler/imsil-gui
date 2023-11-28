@@ -5,17 +5,14 @@ Specifies the IMSIL Project Explorer as the main top level widget.
 The application is a GUI that allows users to see an overview of all projects
 and perform basic file operations with them. The main top level widget is a
 Tkinter `Frame` that contains three further Frames in a grid layout that
-contain themselves contain the rest widgets of the application.
-
+contain the widgets of the application.
 
 Author: Konstantinos Zafeiris 1183944
-
 Date: March 2023
 
---------------
 To run the application, simply execute the main.py using Python 3:
 
-    $ python3 -m main.py
+    $ python3 main.py
 
 """
 import os
@@ -30,8 +27,9 @@ from tkinter.ttk import Frame
 from typing import Union
 
 # Append working directory of IMSIL Parameter Editor to handle imports
-sys.path.append(str(Path(__file__).parent.parent))
-sys.path.append("../input_file_generator_v3//")
+parent_path = Path(__file__).parent.parent
+sys.path.append(str(parent_path))
+sys.path.append(str(parent_path.joinpath("input_file_generator_v3")))
 from input_file_generator_v3 import main_window
 from project_explorer.dialogs import NewButtonDialog
 from project_explorer import project_browser as pb
@@ -50,10 +48,11 @@ class ProjectExplorer(Frame):
     __slots__ = ("global_frame", "tree")
 
     def __init__(self, master=None) -> None:
-        """Sets up the GUI elements and create window on screen center.
+        """
+        Set up the GUI elements and create window on screen center.
 
-        The window consists of a top frame called global_frame that sets in
-        a vertical grid 3 sub-frames and separators between them. The
+        The window consists of a top frame called global_frame that sets
+        3 sub-frames in a vertical grid and separators between them. The
         creation of the sub-frames elements are delegated to class methods.
 
         +----------------------------------------+
@@ -68,7 +67,7 @@ class ProjectExplorer(Frame):
         +----------------------------------------+
         """
         # Initialize Tk elements by using super's constructor
-        ttk.Frame.__init__(self, master)
+        super().__init__(master)
         # Create members
         self.parameter_editor = None
         self.master = master
@@ -80,54 +79,60 @@ class ProjectExplorer(Frame):
         #    width=400,
         #    name="photo_image")
         # Setup sub-frames
-        body_frame: Frame = Frame(self, name="body_frame",
-                                  height=200, width=200)
-        header_frame: Frame = Frame(self, name="header_frame",
-                                    height=200, width=200)
-        buttons_frame: Frame = Frame(self, name="buttons_frame",
-                                     height=200, width=200)
+        header_frame = Frame(self, name="header_frame", height=200, width=200)
+        body_frame = Frame(self, name="body_frame", height=200, width=200)
+        buttons_frame = Frame(self, name="buttons_frame", height=200, width=200)
         # Setup Header Frame
         self.setup_header_frame(header_frame)
-        header_frame.grid(column=0, row=0, columnspan=2, sticky="nwe")
+        header_frame.grid(row=0, column=0, columnspan=2, sticky="e")
         # Header-Body frame separator
-        top_separator = ttk.Separator(self, orient="horizontal",
-                                      name="top_separator")
-        top_separator.grid(column=0, columnspan=2, row=1, sticky="we")
+        #top_separator = ttk.Separator(self, orient="horizontal",
+        #                              name="top_separator")
+        #top_separator.grid(row=1, column=0, columnspan=2, sticky="we")
         # Setup Body Frame
         self.setup_body_frame(body_frame)
         body_frame.grid(row=3, column=0, columnspan=2, sticky="nswe")
         # Body-Buttons frame separator
         bottom_separator = ttk.Separator(self, orient="horizontal",
                                          name="bottom_separator")
-        bottom_separator.grid(column=0, columnspan=2, row=4, sticky="swe")
+        bottom_separator.grid(row=4, column=0, columnspan=2, sticky="swe")
         # Setup Buttons Frame
         self.setup_buttons_frame(buttons_frame)
-        buttons_frame.grid(column=0, row=5, columnspan=2)
+        buttons_frame.grid(row=5, column=0, columnspan=2)
         self.grid(column=0, row=0, sticky="snwe")
         self.columnconfigure("all", weight=1)
-        self.rowconfigure(3, weight=10)
-        self.rowconfigure([0, 5], minsize=30, weight=0)
+        self.rowconfigure(0, weight=0)
         self.rowconfigure([1, 2, 4], weight=0)
+        self.rowconfigure(3, weight=10)
+        self.rowconfigure(5, minsize=30, weight=0)
+        # Set font for buttons
+        buttons_font_style = ttk.Style()
+        buttons_font_style.configure("ProjectExplorer.TButton",
+                                     font=("Helvetica", 11))
 
     # Gui Setup Methods
     def setup_header_frame(self, header_frame: Frame) -> None:
-        """Sets up the header frame with the logo image, path label,
-        and root button.
-
-        Args: header_frame (Frame):
-            The Tkinter Frame object representing the header frame in
-            global_frame.
         """
-        # image_label: ttk.Label = ttk.Label(
+        Set up the header frame.
+
+        The header frame contains a logo image (not yet implemented),
+        a path label, and a button for changing the path.
+
+        Args:
+            header_frame (Frame):
+                The Tkinter Frame object representing the header frame in
+                global_frame.
+        """
+        # image_label = ttk.Label(
         #   header_frame, width=450, name="image_label", image=self.logo_image)
-        label_style = ttk.Style()
-        label_style.configure("ProjectExplorer.TLabel", font=("Segoe UI", 10))
-        path_label: ttk.Label = ttk.Label(
-            header_frame, text="", name="path_label", wraplength=395, width=66,
-            anchor="w", background="#F2EFEF", relief="groove", justify="left")
-        root_button: ttk.Button = ttk.Button(
-            header_frame, name="root_button", text="Change Directory",
-            width=22, style="ProjectExplorer.TButton",
+        path_label = ttk.Label(
+            header_frame, text=" Root: ", name="path_label",
+            wraplength=395, width=66,
+            anchor="w", background="#F2EFEF", relief="groove", justify="left",
+            style="ProjectExplorer.TLabel")
+        root_button = ttk.Button(
+            header_frame, name="root_button", text="Change Root",
+            width=12, style="ProjectExplorer.TButton",
             command=self.change_root)
         # image_label.grid(column=0, row=0, columnspan=2, sticky="nswe")
         path_label.grid(column=0, row=2, sticky="nswe")
@@ -136,15 +141,18 @@ class ProjectExplorer(Frame):
         header_frame.rowconfigure("all", weight=1)
 
     def setup_body_frame(self, body_frame: Frame) -> None:
-        """Sets up the body frame of the application's main window with a
-        Treeview widget and associated scrollbars.
+        """
+        Set up the body frame.
+
+         The body frame contains a Treeview widget and associated scrollbars.
 
         Args: body_frame (Frame):
             A Tkinter Frame object representing the
             main body of the application's main window.
         """
         buttons_font_style = ttk.Style()
-        buttons_font_style.configure("Treeview", font=("Segoe UI", 9))
+        #buttons_font_style.configure("Treeview", font=("Segoe UI", 9))
+        buttons_font_style.configure("Treeview", font=("Helvetica", 11))
         self.tree = ttk.Treeview(
             master=body_frame, style="Treeview", selectmode="browse",
             columns=("filename", "project", "date", "status", "filepath"),
@@ -162,7 +170,7 @@ class ProjectExplorer(Frame):
 
         self.tree.heading("#0", text="Filename", anchor="w")
         self.tree.heading("project", text="Project Name", anchor="w")
-        self.tree.heading("date", text="Modification Date", anchor="w")
+        self.tree.heading("date", text="Modified", anchor="w")
         self.tree.heading("status", text="Status", anchor="w")
         self.tree.column("#0", stretch=True, width=350)
         # project column is hidden but used for the explorer view
@@ -179,18 +187,15 @@ class ProjectExplorer(Frame):
 
     def setup_buttons_frame(self, buttons_frame: Frame) -> None:
         """
-        Sets up the buttons frame, the buttons and their specific style,
+        Set up the buttons frame.
+
+        The buttons frame contains buttons and their specific style,
         and bind them to their respective methods.
 
         Args:
-        buttons_frame (tk.Frame): The frame containing the buttons.
-
-        Returns:
-        None
+        buttons_frame (tk.Frame):
+            The frame containing the buttons.
         """
-        buttons_font_style = ttk.Style()
-        buttons_font_style.configure("ProjectExplorer.TButton",
-                                     font=("Helvetica", 15, "bold"))
         new_button = ttk.Button(
             buttons_frame, name="new_button", text="New", #width=11,
             state="disabled", command=self.new_clicked,
@@ -222,7 +227,8 @@ class ProjectExplorer(Frame):
 
     # Bindings Methods
     def change_root(self, path_to_root=None) -> None:
-        """Handles changing the root directory.
+        """
+        Handle changing the root directory.
 
         Prompts the user to select a new directory through a file dialog and
         then updates the path label in the header frame with the new path.
@@ -244,12 +250,16 @@ class ProjectExplorer(Frame):
         new_button.configure(state="enabled")
 
     def check_selection(self, event: tk.Event):
-        """Checks ttk.Treeview selection and enables the `Edit` button if it
-        is an .inp file.
+        """
+        Enable buttons depending on ttk.Treeview selection.
+
+        Currently only the selection of an .inp file triggers enabling of
+        the View and Edit buttons.
 
         Args:
-            event (tk.Event): The event that triggers the method, usually a
-                button click release event.
+            event (tk.Event):
+                The event that triggers the method, usually a button click
+                release event.
         """
         filepath = self.tree.set(event.widget.selection(), "filename")
         if filepath.endswith(".inp"):
@@ -283,9 +293,6 @@ class ProjectExplorer(Frame):
         on most distros, in windows it opens the file with the application
         that the file extension is associated with. If none is, then the user
         will be asked to define one.
-
-        Returns:
-            None
         """
         filepath = self.tree.set(self.tree.selection()[0], "filepath")
         if platform.system() == "Windows":
@@ -293,12 +300,9 @@ class ProjectExplorer(Frame):
         else:
             subprocess.call(("xdg-open", filepath))
 
-    def edit_clicked(self):
+    def edit_clicked(self) -> None:
         """
-        Opens the Parameter Editor and loads the current treeview selection.
-
-        Returns:
-            None
+        Open the Parameter Editor and load the current treeview selection.
         """
         filepath = Path(self.tree.set(self.tree.selection()[0], "filepath"))
         # Check if selection is valid
@@ -325,7 +329,7 @@ class ProjectExplorer(Frame):
 
     def new_clicked(self) -> None:
         """
-        Opens a two-button dialog and let user choose the desired action.
+        Open a two-button dialog and let user choose the desired action.
 
         The action always is the creation of a new file either on the
         directory that is selected, or on the root if none is. The file is
@@ -357,18 +361,18 @@ class ProjectExplorer(Frame):
 
 
 def make_flexible(obj, row=0, column=0, row_weight=1, column_weight=1):
-    """Allows the top-level window to be flexible when using .grid()"""
+    """Allow the top-level window to be flexible when using .grid()."""
     if row is not None:
         obj.rowconfigure(row, weight=row_weight)
     if column is not None:
         obj.columnconfigure(column, weight=column_weight)
+
 
 def on_closing():
     if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
         for item in app.tree.get_children():
             app.tree.delete(item)
     root.destroy()
-
 
 
 if __name__ == "__main__":
