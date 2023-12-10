@@ -31,7 +31,7 @@ parent_path = Path(__file__).parent.parent
 sys.path.append(str(parent_path))
 sys.path.append(str(parent_path.joinpath("input_file_generator_v3")))
 from input_file_generator_v3 import main_window
-from project_explorer.dialogs import NewButtonDialog
+from project_explorer.dialogs import NewButtonDialog, filename_fix_existing
 from project_explorer import project_browser as pb
 
 
@@ -126,7 +126,7 @@ class ProjectExplorer(Frame):
         # image_label = ttk.Label(
         #   header_frame, width=450, name="image_label", image=self.logo_image)
         path_label = ttk.Label(
-            header_frame, text=" Root: ", name="path_label",
+            header_frame, text= "Root: ", name="path_label",
             wraplength=395, width=66,
             anchor="w", background="#F2EFEF", relief="groove", justify="left",
             style="ProjectExplorer.TLabel")
@@ -151,7 +151,6 @@ class ProjectExplorer(Frame):
             main body of the application's main window.
         """
         buttons_font_style = ttk.Style()
-        #buttons_font_style.configure("Treeview", font=("Segoe UI", 9))
         buttons_font_style.configure("Treeview", font=("Helvetica", 11))
         self.tree = ttk.Treeview(
             master=body_frame, style="Treeview", selectmode="browse",
@@ -177,6 +176,7 @@ class ProjectExplorer(Frame):
         self.tree.column("project", stretch=False, width=0)
         self.tree.column("status", stretch=True, width=80)
         self.tree.column("date", stretch=True, width=80)
+        self.tree["displaycolumns"] = ("status", "date")
         self.tree.bind("<<TreeviewOpen>>", pb.update_tree)
         self.tree.bind("<<TreeviewSelect>>", self.check_selection)
         self.tree.grid(column=0, row=0, sticky="nswe", columnspan=2)
@@ -197,23 +197,23 @@ class ProjectExplorer(Frame):
             The frame containing the buttons.
         """
         new_button = ttk.Button(
-            buttons_frame, name="new_button", text="New", #width=11,
+            buttons_frame, name="new_button", text="New",
             state="disabled", command=self.new_clicked,
             style="ProjectExplorer.TButton")
         edit_button = ttk.Button(
-            buttons_frame, name="edit_button", text="Edit", #width=11,
+            buttons_frame, name="edit_button", text="Edit",
             state="disabled", command=self.edit_clicked,
             style="ProjectExplorer.TButton")
         view_button = ttk.Button(
-            buttons_frame, name="view_button", text="View", #width=11,
+            buttons_frame, name="view_button", text="View",
             state="disabled", command=self.view_clicked,
             style="ProjectExplorer.TButton")
         run_button = ttk.Button(
-            buttons_frame, name="run_button", text="Run",# width=11,
+            buttons_frame, name="run_button", text="Run",
             state="disabled", command=self.run_clicked,
             style="ProjectExplorer.TButton")
         plot_button = ttk.Button(
-            buttons_frame, name="plot_button", text="Plot",# width=11,
+            buttons_frame, name="plot_button", text="Plot",
             state="disabled", command=self.plot_clicked,
             style="ProjectExplorer.TButton")
 
@@ -242,8 +242,7 @@ class ProjectExplorer(Frame):
         else:
             new_path = path_to_root
         self.root_directory = new_path
-        # no reason to repeat root directory, label is free for any other use
-        # path_label.configure(text=str(new_path))
+        path_label.configure(text="Root: " + str(new_path))
         self.tree.delete(*self.tree.get_children(""))
         self.root_node = pb.populate_roots(self.tree, new_path)
         new_button = self.nametowidget("buttons_frame.new_button")
@@ -353,8 +352,8 @@ class ProjectExplorer(Frame):
                 f.write("")
         elif issubclass(type(new_button_result), PurePath):
             # Copy file
-            shutil.copy(new_button_result, PurePath(
-                new_file_dir, new_button_result.name))
+            shutil.copy(new_button_result,
+                        filename_fix_existing(new_file_dir, new_button_result))
         else:
             pass  # No action was chosen by the user
         self.change_root(path_to_root=self.root_directory)
@@ -369,6 +368,7 @@ def make_flexible(obj, row=0, column=0, row_weight=1, column_weight=1):
 
 
 def on_closing():
+    """Handle window behavior on application closing"""
     if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
         for item in app.tree.get_children():
             app.tree.delete(item)
@@ -376,13 +376,13 @@ def on_closing():
 
 
 if __name__ == "__main__":
-    # Creates the application loop and attach the Project Explorer to it
+    # Create the application loop and attach the Project Explorer to it
     root = tk.Tk()
     root.title("IMSIL Project Explorer")
     root.resizable(width=True, height=True)
     root.rowconfigure("all", weight=1, minsize=500)
     root.columnconfigure("all", weight=1, minsize=500)
-    root.minsize(500, 300)
+    root.minsize(600, 300)
     root.config(background="LightBlue4")
     root.protocol("WM_DELETE_WINDOW", on_closing)
     make_flexible(root)

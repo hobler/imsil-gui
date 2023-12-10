@@ -91,8 +91,7 @@ def populate_tree(tree: ttk.Treeview, node: str, path: PurePath) -> None:
             tree.set(item_id, "filepath", item_path)
         elif item_type == "file":
             item_id = tree.insert(node, "end", text=item, values=[item])
-            tree.set(item_id, "date", datetime.fromtimestamp(
-                os.stat(item_path).st_mtime).date())
+            tree.set(item_id, "date", get_date(os.stat(item_path).st_mtime))
             tree.set(item_id, "filepath", item_path)
             tree.set(item_id, "project", Path(item).stem)
             tree.set(item_id, "status", random.choice(
@@ -130,8 +129,8 @@ def populate_roots(tree: ttk.Treeview, path: PurePath) -> str:
         str:
             Node id of root
     """
-    node = tree.insert("", "end", text=str(path),
-                       values=["", "", "", "", path])
+    node = tree.set("", "project",str(path))
+    node = tree.set("", "project",str(path))
     populate_tree(tree, node, path)
     return node
 
@@ -142,7 +141,6 @@ def update_tree(event) -> None:
     item = tree.selection()[0]
     node_path = PurePath(tree.set(item, "filepath"))
     populate_tree(tree, tree.focus(), node_path)
-
 
 def change_dir(tree: ttk.Treeview, path: PurePath):
     """Handle changing the base root of the TreeView
@@ -169,3 +167,23 @@ def autoscroll(scrollbar, first, last):
     else:
         scrollbar.grid()
     scrollbar.set(first, last)
+
+def get_date(os_date_stat) -> str:
+    """
+    Return the string that is assigned to the date column of the tree.
+
+    If the date is today then return the time of creation, else return
+    the complete date
+    Args:
+        os_date_stat:
+            os.stat of the file
+    Return:
+        str:
+            date string representation in human-readable form
+    """
+    datetimestamp = datetime.fromtimestamp(os_date_stat)
+    if datetimestamp.day == datetime.now().day:
+        return datetimestamp.strftime("%H:%M")
+    else:
+        return datetimestamp.date()
+

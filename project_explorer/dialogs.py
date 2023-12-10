@@ -6,11 +6,11 @@ The dialog implementations were not subclassed from Dialog but rather
 re-implemented to provide specific appearance and functionality that was
 different from the one forced from the superclass.
 """
+import os
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-from tkinter.messagebox import showerror
-from tkinter.simpledialog import askstring
-from tkinter.ttk import Frame, Label
+from tkinter.ttk import Frame, Label, Entry
+from tkinter.constants import LEFT, END, SUNKEN, RAISED, NORMAL, DISABLED
 from pathlib import PurePath, Path
 
 
@@ -45,7 +45,12 @@ class NewButtonDialog(tk.Toplevel):
         self.box = None
         self.result = None
         self.initial_focus = self.body()
+        self.new_file_button = None
+        self.copy_file_button = None
         self.button_box()
+        self.entry_label = None
+        self.entry: Entry = None
+        self.confirm_button: tk.Button = None
 
         if not self.initial_focus:
             self.initial_focus = self
@@ -68,7 +73,6 @@ class NewButtonDialog(tk.Toplevel):
         """Destroys the window."""
         self.initial_focus = None
         super().destroy()
-        #tk.Toplevel.destroy(self)
 
     def body(self):
         """Creates the dialog's body."""
@@ -77,7 +81,6 @@ class NewButtonDialog(tk.Toplevel):
         prompt_label = Label(self.box, text=" Please choose an action:",
                              font=("Segoe UI", 12, "bold"))
         prompt_label.grid(column=0, row=0, columnspan=2, sticky="nswe")
-        self.bind("<Return>", self.finalize)
         self.bind("<Escape>", self.cancel)
         self.box.pack(padx=0, pady=0)
         return self.box
@@ -91,12 +94,12 @@ class NewButtonDialog(tk.Toplevel):
         asks for a .inp file to be selected so that it will eventually be
         copied, the file path is then assigned to the "result" attribute.
         """
-        new_file_button = tk.Button(self.box, text="Create new Project",
-                                    command=self.new_file)
-        copy_file_button = tk.Button(self.box, text="Copy Existing Project",
+        self.new_file_button = tk.Button(self.box, text="Create new Project",
+                                    command=self.ask_string)
+        self.copy_file_button = tk.Button(self.box, text="Copy Existing Project",
                                      command=self.copy_project)
-        new_file_button.grid(column=0, row=1, sticky="nswe")
-        copy_file_button.grid(column=1, row=1, sticky="nswe")
+        self.new_file_button.grid(column=0, row=1, sticky="nswe")
+        self.copy_file_button.grid(column=1, row=1, sticky="nswe")
 
     def finalize(self):
         """Takes care of window management and then closes the dialog."""
@@ -116,44 +119,83 @@ class NewButtonDialog(tk.Toplevel):
         self.destroy()
 
     def new_file(self):
-        """Handles the request of a filename for a new .inp file"""
+        """
+        Handle the request of a filename for a new .inp file
+
+        Since the existence of a project is uniquely defined by the
+        corresponding .inp file, an .inp file will be created.
+        """
         name_string = ""
-        while name_string is not None:
-            name_string = askstring(title="New Project",
-                                    prompt=" Enter the new .inp filename:")
-            if (name_string is not None and
-                    name_string.lower().endswith(".inp")):
-                if Path(self.new_file_dir, name_string).is_file():
-                    showerror("Please provide another filename",
-                              message=f"The filename {name_string} is already"
-                                      + "taken in the selected directory.")
-                else:
-                    break
-            elif (name_string is not None
-                    and not name_string.lower().endswith(".inp")
-                    and len(name_string) > 4):
-                showerror("The new filename must end in .inp",
-                          message="Please provide a filename that has .inp "
-                                  "file extension")
-        self.result = name_string
-        self.finalize()
+        name_string = self.entry.get()
+        if name_string is not None and name_string != "":
+            name_string = filename_fix_existing(self.new_file_dir, name_string)
+            self.result = name_string
+            self.finalize()
+
+    def ask_string(self):
+        """Create an Entry widget on the dialog window"""
+
+        self.entry_label = Label(self, text="Please type a project name",
+                                 justify=LEFT)
+        self.entry_label.pack()
+        self.new_file_button.config(relief=SUNKEN)
+        self.new_file_button.config(state=DISABLED)
+        self.entry = Entry(self, name="entry")
+        self.entry.pack()
+
+        self.entry.insert(0, "Project Name")
+        self.entry.select_range(0, END)
+        self.confirm_button = tk.Button(self, text="Confirm",
+                                    command=self.new_file)
+        self.confirm_button.pack()
 
     def copy_project(self):
         """Handles the request of a .inp file from the native file dialog."""
+        if self.entry is not None:
+            self.entry.destroy()
+            self.confirm_button.destroy()
+            self.entry_label.destroy()
+            self.new_file_button.config(relief=RAISED)
+            self.new_file_button.config(state=NORMAL)
         file_name = None
-        while file_name is None:
-            file_name = askopenfilename(filetypes=[("Input Files", ".inp")])
-            if Path(self.new_file_dir, Path(file_name).name).is_file():
-                showerror(title="Please choose another file",
-                          message="A file of this name already exists in the "
-                                  "target directory")
-                file_name = None
-            else:
-                self.result = PurePath(file_name)
-        if self.result is not None:
-            self.finalize()
+        file_name = askopenfilename(filetypes=[("Input Files", ".inp")])
+        if file_name is None or str(file_name) == "." or file_name == "":
+            return
+        self.result = PurePath(file_name)
+        self.finalize()
 
+def filename_fix_existing(new_file_dir, filename) -> str:
+    """
+    Expand name portion of filename with numeric '(x)' suffix to
+    return filename that doesn't exist already.
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    print(NewButtonDialog(root, new_file_dir=None).result)
+    This function accepts either the filename:str or the filepath:Purepath
+    as its filename argument.
+    """
+    dirname = new_file_dir
+    if type(filename) == str:
+        name, ext = filename, "inp"
+    elif isinstance(filename, PurePath):
+        parent = filename.parent
+        name, ext = str(filename.name).rsplit('.', 1)
+    names = [x for x in os.listdir(dirname) if x.startswith(name)]
+    names = [x.rsplit('.', 1)[0] for x in names]
+    suffixes = [x.replace(name, '') for x in names]
+    # filter suffixes that match ' (x)' pattern
+    suffixes = [x[1:-1] for x in suffixes
+                if x.startswith('(') and x.endswith(')')]
+    indexes = [int(x) for x in suffixes
+               if set(x) <= set('0123456789')]
+    idx = 0
+    if indexes:
+        idx += sorted(indexes)[-1]
+    if not indexes and names:
+        idx = 1
+    if idx == 0:
+        idx = ""
+    else:
+        idx = f"({idx+1})"
+    if isinstance(filename, PurePath):
+        return f"{str(parent)}\\{name}{idx}.{ext}"
+    return f"{name}{idx}.{ext}"
+
