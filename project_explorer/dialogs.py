@@ -196,6 +196,6 @@ def filename_fix_existing(new_file_dir, filename) -> str:
     else:
         idx = f"({idx+1})"
     if isinstance(filename, PurePath):
-        return f"{str(parent)}\\{name}{idx}.{ext}"
+        return str(os.path.join(parent,f"{name}{idx}.{ext}"))
     return f"{name}{idx}.{ext}"
 
