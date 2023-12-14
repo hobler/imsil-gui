@@ -71,7 +71,7 @@ class NewButtonDialog(tk.Toplevel):
         self.wait_window(self)
 
     def check_selection(self):
-        if self.new_file_dir.is_dir() and self.new_file_dir.suffix == ".inp":
+        if self.new_file_dir.is_dir() or self.new_file_dir.suffix != ".inp":
             self.copy_file_button.config(state=DISABLED)
 
     def destroy(self):
@@ -172,6 +172,7 @@ class NewButtonDialog(tk.Toplevel):
         name_string = ""
         name_string = self.entry.get()
         if name_string is not None and name_string != "":
+            self.new_file_dir = self.new_file_dir.parent
             name_string = filename_fix_existing(self.new_file_dir, name_string)
             self.result = name_string
             self.finalize()
