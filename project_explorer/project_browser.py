@@ -131,6 +131,7 @@ def populate_roots(tree: ttk.Treeview, path: PurePath) -> str:
         str:
             Node id of root
     """
+    node = tree.set("", "filepath", str(path))
     node = tree.set("", "project", str(path))
     populate_tree(tree, node, path)
     return node
