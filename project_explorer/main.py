@@ -24,14 +24,14 @@ import tkinter as tk
 from pathlib import PurePath, Path
 from tkinter import ttk, filedialog
 from tkinter.ttk import Frame
-from typing import Union
+from typing import Union, List
 
 # Append working directory of IMSIL Parameter Editor to handle imports
 parent_path = Path(__file__).parent.parent
 sys.path.append(str(parent_path))
 sys.path.append(str(parent_path.joinpath("input_file_generator_v3")))
 from input_file_generator_v3 import main_window
-from project_explorer.dialogs import NewButtonDialog, filename_fix_existing
+from project_explorer.dialogs import NewButtonDialog
 from project_explorer import project_browser as pb
 
 
@@ -72,6 +72,8 @@ class ProjectExplorer(Frame):
         self.parameter_editor = None
         self.master = master
         self.tree: Union[ttk.Treeview, None] = None
+        self.opened_nodes: List[str] = []
+        self.opened_nodes_fake: List[str] = []
         self.root_directory: Union[PurePath, None] = None
         self.root_node = None
         # self.logo_image: tk.PhotoImage = tk.PhotoImage(
@@ -84,11 +86,11 @@ class ProjectExplorer(Frame):
         buttons_frame = Frame(self, name="buttons_frame", height=200, width=200)
         # Setup Header Frame
         self.setup_header_frame(header_frame)
-        header_frame.grid(row=0, column=0, columnspan=2, sticky="e")
+        header_frame.grid(row=0, column=0, columnspan=2, sticky="we")
         # Header-Body frame separator
-        #top_separator = ttk.Separator(self, orient="horizontal",
+        # top_separator = ttk.Separator(self, orient="horizontal",
         #                              name="top_separator")
-        #top_separator.grid(row=1, column=0, columnspan=2, sticky="we")
+        # top_separator.grid(row=1, column=0, columnspan=2, sticky="we")
         # Setup Body Frame
         self.setup_body_frame(body_frame)
         body_frame.grid(row=3, column=0, columnspan=2, sticky="nswe")
@@ -100,7 +102,7 @@ class ProjectExplorer(Frame):
         self.setup_buttons_frame(buttons_frame)
         buttons_frame.grid(row=5, column=0, columnspan=2)
         self.grid(column=0, row=0, sticky="snwe")
-        self.columnconfigure("all", weight=1)
+        self.columnconfigure("all", weight=1, minsize=buttons_frame.winfo_reqwidth())
         self.rowconfigure(0, weight=0)
         self.rowconfigure([1, 2, 4], weight=0)
         self.rowconfigure(3, weight=10)
@@ -109,6 +111,8 @@ class ProjectExplorer(Frame):
         buttons_font_style = ttk.Style()
         buttons_font_style.configure("ProjectExplorer.TButton",
                                      font=("Helvetica", 11))
+        self.change_root(os.getcwd())
+        self.update()
 
     # Gui Setup Methods
     def setup_header_frame(self, header_frame: Frame) -> None:
@@ -126,8 +130,8 @@ class ProjectExplorer(Frame):
         # image_label = ttk.Label(
         #   header_frame, width=450, name="image_label", image=self.logo_image)
         path_label = ttk.Label(
-            header_frame, text= "Root: ", name="path_label",
-            wraplength=395, width=66,
+            header_frame, text="Root: ", name="path_label",
+            wraplength=450, width=66, padding=(2, 0),
             anchor="w", background="#F2EFEF", relief="groove", justify="left",
             style="ProjectExplorer.TLabel")
         root_button = ttk.Button(
@@ -136,8 +140,9 @@ class ProjectExplorer(Frame):
             command=self.change_root)
         # image_label.grid(column=0, row=0, columnspan=2, sticky="nswe")
         path_label.grid(column=0, row=2, sticky="nswe")
-        root_button.grid(column=2, row=2, sticky="nswe")
-        header_frame.columnconfigure("all", weight=1)
+        root_button.grid(column=0, row=2, sticky="nse")
+        path_label.columnconfigure("all", weight=2, minsize=path_label.winfo_reqwidth())
+        header_frame.columnconfigure("all", weight=1, minsize=header_frame.winfo_reqwidth())
         header_frame.rowconfigure("all", weight=1)
 
     def setup_body_frame(self, body_frame: Frame) -> None:
@@ -158,8 +163,8 @@ class ProjectExplorer(Frame):
             displaycolumns=["project", "date", "status"],
             yscrollcommand=lambda f, l: pb.autoscroll(
                 vertical_scroll_bar, f, l))
-            # xscrollcommand=lambda f, l: pb.autoscroll(
-            #    horizontal_scroll_bar, f, l))
+        #  xscrollcommand=lambda f, l: pb.autoscroll(
+        #     horizontal_scroll_bar, f, l))
         vertical_scroll_bar = ttk.Scrollbar(
             master=body_frame, orient="vertical", command=self.tree.yview)
         # Horizontal scroll bar is currently nonsensical to include since
@@ -238,10 +243,13 @@ class ProjectExplorer(Frame):
         """
         path_label = self.nametowidget("header_frame.path_label")
         if path_to_root is None:
-            new_path = PurePath(filedialog.askdirectory(mustexist=True))
+            new_path = filedialog.askdirectory(mustexist=True)
+            if new_path == () or None:
+                return
+            new_path = PurePath(new_path)
         else:
             new_path = path_to_root
-        self.root_directory = new_path
+        self.root_directory = Path(new_path)
         path_label.configure(text="Root: " + str(new_path))
         self.tree.delete(*self.tree.get_children(""))
         self.root_node = pb.populate_roots(self.tree, new_path)
@@ -306,6 +314,8 @@ class ProjectExplorer(Frame):
         filepath = Path(self.tree.set(self.tree.selection()[0], "filepath"))
         # Check if selection is valid
         filepath = filepath if str(filepath).endswith(".inp") else None
+        # If started from outside the directory, change cwd to where main.py is
+        os.chdir(Path(os.path.abspath(__file__)).parent)
         # Because the parameter editor does not use relative inputs the
         # working directory has to be temporally changed to the directory of
         # the parameter editor so that everything is imported correctly
@@ -340,23 +350,30 @@ class ProjectExplorer(Frame):
         else:
             new_file_dir = Path(
                 self.tree.set(self.tree.selection()[0], "filepath"))
-            if not new_file_dir.is_dir():
-                new_file_dir = new_file_dir.parent
+            # if not new_file_dir.is_dir():
+            #     new_file_dir = new_file_dir.parent
         # Result will be a str with the new filename or a PurePath of the
         # file to be copied
         new_button_result = NewButtonDialog(self, new_file_dir).result
         if isinstance(new_button_result, str):
-            # Create empty file
+            # Create empty file, new_button_result is path filename of new file
+            if not new_file_dir.is_dir():
+                new_file_dir = new_file_dir.parent
             new_file_path = PurePath(new_file_dir, new_button_result)
             with open(new_file_path, "w", encoding="UTF-8") as f:
                 f.write("")
+            if self.tree.selection() == ():
+                self.tree.selection_set(self.tree.get_children()[-1])
+            pb.add_node(self.tree)
+
         elif issubclass(type(new_button_result), PurePath):
             # Copy file
-            shutil.copy(new_button_result,
-                        filename_fix_existing(new_file_dir, new_button_result))
+            # new_button_result is complete PurePath of file to be created
+            # new_file_dir is the filepath of the file to be copied
+            shutil.copy2(new_file_dir, new_button_result)
+            pb.add_node(self.tree, new_button_result.parent, self.root_node)
         else:
             pass  # No action was chosen by the user
-        self.change_root(path_to_root=self.root_directory)
 
 
 def make_flexible(obj, row=0, column=0, row_weight=1, column_weight=1):
@@ -372,7 +389,7 @@ def on_closing():
     if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
         for item in app.tree.get_children():
             app.tree.delete(item)
-    root.destroy()
+        root.destroy()
 
 
 if __name__ == "__main__":
@@ -380,11 +397,11 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.title("IMSIL Project Explorer")
     root.resizable(width=True, height=True)
-    root.rowconfigure("all", weight=1, minsize=500)
-    root.columnconfigure("all", weight=1, minsize=500)
-    root.minsize(600, 300)
+    root.rowconfigure("all", weight=1)
+    root.columnconfigure("all", weight=1)
     root.config(background="LightBlue4")
     root.protocol("WM_DELETE_WINDOW", on_closing)
     make_flexible(root)
     app = ProjectExplorer(root)
+    root.minsize(root.winfo_reqwidth(), root.winfo_reqheight())
     app.mainloop()

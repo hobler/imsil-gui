@@ -16,9 +16,11 @@ Functions:
     autoscroll(scrollbar, first, last) -> None
 
 """
+import _tkinter
 import itertools
 import os
 import random
+import tkinter.ttk
 from datetime import datetime
 from pathlib import PurePath, Path
 from tkinter import ttk
@@ -129,18 +131,88 @@ def populate_roots(tree: ttk.Treeview, path: PurePath) -> str:
         str:
             Node id of root
     """
-    node = tree.set("", "project",str(path))
-    node = tree.set("", "project",str(path))
+    node = tree.set("", "project", str(path))
     populate_tree(tree, node, path)
     return node
 
 
-def update_tree(event) -> None:
+def update_tree(event: tkinter.Event) -> None:
     """Populate a node with its children when selected."""
     tree: ttk.Treeview = event.widget
     item = tree.selection()[0]
     node_path = PurePath(tree.set(item, "filepath"))
-    populate_tree(tree, tree.focus(), node_path)
+    populate_tree(tree, item, node_path)
+
+
+def update_tree_by_node(tree, node) -> None:
+    """Populate a node with its children when selected."""
+    node_path = PurePath(tree.set(node, "filepath"))
+    populate_tree(tree, node, node_path)
+
+
+def add_node(tree: ttk.Treeview, new_file_path=None, root=None) -> None:
+    """
+    Add a new node to the tree while retaining the current view.
+
+    Deletes all the to-be siblings of the new node and populates the
+    parent with the new children including the new node. All open
+    children and sub-children are saved based on their filename
+    and then iterated over and re-opened.
+    """
+    item = None
+    # If file has been copied to an unknown position, find the parent node
+    if new_file_path is not None:
+        for child in get_all_children(tree, root):
+            if new_file_path == Path(tree.set(child, "filepath")).parent:
+                item = child
+                break
+        if item is None:
+            item = root
+    else:
+        item = tree.selection()[0]
+    item = tree.parent(item)
+    # If parent directory is fake, then update its parent
+    if item.startswith("TempDir"):
+        item = tree.parent(item)
+    opened_nodes = []
+    # Find all opened nodes below the parent
+    for child in get_all_children(tree, item):
+        if tree.item(child, 'open'):
+            opened_nodes.append(tree.item(child, "text"))
+    update_tree_by_node(tree, item)
+    open_nodes(tree, item, opened_nodes)
+
+
+def open_nodes(tree: ttk.Treeview, item: str, opened_nodes):
+    """
+    Iterate over the tree and open passed nodes
+
+    Attempts to find all descendants of item and then
+    open them if their text is found in the passed list.
+    Due to the tree needing to update to populate newly
+    opened nodes and then perhaps open their children
+    the error raised from not finding a node is caught
+    and the function is called recursively. The function
+    runs n times, where n is the previously opened tree depth.
+    """
+    try:
+        for child in get_all_children(tree, item):
+            if tree.item(child, 'text') in opened_nodes:
+                opened_nodes.remove(tree.item(child, 'text'))
+                update_tree_by_node(tree, child)
+                tree.item(child, open=True)
+    except _tkinter.TclError:
+        open_nodes(tree, item, opened_nodes)
+
+
+def get_all_children(tree: ttk.Treeview, node):
+    """Return all descendants of a node"""
+    children = []
+    children.extend(tree.get_children(node))
+    for child in tree.get_children(node):
+        children.extend(get_all_children(tree, child))
+    return children
+
 
 def change_dir(tree: ttk.Treeview, path: PurePath):
     """Handle changing the base root of the TreeView
@@ -168,7 +240,8 @@ def autoscroll(scrollbar, first, last):
         scrollbar.grid()
     scrollbar.set(first, last)
 
-def get_date(os_date_stat) -> str:
+
+def get_date(os_date_stat):
     """
     Return the string that is assigned to the date column of the tree.
 
@@ -176,7 +249,7 @@ def get_date(os_date_stat) -> str:
     the complete date
     Args:
         os_date_stat:
-            os.stat of the file
+            'os.stat' of the file
     Return:
         str:
             date string representation in human-readable form
@@ -186,4 +259,3 @@ def get_date(os_date_stat) -> str:
         return datetimestamp.strftime("%H:%M")
     else:
         return datetimestamp.date()
-
