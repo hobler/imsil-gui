@@ -74,7 +74,7 @@ class ProjectExplorer(Frame):
         self.tree: Union[ttk.Treeview, None] = None
         self.opened_nodes: List[str] = []
         self.opened_nodes_fake: List[str] = []
-        self.root_directory: Union[PurePath, None] = None
+        self.root_directory: Union[PurePath, None] = Path.home()
         self.root_node = None
         # self.logo_image: tk.PhotoImage = tk.PhotoImage(
         #    file="resources/logo1.png",
@@ -111,7 +111,7 @@ class ProjectExplorer(Frame):
         buttons_font_style = ttk.Style()
         buttons_font_style.configure("ProjectExplorer.TButton",
                                      font=("Helvetica", 11))
-        self.change_root(os.getcwd())
+        self.change_root(Path.home())
         self.update()
 
     # Gui Setup Methods
@@ -243,7 +243,7 @@ class ProjectExplorer(Frame):
         """
         path_label = self.nametowidget("header_frame.path_label")
         if path_to_root is None:
-            new_path = filedialog.askdirectory(mustexist=True)
+            new_path = filedialog.askdirectory(mustexist=True, initialdir=self.root_directory)
             if new_path == () or None:
                 return
             new_path = PurePath(new_path)
@@ -274,11 +274,13 @@ class ProjectExplorer(Frame):
             edit_button.configure(state="enabled")
             view_button = self.nametowidget("buttons_frame.view_button")
             view_button.configure(state="enabled")
+            return True
         else:
             buttons = self.nametowidget("buttons_frame").winfo_children()
             for button in buttons:
                 if "new_button" not in str(button):
                     button.configure(state="disabled")
+            return False
 
     def plot_clicked(self, event):
         """
@@ -355,23 +357,28 @@ class ProjectExplorer(Frame):
         # Result will be a str with the new filename or a PurePath of the
         # file to be copied
         new_button_result = NewButtonDialog(self, new_file_dir).result
-        if isinstance(new_button_result, str):
+        if isinstance(new_button_result, tuple):
+            # Create new file new_button_result is tuple of (filename, dir)
+            new_file_dir = Path(new_button_result[1])
+            new_button_result = new_button_result[0]
             # Create empty file, new_button_result is path filename of new file
-            if not new_file_dir.is_dir():
+            if not new_file_dir.is_dir() and str(new_file_dir) != self.tree.set(self.root_node, 'filepath'):
                 new_file_dir = new_file_dir.parent
             new_file_path = PurePath(new_file_dir, new_button_result)
             with open(new_file_path, "w", encoding="UTF-8") as f:
                 f.write("")
             if self.tree.selection() == ():
-                self.tree.selection_set(self.tree.get_children()[-1])
-            pb.add_node(self.tree)
+                self.tree.selection_set("")
+            pb.add_node(self.tree, new_file_dir, self.root_node, Path(new_button_result).stem)
 
         elif issubclass(type(new_button_result), PurePath):
             # Copy file
             # new_button_result is complete PurePath of file to be created
             # new_file_dir is the filepath of the file to be copied
             shutil.copy2(new_file_dir, new_button_result)
-            pb.add_node(self.tree, new_button_result.parent, self.root_node)
+            pb.add_node(self.tree, new_button_result.parent, self.root_node, new_button_result.stem)
+            if self.tree.selection() == ():
+                self.tree.selection_set("")
         else:
             pass  # No action was chosen by the user
 

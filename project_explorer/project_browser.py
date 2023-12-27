@@ -151,7 +151,7 @@ def update_tree_by_node(tree, node) -> None:
     populate_tree(tree, node, node_path)
 
 
-def add_node(tree: ttk.Treeview, new_file_path=None, root=None) -> None:
+def add_node(tree: ttk.Treeview, new_file_path=None, root=None, new_node=None) -> None:
     """
     Add a new node to the tree while retaining the current view.
 
@@ -175,13 +175,14 @@ def add_node(tree: ttk.Treeview, new_file_path=None, root=None) -> None:
     # If parent directory is fake, then update its parent
     if item.startswith("TempDir"):
         item = tree.parent(item)
-    opened_nodes = []
+    opened_nodes = [new_node]
     # Find all opened nodes below the parent
     for child in get_all_children(tree, item):
         if tree.item(child, 'open'):
             opened_nodes.append(tree.item(child, "text"))
     update_tree_by_node(tree, item)
     open_nodes(tree, item, opened_nodes)
+    open_path_to_new_node(tree, root, new_file_path)
 
 
 def open_nodes(tree: ttk.Treeview, item: str, opened_nodes):
@@ -199,11 +200,24 @@ def open_nodes(tree: ttk.Treeview, item: str, opened_nodes):
     try:
         for child in get_all_children(tree, item):
             if tree.item(child, 'text') in opened_nodes:
+                if tree.item(child, 'open') == 1:
+                    continue
                 opened_nodes.remove(tree.item(child, 'text'))
                 update_tree_by_node(tree, child)
                 tree.item(child, open=True)
     except _tkinter.TclError:
         open_nodes(tree, item, opened_nodes)
+
+
+def open_path_to_new_node(tree: ttk.Treeview, root, new_node_path: Path):
+    """Find all ancestor nodes of the new node and open them"""
+    nodes = new_node_path.parts
+    for node in nodes:
+        for child in get_all_children(tree, root):
+            if tree.item(child, 'text') == node:
+                update_tree_by_node(tree, child)
+                tree.item(child, open=True)
+                break
 
 
 def get_all_children(tree: ttk.Treeview, node):

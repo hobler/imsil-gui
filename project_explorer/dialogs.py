@@ -52,6 +52,7 @@ class NewButtonDialog(tk.Toplevel):
         self.entry_label = None
         self.entry: Union[Entry | None] = None
         self.confirm_button: Union[tk.Button | None] = None
+        self.copy_directory = None
 
         if not self.initial_focus:
             self.initial_focus = self
@@ -130,6 +131,7 @@ class NewButtonDialog(tk.Toplevel):
         self.new_file_button.config(state=DISABLED)
         self.copy_file_button.config(relief=RAISED)
         self.copy_file_button.config(state=NORMAL)
+        self.check_selection()
         self.entry.delete(0, END)
         self.entry.insert(0, "Project Name")
 
@@ -172,18 +174,23 @@ class NewButtonDialog(tk.Toplevel):
         name_string = ""
         name_string = self.entry.get()
         if name_string is not None and name_string != "":
-            self.new_file_dir = self.new_file_dir.parent
-            name_string = filename_fix_existing(self.new_file_dir, name_string)
-            self.result = name_string
+            directory = self.new_file_dir.parent if self.new_file_dir.is_file() else self.new_file_dir
+            dst_directory = askdirectory(title="Choose a destination directory",
+                                         initialdir=directory,
+                                         mustexist=True, parent=self)
+            name_string = filename_fix_existing(dst_directory, name_string)
+            self.copy_directory = dst_directory
+            self.result = name_string, dst_directory
             self.finalize()
 
     def copy_file(self):
         """Handles the request of a .inp file from the native file dialog."""
         name_string = self.entry.get()
+        directory = self.new_file_dir.parent if self.new_file_dir.is_file() else self.new_file_dir
         dst_directory = askdirectory(title="Choose a destination directory",
-                                     initialdir=self.new_file_dir,
+                                     initialdir=directory,
                                      mustexist=True, parent=self)
-        if dst_directory is not None and dst_directory != ():
+        if dst_directory is not None and dst_directory != () and dst_directory != '':
             self.result = PurePath(filename_fix_existing(dst_directory,
                 PurePath(dst_directory, name_string + ".inp")))
             self.finalize()
