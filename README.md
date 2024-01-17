@@ -14,6 +14,9 @@ cleaned up and restructured (Author: Christian Alacs).
 The files in the directory `input_file_generator_v3` represent the current
 state of the project (Author: Florian Asperger).
 
+The files in the directory `project_explorer` provide a GUI for managing and
+viewing projects in a directory.
+
 ## How to start `IMSIL-GUI`
 ### Used libraries
 The following libraries need to be installed in order to run the application.
@@ -21,6 +24,7 @@ The following libraries need to be installed in order to run the application.
 -	`f90nml` **(Version &ge; 1.4.0)**: used to load and save IMSIL input files.
 
 ### Running the program
+#### Running the program as standalone
 The main script of the IMSIL input file generator is `main.py` 
 (https://github.com/hobler/imsil-gui/blob/master/input_file_generator_v3/main.py). 
 The only functionality of the `main.py` script is to generate the Welcome 
@@ -29,6 +33,9 @@ window, which in turn allows to open the IMSIL Input Parameter Editor. Start
 
     $ python3 main.py
 
+#### Running the program from the `project explorer`
+Additionally, the program can be run while using the Project Explorer GUI  
+by selecting a project file and clicking on the `Edit` button.
 
 ## Main window
 The Main Window serves the purpose create a new or load an existing input 
@@ -219,5 +226,20 @@ logic of the index variable arrays is as follows:
     value ‘’ (empty).  
   -	If the array is expanded, every row added, by pressing the ‘+’ Button, 
     will have the value ‘’ (empty). 
-       
+
+# Project Explorer Functionalities
+
+The Project Explorer follows the same behavior as a common file browser, 
+showing the directories, projects and project files in a TreeView manner.
+By selecting a directory as the root of the tree via clicking the `Root` 
+button the user has the following options by clicking their corresponding
+buttons.
+
+-  `New` Can be used to create a new project file or copy an existing
+    one to a selected location.
+- `Edit` Can be used when a project file is selected, opens the Imsil GUI
+    parameter editor.
+- `View` Opens the local editor to manually view and modify the project file.
+- `Run` Not yet implemented
+- `Plot` Not yet implemented
 

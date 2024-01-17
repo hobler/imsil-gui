@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Specifies the IMSIL Project Explorer as the main top level widget.
+Specify the IMSIL Project Explorer as the main top level widget.
 
 The application is a GUI that allows users to see an overview of all projects
 and perform basic file operations with them. The main top level widget is a
@@ -37,7 +37,7 @@ from project_explorer import project_browser as pb
 
 class ProjectExplorer(Frame):
     """
-    Represents the top-level main window of the Tkinter application.
+    Represent the top-level main window of the Tkinter application.
 
     The ProjectExplorer class is responsible for creating and managing the
     main parent frame of the application. It contains the application's main
@@ -83,7 +83,8 @@ class ProjectExplorer(Frame):
         # Setup sub-frames
         header_frame = Frame(self, name="header_frame", height=200, width=200)
         body_frame = Frame(self, name="body_frame", height=200, width=200)
-        buttons_frame = Frame(self, name="buttons_frame", height=200, width=200)
+        buttons_frame = Frame(self, name="buttons_frame", height=200,
+                              width=200)
         # Setup Header Frame
         self.setup_header_frame(header_frame)
         header_frame.grid(row=0, column=0, columnspan=2, sticky="we")
@@ -102,7 +103,8 @@ class ProjectExplorer(Frame):
         self.setup_buttons_frame(buttons_frame)
         buttons_frame.grid(row=5, column=0, columnspan=2)
         self.grid(column=0, row=0, sticky="snwe")
-        self.columnconfigure("all", weight=1, minsize=buttons_frame.winfo_reqwidth())
+        self.columnconfigure("all", weight=1,
+                             minsize=buttons_frame.winfo_reqwidth())
         self.rowconfigure(0, weight=0)
         self.rowconfigure([1, 2, 4], weight=0)
         self.rowconfigure(3, weight=10)
@@ -141,8 +143,10 @@ class ProjectExplorer(Frame):
         # image_label.grid(column=0, row=0, columnspan=2, sticky="nswe")
         path_label.grid(column=0, row=2, sticky="nswe")
         root_button.grid(column=0, row=2, sticky="nse")
-        path_label.columnconfigure("all", weight=2, minsize=path_label.winfo_reqwidth())
-        header_frame.columnconfigure("all", weight=1, minsize=header_frame.winfo_reqwidth())
+        path_label.columnconfigure("all", weight=2,
+                                   minsize=path_label.winfo_reqwidth())
+        header_frame.columnconfigure("all", weight=1,
+                                     minsize=header_frame.winfo_reqwidth())
         header_frame.rowconfigure("all", weight=1)
 
     def setup_body_frame(self, body_frame: Frame) -> None:
@@ -240,10 +244,16 @@ class ProjectExplorer(Frame):
         Finally, deletes all existing items from the tree view to prevent
         item duplication and re-populates it with the contents of the new
         directory. Additionally, enables the 'New' button in the buttons frame.
+
+        Args:
+            path_to_root (PurePath | str): Optional argument of a selected path
+                if not None, the root will be this path, otherwise the user
+                will be prompted to select one.
         """
         path_label = self.nametowidget("header_frame.path_label")
         if path_to_root is None:
-            new_path = filedialog.askdirectory(mustexist=True, initialdir=self.root_directory)
+            new_path = filedialog.askdirectory(mustexist=True,
+                                               initialdir=self.root_directory)
             if new_path == () or None:
                 return
             new_path = PurePath(new_path)
@@ -296,7 +306,7 @@ class ProjectExplorer(Frame):
 
     def view_clicked(self) -> None:
         """
-        Opens the file in the native file editor.
+        Open the file in the native file editor.
 
         Platform dependent behavior. Linux uses xdg-open which is available
         on most distros, in windows it opens the file with the application
@@ -312,8 +322,13 @@ class ProjectExplorer(Frame):
     def edit_clicked(self) -> None:
         """
         Open the Parameter Editor and load the current treeview selection.
+
+        Since the input_file_generator_v3 uses relative imports, the working
+        directory has to be changed so that all required classes are imported
+        correctly, when finished, the working directory is set back to normal.
         """
-        filepath = Path(self.tree.set(self.tree.selection()[0], "filepath"))
+        filepath = Path(self.tree.set(self.tree.selection()[0],
+                                      "filepath"))
         # Check if selection is valid
         filepath = filepath if str(filepath).endswith(".inp") else None
         # If started from outside the directory, change cwd to where main.py is
@@ -362,21 +377,24 @@ class ProjectExplorer(Frame):
             new_file_dir = Path(new_button_result[1])
             new_button_result = new_button_result[0]
             # Create empty file, new_button_result is path filename of new file
-            if not new_file_dir.is_dir() and str(new_file_dir) != self.tree.set(self.root_node, 'filepath'):
+            if (not new_file_dir.is_dir() and str(new_file_dir)
+                    != self.tree.set(self.root_node, 'filepath')):
                 new_file_dir = new_file_dir.parent
             new_file_path = PurePath(new_file_dir, new_button_result)
             with open(new_file_path, "w", encoding="UTF-8") as f:
                 f.write("")
             if self.tree.selection() == ():
                 self.tree.selection_set("")
-            pb.add_node(self.tree, new_file_dir, self.root_node, Path(new_button_result).stem)
+            pb.add_node(self.tree, new_file_dir, self.root_node,
+                        Path(new_button_result).stem)
 
         elif issubclass(type(new_button_result), PurePath):
             # Copy file
             # new_button_result is complete PurePath of file to be created
             # new_file_dir is the filepath of the file to be copied
             shutil.copy2(new_file_dir, new_button_result)
-            pb.add_node(self.tree, new_button_result.parent, self.root_node, new_button_result.stem)
+            pb.add_node(self.tree, new_button_result.parent, self.root_node,
+                        new_button_result.stem)
             if self.tree.selection() == ():
                 self.tree.selection_set("")
         else:
@@ -384,7 +402,17 @@ class ProjectExplorer(Frame):
 
 
 def make_flexible(obj, row=0, column=0, row_weight=1, column_weight=1):
-    """Allow the top-level window to be flexible when using .grid()."""
+    """
+    Allow the top-level window to be flexible when using .grid().
+
+    This is mandatory for the window resizing.
+    Args:
+        obj (tk.Tk): the root of the application
+        row (int) : (Optional) the row to make flexible
+        column (int) : (Optional) the column to make flexible
+        row_weight (int) : (Optional) the weight of the row resizing
+        column_weight (int) : (Optional) the weight of the column resizing
+    """
     if row is not None:
         obj.rowconfigure(row, weight=row_weight)
     if column is not None:

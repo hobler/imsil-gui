@@ -1,7 +1,7 @@
 """
 Provide functions for creating and updating a Treeview widget.
 
-Use tkinter, comply with Google Python style guide and PEP-8 naming conventions.
+Use tkinter, comply with Google Python style and PEP-8 naming conventions.
 
 Functions:
 
@@ -11,8 +11,6 @@ Functions:
         Assign root of tree to path and populate it
     update_tree(event) -> None
         Populate a node with its children when selected
-    change_dir(tree: ttk.Treeview, path: PurePath) -> None
-        # TODO: Is there any reason to keep this for now ???
     autoscroll(scrollbar, first, last) -> None
 
 """
@@ -72,7 +70,8 @@ def populate_tree(tree: ttk.Treeview, node: str, path: PurePath) -> None:
                 node, "end", "TempDir" + str(next(TEMP_DIR_ID_COUNTER)),
                 text=project_name)
             tree.set(fake_directory_id, "project", str(project_name))
-            tree.set(fake_directory_id, "filepath", PurePath(path, inp_item))
+            tree.set(fake_directory_id, "filepath", PurePath(path,
+                                                             inp_item))
     # Iterate through all items and assign them to node
     for item in sorted(os.listdir(path)):
         item_path = PurePath(path, str(item))
@@ -93,7 +92,8 @@ def populate_tree(tree: ttk.Treeview, node: str, path: PurePath) -> None:
             tree.set(item_id, "filepath", item_path)
         elif item_type == "file":
             item_id = tree.insert(node, "end", text=item, values=[item])
-            tree.set(item_id, "date", get_date(os.stat(item_path).st_mtime))
+            tree.set(item_id, "date", get_date(
+                                              os.stat(item_path).st_mtime))
             tree.set(item_id, "filepath", item_path)
             tree.set(item_id, "project", Path(item).stem)
             tree.set(item_id, "status", random.choice(
@@ -131,7 +131,7 @@ def populate_roots(tree: ttk.Treeview, path: PurePath) -> str:
         str:
             Node id of root
     """
-    node = tree.set("", "filepath", str(path))
+    tree.set("", "filepath", str(path))
     node = tree.set("", "project", str(path))
     populate_tree(tree, node, path)
     return node
@@ -146,12 +146,18 @@ def update_tree(event: tkinter.Event) -> None:
 
 
 def update_tree_by_node(tree, node) -> None:
-    """Populate a node with its children when selected."""
+    """
+    Populate a node with its children when selected.
+
+    Args:
+        tree (ttk.TreeView) : The tree to act upon.
+        node (str) : The id of the node from which to start updating the tree.
+    """
     node_path = PurePath(tree.set(node, "filepath"))
     populate_tree(tree, node, node_path)
 
 
-def add_node(tree: ttk.Treeview, new_file_path=None, root=None, new_node=None) -> None:
+def add_node(tree: ttk.Treeview, new_file_path=None, root=None, new_node=None):
     """
     Add a new node to the tree while retaining the current view.
 
@@ -159,12 +165,23 @@ def add_node(tree: ttk.Treeview, new_file_path=None, root=None, new_node=None) -
     parent with the new children including the new node. All open
     children and sub-children are saved based on their filename
     and then iterated over and re-opened.
+
+    Args:
+        tree (ttk.TreeView) : The tree to act upon
+        new_file_path (str) : The path to the item that the newly added node
+            represents
+        root (str) : The id of the root of the tree, required when the new node
+            is added to a non-opened location of the tree
+        new_node (str) : The id of the newly added node, required to open the
+            new node when a node of the same name already exists and is opened
+            on the tree
     """
     item = None
     # If file has been copied to an unknown position, find the parent node
     if new_file_path is not None:
         for child in get_all_children(tree, root):
-            if new_file_path == Path(tree.set(child, "filepath")).parent:
+            if new_file_path == Path(tree.set(
+                                     child, "filepath")).parent:
                 item = child
                 break
         if item is None:
@@ -196,6 +213,12 @@ def open_nodes(tree: ttk.Treeview, item: str, opened_nodes):
     the error raised from not finding a node is caught
     and the function is called recursively. The function
     runs n times, where n is the previously opened tree depth.
+
+    Args:
+        tree (ttk.TreeView) : The tree to act upon
+        item (str) : The node from which to start updating the tree
+        opened_nodes List[str] : List of the node texts that were opened and
+            need to be opened after updating the tree
     """
     try:
         for child in get_all_children(tree, item):
@@ -210,7 +233,14 @@ def open_nodes(tree: ttk.Treeview, item: str, opened_nodes):
 
 
 def open_path_to_new_node(tree: ttk.Treeview, root, new_node_path: Path):
-    """Find all ancestor nodes of the new node and open them"""
+    """
+    Find all ancestor nodes of the new node and open them.
+
+    Args:
+        tree (ttk.TreeView) : The tree to act upon
+        root (str) : The id of the tree root
+        new_node_path (Path) : The Path on the filesystem of the new node
+    """
     nodes = new_node_path.parts
     for node in nodes:
         for child in get_all_children(tree, root):
@@ -221,29 +251,17 @@ def open_path_to_new_node(tree: ttk.Treeview, root, new_node_path: Path):
 
 
 def get_all_children(tree: ttk.Treeview, node):
-    """Return all descendants of a node"""
+    """
+    Return all descendants of a node
+    Args:
+        tree (ttk.TreeView) : The tree to act upon
+        node (str) : The id of the node from which to find all children
+    """
     children = []
     children.extend(tree.get_children(node))
     for child in tree.get_children(node):
         children.extend(get_all_children(tree, child))
     return children
-
-
-def change_dir(tree: ttk.Treeview, path: PurePath):
-    """Handle changing the base root of the TreeView
-
-    When a changing root is requested all existing children of the root node
-    are deleted a new node is selected as root and is then populated by its
-    children.
-
-    Deprecated, to be deleted.
-    """
-    if tree.parent(str(path)):
-        path = os.path.abspath(tree.set(str(path), "filename"))
-        if os.path.isdir(path):
-            os.chdir(path)
-            tree.delete(tree.get_children("")[0])
-            populate_roots(tree, path)
 
 
 def autoscroll(scrollbar, first, last):
