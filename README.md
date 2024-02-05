@@ -15,7 +15,7 @@ The files in the directory `input_file_generator_v3` represent the current
 state of the project (Author: Florian Asperger).
 
 The files in the directory `project_explorer` provide a GUI for managing and
-viewing projects in a directory.
+viewing projects in a directory (Author: Konstantinos Zafeiris)
 
 ## How to start `IMSIL-GUI`
 ### Used libraries
@@ -24,7 +24,21 @@ The following libraries need to be installed in order to run the application.
 -	`f90nml` **(Version &ge; 1.4.0)**: used to load and save IMSIL input files.
 
 ### Running the program
-#### Running the program as standalone
+
+#### Running the program from the `project explorer` directory
+To launch the project explorer GUI and access the IMSIL Input File generator
+within it, navigate to the `imsil-gui/project_explorer` directory and execute
+the main script by entering:
+
+```
+$ python3 main.py
+```
+
+Once the GUI is open, you can run the IMSIL Input File generator directly 
+from the Project Explorer GUI. Simply select a project file and click on the 
+`Edit` button to begin.
+
+#### Running the IMSIL Input FIle generator as a standalone program
 The main script of the IMSIL input file generator is `main.py` 
 (https://github.com/hobler/imsil-gui/blob/master/input_file_generator_v3/main.py). 
 The only functionality of the `main.py` script is to generate the Welcome 
@@ -33,11 +47,7 @@ window, which in turn allows to open the IMSIL Input Parameter Editor. Start
 
     $ python3 main.py
 
-#### Running the program from the `project explorer`
-Additionally, the program can be run while using the Project Explorer GUI  
-by selecting a project file and clicking on the `Edit` button.
-
-## Main window
+## IMSIL Input File Generator Main Window
 The Main Window serves the purpose create a new or load an existing input 
 file for IMSIL. 
 
@@ -59,7 +69,7 @@ box containing either a previous name or "< click to change >". Editing will
 directly change the parameters NR and NATOM as well as Ions and Regions 
 parameters.
 
-Additional the Ion energy and the Regions geometry can be edited in this window.
+Additionally, the Ion energy and the Regions geometry can be edited in this window.
 
 To edit other parameters, the user has to open the Parameter Editor by clicking 
 on the "Parameter Editor..." button.
@@ -94,6 +104,14 @@ confirm or cancel the changes.
 # Files
 In the following section (almost) all files of the project are briefly
 described.
+
+#### `project_explorer:`
+- `main.py`: Launches the main window application and handles the event loop
+    and all user interactions
+- `dialogs.py`: Handles the creation, actions and deletion of dialogs that are
+  used by the main application window for user input.
+- `project_explorer.py`: Defines methods for populating, displaying and 
+  handling changes in the TreeView widget of the main application
 
 #### `input_file_generator_v3`:
 -	`parameters.db`: the SQLite database
@@ -151,8 +169,26 @@ described.
      the current version of the program.
 
 # Functionality
-The functionality of the program is briefly explained as follows:
+The functionality of the Project Explorer GUI is as follows:
+## Project Explorer Functionalities
+
+The Project Explorer follows the same behavior as a common file browser, 
+showing the directories, projects and project files in a TreeView manner.
+By selecting a directory as the root of the tree via clicking the `Root` 
+button the user has the following options by clicking their corresponding
+buttons.
+
+-  `New` Can be used to create a new project file or copy an existing
+    one to a selected location.
+- `Edit` Can be used when a project file is selected, opens the Imsil GUI
+    parameter editor.
+- `View` Opens the local editor to manually view and modify the project file.
+- `Run` Not yet implemented
+- `Plot` Not yet implemented
+
+The functionality of the ISMIL Input Parameter is briefly explained as follows:
  
+## Imsil Input Parameters
 The program can be started by running the file main.py. By doing so, the
 Main Window will appear. After creating or loading a file, the Ions and Regions 
 can be edited. To edit other Parameters, the user can press the 
@@ -227,19 +263,5 @@ logic of the index variable arrays is as follows:
   -	If the array is expanded, every row added, by pressing the ‘+’ Button, 
     will have the value ‘’ (empty). 
 
-# Project Explorer Functionalities
 
-The Project Explorer follows the same behavior as a common file browser, 
-showing the directories, projects and project files in a TreeView manner.
-By selecting a directory as the root of the tree via clicking the `Root` 
-button the user has the following options by clicking their corresponding
-buttons.
-
--  `New` Can be used to create a new project file or copy an existing
-    one to a selected location.
-- `Edit` Can be used when a project file is selected, opens the Imsil GUI
-    parameter editor.
-- `View` Opens the local editor to manually view and modify the project file.
-- `Run` Not yet implemented
-- `Plot` Not yet implemented
 
