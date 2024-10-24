@@ -1,0 +1,487 @@
+This record is used to define the parameters of nuclear stopping. For
+a description of some of the parameters refer to Chapters \ref{s:coll}
+and \ref{s:pot}.  The \texttt{\&SNPAR} record has the index variables
+\texttt{ATOM1} and \texttt{ATOM2}. \texttt{ATOM1} corresponds to the index 
+of the projectile, while \texttt{ATOM2} corresponds to the index of the target
+atom/recoil. Regarding the definition of atom indices, see Section~\ref{s:atom}.
+
+
+\begin{keydescription}{\texttt{CHKFFPCYL} --- Check ffp cylinder flag}
+%
+  This parameter specifies whether a check is to be performed on whether
+  a recoil partner in an amorphous region is inside the previous free flight 
+  path cylinder. If this is the case, the collision is abandoned. 
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{COEFFILE} --- Screening function coefficient file}
+%
+  This parameter specifies the file containing the coefficients of a
+  sum-of-exponentials screening function. This model is used for the calculation 
+  of the scattering angles, if \texttt{QUAD} specifies a numerical integration
+  method and \texttt{SCRFUN='coeffile'}. Files are assumed to be located in the 
+  subdirectory \texttt{'screencoefs'} of the search path. 
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character strings \\ 
+    Default: \> \texttt{'ZBLspec'} \\
+    Range:   \> \texttt{'ZBLspec'} or the name of a user-supplied file 
+                containing screening function \\
+             \> coefficients ($\le$ 80 characters)
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{DENFFP} --- Minimum energy transfer}
+%
+  This parameter specifies the minimum energy transfer in eV which has
+  to be considered in a collision. It is used for the calculation of
+  the free flight path in amorphous targets. The free flight path is
+  chosen such that both the energy transfer is larger than
+  \texttt{DENFFP} and the scattering angle is larger than
+  \texttt{PSIFFP}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 15 \\
+    Range:   \> $>0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{EF} --- Final projectile energy}
+%
+  This parameter specifies the cutoff energy in eV below which the
+  simulation of the ion trajectory is terminated. For \texttt{LSPUT=T} the
+  cutoff energy is reduced to the minimum surface binding energy for position
+  closer to the surface than \texttt{DNEAR} of the \texttt{DAMAGE} record.
+  Note that additional displacement is possible at the end of the trajectory if
+  \texttt{LFLOW=T}. The units of \texttt{EF} are eV. 
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 10 \\
+    Range:   \> $0 < \texttt{EF} \le \texttt{ENERGY}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ETIME} --- Maximum energy for time integral}
+%
+  This parameter specifies the energy below which the time
+  integral is considered for the calculation of the turning points of
+  the trajectories. The turning point is the intersection of the asymptotes
+  of the classical scattering problem. If the turning point is beyond the
+  plane perpendicular to the incidence direction that contains the collision
+  partner, the collision point is moved into that plane. The units of
+  \texttt{ETIME} are keV.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 5 \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{FFPMAX} --- Maximum free flight path}
+%
+  This parameter specifies an upper limit to the free flight path in amorphous
+  material.  \texttt{FFPMAX} is applied to the statistical free flight path, not
+  to its mean value obtained from \texttt{DENFFP} and \texttt{PSIFFP}. If larger
+  than the size of the simulation domain, \texttt{FFPMAX} is silently reduced to
+  the size of the simulation domain in $z$ direction (but not to less than
+  0.1\AA) in a dynamic simulation (\texttt{LDYN=T}) or when the target is read
+  from a \texttt{CELL} file (\texttt{LCELL=T}). In 2-D, the size of
+  the simulation domain is taken as the diameter of the rectangle
+  circumscribing the simulation domain. The units of \texttt{FFPMAX} are \AA.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 10\% of size of simulation domain \\
+    Range:   \> $0 \le \texttt{FFPMAX} \le$ size of simulation domain
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LAPSISEF} --- Apsis cutoff energy flag}
+%
+  If true, this parameter specifies that the kinetic energy at the apsis of 
+  collision rather than the energy after collision should be checked against 
+  \texttt{EF} to determine trajectory cutoff. This can provide a better
+  comparison with MD simulations.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LINEL} --- Inelastic scattering flag}
+%
+  This parameter specifies whether the local electronic energy loss is
+  considered in the calculation of the scattering angles and energy
+  transfer.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\iffalse
+\begin{keydescription}{\texttt{LMD} --- Molecular dynamics flag}
+%
+  This parameter specifies whether a molecular dynamics or a binary 
+  collision simulation is to be performed. For \texttt{LMD=T} there must
+  be one crystalline and no other region. In this region there must be
+  only one target atom species.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\iffalse
+\begin{keydescription}{\texttt{LMEHL} --- Gauss-Mehler quadrature flag}
+%
+  This parameter specifies whether the scattering angles and the time
+  integral shall be calculated by Gauss-Mehler quadrature using the ZBL
+  interatomic potential. For \texttt{LMEHL=F} the scattering angles and time 
+  integrals are calculated by interpolation in the scattering table (see
+  \texttt{SCATFILE}).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{LNEGX1} --- Enforce negative time integral shift flag}
+%
+  This flag, when set, enforces negative (or zero) time integral shifts along 
+  the incoming asymptote. This means that in the rare case when the time 
+  integral shift is positive, it is set to zero. Only relevant when the time 
+  integral is considered, i.e., when the projectile energy is smaller than 
+  \texttt{ETIME}. For channeling simulations \texttt{LNEGX1=T} is recommended, 
+  otherwise nearly simultaneous collision may be missed.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LPMAXTAB} --- Maximum impact parameter table flag}
+%
+  This parameter specifies whether the maximum impact parameter as a function 
+  of energy should be written to the \texttt{PMAX} file. The table lists the
+  energy and the corresponding impact parameters in different regions (in terms
+  of distance from the surface).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LPOSFFP} --- Enforce positive free flight paths flag}
+%
+  This flag, when set, enforces positive (or zero) free flight paths. Negative 
+  free flight paths may occur when \texttt{LPOSFFP=F} if the time integral is 
+  considered. For channeling simulations \texttt{LPOSFFP=F} is considered, 
+  since this will more reliably catch nearly simultaneous collisions (double 
+  scattering is avoided by \texttt{NLOLDM} of the \texttt{\&XTAL} record).
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LSTFFP} --- Statistical free flight path flag}
+%
+  This parameter specifies whether the free flight paths are calculated 
+  statistically (\texttt{LSTFFP=T}) or deterministically (\texttt{LSTFFP=F}). 
+  In both cases, a free flight path is calculated from the parameters 
+  \texttt{DENFFP}, \texttt{FFPMAX}, \texttt{PMAXMAX}, \texttt{PMAXMIN}, 
+  \texttt{PMAXPSI}, \texttt{PSIFFP}, and the current projectile energy and 
+  species. If \texttt{LSTFFP=F}, this free flight path is taken as is. If 
+  \texttt{LSTFFP=T}, this value is taken as the mean value of an exponential
+  distribution of the free flight path.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NABSC} --- Number of abscissae for quadrature
+   of the scattering angle}
+%
+  This parameter specifies the number of abscissas to be used in the quadrature 
+  for the calculation of the scattering angle in the center-of-mass system (if 
+  \texttt{QUAD} specifies an integration method).
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of integer \\
+    Default: \> 4 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\iffalse
+\begin{keydescription}{\texttt{NABSCTIME} --- Number of abscissas for quadrature
+   of the time integral}
+%
+  This parameter specifies the number of abscissas to be used in the quadrature 
+  for the calculation of the time integral (if \texttt{QUADTIME} specifies an 
+  integration method).
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of integer \\
+    Default: \> 4 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\iffalse
+\begin{keydescription}{\texttt{NMEHL} --- Number of abscissas in Gauss-Mehler 
+    quadrature}
+%
+  This parameter specifies the number of abscissas in the Gauss Mehler 
+  quadrature for the calculation of the scattering angle (if \texttt{LMEHL=T})
+  and for the calculation of the time integral (if \texttt{E<ETIME}).
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 32 \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{PMAXMAX} --- Maximum maximum impact
+    parameter in amorphous material}
+%
+  This parameter specifies an upper limit to the maximum impact
+  parameter in amorphous regions (regions with \texttt{XTAL='no'}).
+  The actual maximum impact parameter is usually smaller according to
+  {\tt DENFFP} and \texttt{PSIFFP}.  There may be another effective
+  upper limit to the maximum impact parameter imposed by the
+  scattering table used.  The units of \texttt{PMAXMAX} are \AA.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 4 \\
+    Range:   \> $>0$.
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{PMAXMIN} --- Minimum maximum impact
+    parameter in amorphous material}
+%
+  This parameter specifies a lower limit to the maximum impact
+  parameter in amorphous regions (regions with \texttt{XTAL='no'}).
+  The actual maximum impact parameter is usually larger according to
+  {\tt DENFFP} and \texttt{PSIFFP}.  The units of \texttt{PMAXMIN} are \AA.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0.004 \\
+    Range:   \> $>0$.
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{PMAXPSI} --- Maximum maximum impact
+    parameter for the angle criterion}
+%
+  This parameter specifies an upper limit to the maximum impact
+  parameter as determined from the scattering angle criterion
+  (\texttt{PSIFFP}).  If the scattering angle criterion gives a
+  maximum impact parameter larger than \texttt{PMAXPSI}, it is reset
+  to \texttt{PMAXPSI}. Note that the maximum impact parameter can be
+  larger than \texttt{PMAXPSI} due to {\tt DENFFP}. 
+  The units of \texttt{PMAXPSI} are \AA.  
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> $1.53 / \min( 1,
+                 \sqrt{0.15+0.85~\texttt{ENERGY}/10~\mathrm{keV}} )$ \\
+    Range:   \> $>0$.
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{PSIF} --- Final ion angle}
+%
+  This parameter specifies the cutoff angle of the ion in degrees, at
+  which the simulation of the trajectory is terminated. It is measured
+  with respect to the surface normal unless \texttt{LPINIT=T} on the
+  \texttt{\&IONS} record, in which case it is measured with respect to
+  the plane defined by the surface normal and \texttt{ROTATE} of the
+  \texttt{\&IONS} record.  \texttt{PSIF=0} means that no cutoff angle
+  has to be taken into account.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 0 \\
+    Range:   \> $0 \le \texttt{PSIF} \le 90$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{PSIFFP} --- Minimum scattering angle}
+%
+  This parameter specifies the minimum scattering angle in degrees which has
+  to be considered in a collision. It is used for the calculation of the 
+  free flight path in amorphous targets. It is chosen such that both 
+  the energy transfer is larger than \texttt{DENFFP} and the scattering angle
+  is larger than \texttt{PSIFFP}.
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 1 \\
+    Range:   \> $0 < \texttt{PSIFFP} < 180$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{QUAD} --- Method of scattering angle quadrature}
+%
+  This parameter specifies the method of numerical quadrature for the
+  calculation of the scattering angles in the center-of-mass system. 
+  \texttt{'Legendre'} means Gauss-Legendre quadrature, \texttt{'Mehler'} 
+  Gauss-Mehler quadrature (also known as Gauss-Chebyshev quadrature). 
+  \texttt{'no'} means that the scattering angle is determined by 
+  interpolation in the scattering table specified by \texttt{SCATFILE}.
+  Either both or none of \texttt{QUAD} and \texttt{QUADTIME} must be 
+  \texttt{'no'}.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character strings \\
+    Default: \> \texttt{'no'} \\
+    Range:   \> \texttt{'Legendre'}, \texttt{'Mehler'}, \texttt{'no'}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{QUADTIME} --- Method of time integral quadrature}
+%
+  This parameter specifies the method of numerical quadrature for the
+  calculation of the time integral. This parameter is currently unused.
+  Time integrals are calculated using the scattering table \texttt{SCATTAB}. 
+  \iffalse
+  \texttt{'Legendre'} means Gauss-Legendre 
+  quadrature, \texttt{'Mehler'} Gauss-Mehler quadrature (also known as 
+  Gauss-Chebyshev quadrature). \texttt{'no'} means that the time integral is 
+  determined by interpolation in the scattering table specified by 
+  \texttt{SCATFILE}. 
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character(8) \\
+    Default: \> \texttt{'no'} \\
+    Range:   \> \texttt{'Legendre'}, \texttt{'Mehler'}, \texttt{'no'}
+  \end{keytab}
+  \fi
+\end{keydescription}
+
+\begin{keydescription}{\texttt{REFLECTMAX} --- Maximium number of surface 
+reflections}
+%
+  This parameter specifies the maximum number of reflections at the surface
+  potential. Such reflections may occur when a projectile tries to leave the 
+  target but does not have enough energy to do so. When the number of surface 
+  reflections of a projectile exceeds \texttt{REFLECTMAX}, the projectile is 
+  stopped. 
+  \begin{keytab}
+    Type:    \> integer \\ 
+    Default: \> $\infty$ \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SCATFILE} --- Scattering table file}
+%
+  This parameter specifies a file containing tabulated scattering angles
+  and time integrals. This model is used if 
+  \texttt{QUAD='no'}. Then the scattering angles and time integrals are determined 
+  by bicubic interpolation in the table contained in \texttt{SCATFILE}. Files 
+  are assumed to be located in the subdirectory \texttt{'scattab'} of the 
+  search path.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character strings \\ 
+    Default: \> \texttt{'BSI'}, \texttt{'SISI'}, \texttt{'PSI'}, 
+                \texttt{'ASSI'}, \texttt{'BO'}, or \texttt{'ERSI'} for the 
+                appropriate \\
+             \> atom combinations, \\
+             \> \texttt{'SCATTAB'} otherwise \\
+    Range:   \> in addtion to the possible default values, 
+                \texttt{'SCATTAB\_big'}, or the name \\
+             \> ($\le$ 80 characters) of a user-supplied file containing a scattering table 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SCRFILE} --- Screening function file}
+%
+  This parameter specifies a file containing tabulated values of the
+  screening function. This model is used if \texttt{QUAD} specifies a 
+  numerical integration method and 
+  \texttt{COEFFILE} is either unspecified or overriden by specification of
+  \texttt{SCRFILE}. \texttt{COEFFILE} and \texttt{SCRFILE} must not 
+  appear on the same input record. Specification of \texttt{COEFFILE} or 
+  \texttt{SCRFILE} on later input records override those on earlier ones. 
+  \texttt{SCRFILE='ZBL'} and \texttt{SCRFILE='DMol'} are interpreted as 
+  \texttt{SCRFILE='zbl/XXYY'} and \texttt{SCRFILE='dmol/XXYY'},
+  respectively, where \texttt{XX} and \texttt{YY} are replaced by the chemical 
+  element names of the respective atoms. Only atom combinations with the 
+  atomic number of \texttt{XX} smaller than or equal to the atomic number of 
+  \texttt{YY} are available. Files are assumed to be located in the subdirectory 
+  \texttt{'screentab'} of the search path.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character strings \\ 
+    Default: \> \texttt{'ZBL'} \\
+    Range:   \> \texttt{'ZBL'}, \texttt{'DMol'}, 
+                \texttt{'zbl/XXYY'}, \texttt{'dmol/XXYY'} 
+                (for the meaning of \texttt{XXYY} see \\
+             \> above), or the name ($\le$ 80 characters) of a user-supplied
+                file containing  \\
+             \> a screening function table 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SCRFUN} --- Screening function}
+%
+  This parameter specifies the screening function for scattering angle
+  calculation. Valid choices are either
+  built-in functions (\texttt{'ZBL'}, \texttt{'KrC'}, \texttt{'Moliere'}),
+  \texttt{'coeffile'} as a reference to a coefficients file, or 
+  \texttt{'scrfile'} as a reference to a screening function file. In the two
+  latter cases, the file is specified by \texttt{COEFFILE} and \texttt{SCRFILE},
+  respectively. \texttt{SCRFUN} is ignored if \texttt{QUAD='no'}. \texttt{ZBL}
+  refers to the universal ZBL potential.  \texttt{SCRFUN} is not used for the 
+  calculation of the time integral, the universal ZBL screening function is 
+  used for this purpose.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character strings \\ 
+    Default: \> \texttt{'ZBL'} \\
+    Range:   \> \texttt{'ZBL'}, \texttt{'KrC'}, \texttt{'Moliere'},
+    			\texttt{'coeffile'}, \texttt{'scrfile'}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SCRLEN} --- Screening length}
+%
+  This parameter specifies the model for the screening length for the
+  calculation of the scattering angle. The model specifies the dependence 
+  on the atomic numbers of the projectile and the target atom. 
+  \texttt{SCRLEN='1'} means a screening length of $1~\rm\AA$. For the
+  calculation of the time integral, always the \texttt{ZBL} screening
+  length is used.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM2},\texttt{ATOM1}) 
+                of character strings \\ 
+    Default: \> \texttt{'ZBL'} for \texttt{SCRFUN='ZBL'} \\
+             \> \texttt{'Firsov'} for \texttt{SCRFUN='KrC'} or 
+                \texttt{'Moliere'} \\
+             \> if specified in the coefficients file, according to this 
+                specification, \\
+             \> otherwise \texttt{'ZBL'}, for \texttt{SCRFUN='coeffile'} \\ 
+             \> \texttt{'1'} for \texttt{SCRFUN='scrfile'} \\
+    Range:   \> \texttt{'1'}, \texttt{'ZBL'}, \texttt{'Firsov'}, 
+                \texttt{'Lindhard'}
+  \end{keytab}
+\end{keydescription}
+

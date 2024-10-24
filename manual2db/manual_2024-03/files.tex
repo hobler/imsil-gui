@@ -1,0 +1,40 @@
+In this chapter, the data files which are required or produced by IMSIL are
+listed, and their format is specified. If IMSIL is run by calling its executable
+directly, all files are searched for or generated in the current working
+directory (i.e. from where the executable is called). Normally, IMSIL requires
+files from the tables directory, so the required tables (or subdirectories
+of the tables directory) must be copied or linked to the current working
+directory.
+
+It is recommended to use the Python scripts \texttt{imsil.py} and
+\texttt{mimsil.py} as described in Section~\ref{s:scripts_run} to start IMSIL.
+If these scripts are used and the name of the input file is \texttt{<xxx>.inp},
+a directory \texttt{<xxx>} is created and \texttt{<xxx>.inp} is copied to
+\texttt{<xxx>/INP}. The same is done with all other files \texttt{<xxx>.*}. In
+addition, the script changes to the new directory \texttt{<xxx>}, so it
+becomes the working directory. In addition, the paths to the tables directory
+and the input file directory (the directory of \texttt{xxx.inp}) are passed to
+IMSIL. When IMSIL attempts to read a file, it first searches the working
+directory (\texttt{<xxx>}), then the input file directory,and finally the
+tables directory. As an exception, the \texttt{INP} file is only searched for
+in the work directory(it should always be found). The path to the tables
+directory is hard-coded in the \texttt{imsil.py} script. Output files are
+always generated in the working directory.
+
+After completion of an IMSIL run, all files \texttt{<EXT>} in the working
+directory \texttt{<xxx>} (where \texttt{<EXT>} stands for an arbitrary file
+name) are copied to the input file directory and renamed to
+\texttt{<xxx>.<ext>}. E.g., if \texttt{example1.inp} is an input file and the
+imsil script is run with \texttt{python <path-to-imsil.py> example1.inp}, then
+a subdirectory \texttt{example1} is created and the file \texttt{example1.inp}
+is copied to \texttt{example1/INP}, the current working directory is changed to
+\texttt{example1}, and IMSIL is run. The simulation generates an output file
+\texttt{OUT} in the working directory, which is then copied to the input file
+directory as \texttt{example1.out}. The same is done with any other files that
+are created during the run.
+
+If execution of IMSIL is delegated to a remote computer, the script copies files
+obeying the pattern \texttt{<xxx>.*} in the input file directory (where the name
+of the input file is \texttt{<xxx>.inp}) as well as the tables directory with
+its files to the remote computer. All other files have to be copied by hand
+before running IMSIL.

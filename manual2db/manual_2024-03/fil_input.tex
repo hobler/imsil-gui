@@ -1,0 +1,229 @@
+There are the following input files:
+\bigskip
+%
+\begin{center}
+\begin{tabular}{|l|p{0.5\textwidth}|l|l|}
+\hline
+(Default) &                   & \multicolumn{2}{c|}{file name specified by} \\
+Name      & File contents, remarks     & parameter  & in record \\
+\hline
+\tt INP         & Input parameters                         & --           & -- \\
+\tt (-)         & \raggedright Geometry file (used if \texttt{NDIM=2} and
+\texttt{GEOMFILE} specified) & \texttt{GEOMFILE} & \tt \&GEOMETRY \\ 
+\tt (-)         & Signed distance function file            & \tt SDFFILE  & \tt \&GEOMETRY \\
+\tt (SCATTAB)   & \raggedright Scattering table file (used if \texttt{QUAD='no'} in record 
+                  \texttt{\&SNPAR})                        & \tt SCATFILE & \tt \&SNPAR \\
+\tt (ZBL)       & \raggedright Screening function file (used if 
+                  \texttt{QUAD$\ne$'no'} and if \texttt{SCRFUN='scrfile'} in record 
+                  \texttt{\&SNPAR})                        & \tt SCRFILE  & \tt \&SNPAR \\
+\tt (ZBLspec)   & \raggedright Screening coefficient file (used if \texttt{QUAD$\ne$'no'} and 
+                  if \texttt{SCRFUN='coeffile'} in record \texttt{\&SNPAR})
+                                                           & \tt COEFFILE & \tt \&SNPAR \\
+\tt (-)         & Random electronic stopping file (used if \texttt{SEMODEL='table'} in
+                  record \texttt{\&SEPAR})                 & \tt SEFILE   & \tt \&SEPAR \\
+\tt (-)         & Definition of the crystal lattice unit cell  
+                                                           & \tt NAME     & \tt \&CRYSTAL \\
+\tt (BCK)       & Backup = data necessary to continue an old run (used if \texttt{USEBK=T} in 
+                  record \texttt{\&SETUP})                 & \tt BKFILE   & \tt \&SETUP \\
+\tt (-)         & Histogram = histogram profiles necessary to initialize 1-D
+                  histogram of desired atom index (used if \texttt{USEHIS=T} in
+                  record \texttt{\&SETUP})                 & \tt HISFILE  & \tt \&SETUP \\
+\tt (-)         & Cell file = 1-D cell-based description of the target
+                  containing the densities of each species (used if
+                  \texttt{USECELL=T} in record \texttt{\&SETUP}) 
+                                                           & \tt CELLFILE & \tt \&SETUP \\
+\ifprivate
+\tt (DEF)       & Defects = Deterministic defecs file containing the defects to be used  (used 
+                  if \texttt{USEDEF=T} in record \texttt{\&SETUP})
+                                                           & \tt DEFFILE  & \tt \&SETUP \\
+\fi
+\tt (-)         & Trajectory file used to initialize the ions (used if \texttt{USETRA=T})
+                                                           & \tt TRAFILE  & \tt \&ION \\
+                                       
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+
+The format of the \texttt{INP} file is descibed in detail in
+Chapter~\ref{k:input}. The geometry file is an input file that (usually)
+contains only \texttt{\&GEOMETRY} records.
+
+The signed distance function file must contain the following lines in a header: 
+%
+\begin{verbatim}
+      Dimension: <ndim>
+      Unit: Angstrom
+      nX: <nx>
+      dX: <dx>
+      nY: <ny>
+      dY: <dy>
+      nZ: <nz>
+      dZ: <dz>
+\end{verbatim}
+%
+The items in angled brackets must be replaced by numerical values. 
+\texttt{ndim} denotes the number of dimensions (\texttt{2} for 2-D, 
+\texttt{3} for 3-D). \texttt{nx}, \texttt{ny}, \texttt{nz} denote the number 
+of grid lines and \texttt{dx}, \texttt{dy}, \texttt{dz} the grid spacings
+in $x$, $y$, and $z$ direction, respectively. \texttt{dx}, \texttt{dy}, and
+\texttt{dz} are either single values, indicating constant grid spacing, or
+\texttt{nx-1}, \texttt{ny-1}, and \texttt{nz-1} comma-separated numbers, 
+respectively. The header is terminated by the line
+%
+\begin{verbatim}
+      Values:
+\end{verbatim}
+%
+The SDF values are then read by the FORTRAN statements
+%
+\begin{verbatim}
+      DO IZ = 1, NZ
+          DO IY = 1, NY
+             READ (22,*) (SDF(IX,IY,IZ,IR), IX=1,NX)
+          END DO
+      END DO
+\end{verbatim}
+%
+Note the region index \texttt{IR}. An SDF file must be provided for each region
+and for the surface of the union of all regions. The latter is assigned to 
+region 0.
+
+The scattering table file \texttt{SCATFILE} is assumed to be located in the
+subdirectory \texttt{scattab} of the \texttt{tables} directory and is read by
+the following FORTRAN statements:
+%
+\begin{verbatim}
+      READ (22,*) NE, NP
+      READ (22,*) (E(IE), IE=1,NE)
+      READ (22,*) (P(IP), IP=1,NP)
+      READ (22,*) PCUTOFF
+      READ (22,*) ((COTTHH(IE,IP), IE=1,NE), IP=1,NP)
+      READ (22,*) ((DCOTDE(IE,IP), IE=1,NE), IP=1,NP)
+      READ (22,*) ((DCOTDP(IE,IP), IE=1,NE), IP=1,NP)
+      READ (22,*) ((TAU(IE,IP), IE=1,NE), IP=1,NP)
+      READ (22,*) ((DTAUDE(IE,IP), IE=1,NE), IP=1,NP)
+      READ (22,*) ((DTAUDP(IE,IP), IE=1,NE), IP=1,NP)
+\end{verbatim}
+%
+\texttt{NE} and \texttt{NP} denote the number of tabulated reduced energy and
+reduced impact parameter values \texttt{E} and \texttt{P}, respectively. The
+reduced energy is the energy divided by $(1+M_1/M_2)Z_1Z_2e^2/a_{12}$, the
+reduced impact parameter is the impact parameter divided by $a_{12}$, with
+$a_{12}$ the ZBL screening length according to Eq.~(\ref{eq:ascr}).
+\texttt{PCUTOFF} is the screened cut-off impact parameter, beyond which the
+deflection angle will be set to zero.  \texttt{COTTHH} contains the tabulated
+values of $\cot(\theta/2)$ with $\theta$ the scattering angle in the
+center-of-mass system. \texttt{DCOTDE} and \texttt{DCOTDP} are the derivatives
+of $\cot(\theta/2)$ with respect to reduced energy and reduced impact
+parameter, respectively. \texttt{TAU} denotes the scaled time integral,
+\texttt{DTAUDE} and \texttt{DTAUDP} its derivatives.
+
+The screening function file \texttt{SCRFILE} is assumed to be located in the
+subdirectory \texttt{screentab} of the \texttt{tables} directory and is read by
+%
+\begin{verbatim}
+      DO I=1,N
+         READ (22,*) R(I), PHI(I)
+      END DO 
+\end{verbatim}
+%
+\texttt{N} denotes the number of data points, \texttt{R} the internuclear
+distance in {\AA}ngstr{\o}ms, and \texttt{PHI} the value of the screening
+function $\Phi(r)$, see Eq.~(\ref{eq:Phi}). If \texttt{SCRFILE='ZBL'}, then
+the element specific ZBL screening functions provided in the subdirectory
+\texttt{screentab/zbl} of the \texttt{tables} directory are used.
+
+The screening coefficient file \texttt{COEFFILE} is assumed to be located in the
+subdirectory \texttt{screencoefs} of the \texttt{tables} directory and is read
+by
+%
+\begin{verbatim}
+      DO
+         READ (22,*) Z1, Z2, (A(I,J), B(I,J), I=1,N)
+      END DO 
+\end{verbatim}
+%
+until the desired atomic numbers \texttt{Z1} and \texttt{Z2} are found.
+\texttt{A} and \texttt{B} are the coefficients $a_i$ and $b_i$, respectively, 
+of Eq.~(\ref{eq:Phi}). The number \texttt{N} of terms in Eq.~(\ref{eq:Phi}) 
+can be specified in a header of a file such as
+%
+\begin{verbatim}
+    # nexp = 4
+\end{verbatim}
+%
+If unspecified, \texttt{N=4} is assumed. If the $a_i$'s do not sum up to unity,
+they are scaled so they do.
+
+When the header of the 
+\texttt{COEFFILE} file contains the string \texttt{rmax}, an additional 
+value is read from each line of the file representing the maximum interaction 
+distance. For instance, 
+%
+\begin{verbatim}
+    # nexp = 3, rmax
+\end{verbatim}
+%
+specifies that the \texttt{COEFFILE} file contains the parameters for three 
+exponentials and the linear term, compare Eq.~(\ref{eq:Phi}). They are read
+by
+%
+\begin{verbatim}
+      DO
+         READ (22,*) Z1, Z2, (A(I,J), B(I,J), I=1,N), RMAX
+      END DO 
+\end{verbatim}
+
+The random electronic stopping power file \texttt{SEFILE} provides an option to
+include measured stopping power data, or data obtained by an external program,
+in the simulation. It is read by the following FORTRAN statements:
+%
+\begin{verbatim}
+      DO, IE=1,NE
+         READ (122,*) E(IE), DEDX(IE)
+      ENDDO
+\end{verbatim}
+%
+The file can begin with an arbitrary number of comment lines beginning with the
+\texttt{*} or \texttt{\#} character, which will be ignored when the file is 
+read. \texttt{E} denotes the energy [eV]. \texttt{DEDX} is the average energy 
+loss per path length [eV/\AA]. \texttt{NE} denotes the number of 
+(\texttt{E},\texttt{DEDX}) points. Below \texttt{E(1)}, the electronic stopping 
+is interpolated linearly between zero energy/zero stopping and the first table
+entry. Above \texttt{E(NE)}, electronic stopping is set to zero.
+
+The file defining a crystal structure (\texttt{NAME} parameter of the
+\texttt{\&CRYSTAL} record) is read by the following FORTRAN statements:
+%
+\begin{verbatim}
+      READ (123,*) ALAT(1:3)
+      READ (123,*) NSITE
+      DO, ISITE=1,NSITE
+         READ(123,*) X(ISITE), Y(ISITE), Z(ISITE), IELEM(ISITE)
+      ENDDO
+\end{verbatim}
+%
+\texttt{ALAT(1:3)} denote the lattice constants (edge lengths of the unit
+cell), \texttt{NSITE} the number of lattice sites, and \texttt{X}, \texttt{Y},
+\texttt{Z} the positions of the lattice sites. $0 \le \texttt{X} \le
+\texttt{ALAT(1)}$, $0 \le \texttt{Y} \le \texttt{ALAT(2)}$, and $0 \le
+\texttt{Z} \le \texttt{ALAT(3)}$ must hold.  \texttt{IELEM} denotes the element
+number and must equal \texttt{1} for a pure  element or integers ranging from
+\texttt{1} to the number of elements in a  compound. The lattice constants and
+the lattice site coordinates  will be scaled such that the correct material
+density as specified by the \texttt{DENSITY} parameter of the \texttt{MATERIAL}
+record is obtained.
+
+The backup file \texttt{BKFILE} stems from the old days, when simulations might
+have taken weeks. Its purpose was to allow the continuation of interrupted
+simulation. It may still be useful for debugging purposes. New simulations
+should not rely on the \texttt{BKFILE}, since its full functionality is not
+guarantteed to be maintained in the future. Note that histograms may be read in
+from a histogram file with the \texttt{HISFILE} parameter of the \texttt{\&SETUP}
+record. The format of the backup file is binary.
+
+The other possible input files are also output files of IMSIL. Their format is
+described in Sections~\ref{s:his1d} and \ref{s:filesmisc}.
+

@@ -1,0 +1,92 @@
+The input language of IMSIL uses the FORTRAN90 syntax for NAMELIST input.  Each
+\textbf{input record} in the input file \texttt{INP} corresponds to a namelist
+in the program. It contains a set of input parameters.  An input record starts
+with an \texttt{\&}, followed by the name of the record (= the name of the
+namelist) and the entities (parameters) to be given values. It ends with a
+slash. Everything outside an input record is ignored and can be used as a
+comment. Comments are typically placed at the beginning of the file. Comments
+may also be placed inside a record after an exclamation mark ``!''. The comment
+then extends to the end of the line.
+
+While all names are case-insensitive, in this manual (except for the
+Examples Chapter), parameter and record names are written uppercase to better
+distinguish them from normal text.
+
+A typical input record reads
+%
+\begin{verbatim}
+ &NAME PARNAME1=value1 PARNAME2=value2 ... /
+\end{verbatim}
+%
+\texttt{\&NAME} is the name of the record, \texttt{PARNAME<i>}
+is the \texttt{i}-th parameter name, and \texttt{value<i>} the value to be assigned
+to \texttt{PARNAME<i>}. Values of logical parameters may either be \texttt{T}
+(true) or \texttt{F} (false). Character values have to be quoted.
+
+Parameter specifications for a namelist may be distributed across multiple input
+records:
+%
+\begin{verbatim}
+ &NAME PARNAME1=value1 ... /
+ &NAME PARNAME1=value3 PARNAME2=value2 ... /
+\end{verbatim}
+%
+If input parameters are repeated, the later definitions override the earlier
+one(s), with the exception of simple arrays of arbitrary size, see below. In the
+example above, \texttt{PARNAME1=value3}.
+
+There are two kinds of array parameters in IMSIL: First, \textbf{simple arrays}
+are one-dimensional arrays of either fixed size (often the size is 2
+or 3), or their size is determined by the number of elements given
+(``arbitrary'' size). Simple arrays have to be specified according to the rules
+for arrays in namelists, i.e.\ the elements are specified after the
+``\texttt{=}'' sign separated by commas:  
+%
+\begin{verbatim}
+ &NAME ARRAYNAME=value1,value2,value3 ... /
+\end{verbatim}
+%
+When more than one input record is specified for the same namelist and
+specifications for the same simple array of arbitrary size are given,
+unless otherwise noted, later array values are appended to earlier ones. Thus,
+%
+\begin{verbatim}
+ &NAME ARRAYNAME=value1,value2 ... /
+ &NAME ARRAYNAME=value3 ... /
+\end{verbatim}
+%
+defines the array \texttt{(value1,value2,value3)} like in the example above, if
+\texttt{ARRAYNAME} is a simple array of arbitrary size. If \texttt{ARRAYNAME} is
+a simple array of fixed size, then \texttt{ARRAYNAME=value3}, i.e., only the
+first element of \texttt{ARRAYNAME} is given a value. The maximum number of
+array values that can be specified on each input record is 20.
+
+Second, \textbf{index variable arrays} are arrays whose values may be specified
+for individual indices using index variables. For instance,
+%
+\begin{samepage}
+\begin{verbatim}
+ &MATERIAL REGION=2 NAME='SI3N4' ... /
+ &MATERIAL REGION=1 NAME='SIO2' ... /
+ &MATERIAL REGION=3 NAME='SI' ... /
+\end{verbatim}
+\end{samepage}
+%
+specifies the array \texttt{NAME(1:3)=('SIO2','SI3N4','SI')}, where in each
+record the index variable \texttt{REGION} indicates the index of the array
+element whose value is to be set.
+
+If an index variable array appears on a record that does not contain the index
+variable(s), the array values for all unspecified indices are set to the
+specified value. On the other hand, on records containing index
+variables, no parameters must be specified that are not arrays of that index. 
+
+Index variable arrays are used for arrays depending on some standard indices
+like the region or atom index, and for multi-dimensional arrays. 
+
+As a convenient feature of NAMELIST input, only those parameters need to be
+specified whose values deviate from the predefined default values (given by the
+program before reading the NAMELIST record). A few parameters are obligatory,
+IMSIL will require them to be specified. Examples of actual input files are
+given in Chapter \ref{k:ex}.
+

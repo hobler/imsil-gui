@@ -1,0 +1,74 @@
+The code uses the principle of close encounter probability \cite{I7102} and
+approximates the paths of the backscattered particles by straight trajectories
+in a random medium. The program gives as the output the RBS signal as a function
+of depth or backscattering energy. The nuclear encounter probability is the
+cross section for the process times the integral of the product of the ion flux
+and the probability of a target atom being at the point of passage.
+
+The Rutherford backscattering cross section relates collision densities to
+target atom densities. The probability of the collision is proportional to the
+cross section area of the target sphere perpendicular to the path of the
+projectile. The resulting probability that an ion will be scattered into a
+detector with a given solid angle is represented in derivative form, the
+derivative of the cross-section with respect to a differential solid angle
+evaluated at a particular solid angle and projectile energy. The resulting
+Rutherford differential cross section is given by:
+%
+ \begin{equation}
+   \frac{\partial \sigma}{\partial \Omega}= 
+   \left[\frac{Z_1 Z_2 e^{2}}{2 E} \right]^{2} 
+   \cdot \frac {1}{\sin^{4}\psi} \cdot
+   \frac{\left[\sqrt{1-{(\frac{m_1\cdot \sin\psi}{m_2}})^{2}} + \cos\psi \right]^{2}}
+   {\sqrt{1-{(\frac{m_1\cdot \sin\psi}{m_2}})^{2}}}
+   \label{rbs:eq1}
+ \end{equation}
+%
+$e^2=1.44 \times 10^{-13}$~MeV$\cdot$cm is constant, $E$ and $m_1$ are the
+energy and the mass of the incident ion, respectively, $m_2$ is the mass of the
+target atom, and $\psi$ is the labaratory backscattering angle.  As the result
+of a backscattering event, a particle will loose energy. The ratio of the
+projectile energy immediately after scattering to the energy immediately before
+scattering is the kinematic factor:
+%
+\begin{equation}
+  K = \left[\frac{\sqrt{1-(\frac{m_1\cdot \sin\psi}{m_2})^{2}} 
+      + \frac{m_1 \cdot \cos\psi }{m_2}}
+    {1 + \frac{m_1}{m_2}} \right]^{2}
+  \label{rbs:eq2}
+\end{equation}
+%
+Atoms are assumed to vibrate independently, where the displacement probability 
+is Gaussian distributed,
+%
+\begin{equation}
+  P = \frac{1}{2 \pi x_\mathrm{rms}^{2}} \cdot \exp(-\frac{r^{2}}{2
+  x_\mathrm{rms}^{2}}),
+  \label{rbs:eq3}
+\end{equation}
+%
+where $x_\mathrm{rms}$ denotes the RMS vibration amplitude of the target atoms
+in one direction, and $r$ the distance vector between collision point and target
+atom.  The energy detected in the detector (the backscattered energy) is
+calculated by approximating the path of the backscattered particle by a
+straight line in random medium.  The backscattering energy is scored in an
+energy spectrum:
+%
+\begin{equation}
+  P_\mathrm{RBS} = \frac{\partial \sigma}{\partial \Omega} \cdot P \cdot
+  N_\mathrm{d}
+  \label{rbs:eq4}
+\end{equation}
+%
+where $N_\mathrm{d}$ is the ion dose. The units of \texttt{$P_\mathrm{RBS}$} are
+cm$^{-2}$sr$^{-1}$.
+%
+\begin{center}
+\begin{tabular}{lll}
+   parameter \quad & IMSIL name & to be specified in record \\
+   \hline
+   backscattering angle $\psi$  & {\tt TILTA}   & {\tt \&OUTPUT}   \\
+   dose $N_\mathrm{d}$          & {\tt DOSE}    & {\tt \&IONS}     \\
+   thermal vibration amplitude $x_\mathrm{rms}$ & {\tt VIB}    
+                                                & {\tt \&MATERIAL} \\
+\end{tabular}
+\end{center}

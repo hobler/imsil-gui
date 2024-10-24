@@ -1,0 +1,108 @@
+Interatomic potentials for binary collision simulation are usually written
+as screened Coulomb potentials
+%
+\begin{equation}
+   V(r) = \frac{1}{4 \pi \varepsilon_0} \frac{Z_1 Z_2 e^2}{r} 
+          \cdot \Phi(\frac{r}{a_{12}}).
+   \label{eq:screenedCoulomb}
+\end{equation}
+%
+$Z_1$ and $Z_2$ denote the atomic numbers of the ion and the target atom, 
+respectively, $r$ the interatomic separation, and 
+$e^2/(4 \pi \varepsilon_0) = 14.4~\mbox{eV\AA}$. The screening function 
+$\Phi(R)$ can either be read from a file or can be chosen as the sum of 
+exponentials with an optional linear term
+%
+\begin{equation}
+   \Phi(R) = \sum_{i=1}^n a_i \cdot \exp(-b_i R) 
+             \left[ + c + d \, \frac{R}{R_\mathrm{max}} \right] .
+    \label{eq:Phi}
+\end{equation}
+%
+The screening length $a_{12}$ is chosen according to
+%
+\begin{equation}
+   a_{12} = \frac{0.468~\mbox{\AA}}{\left(Z_1^p + Z_2^p\right)^q}
+   \label{eq:ascr}
+\end{equation}
+%
+The predefined values for the parameters $a_i$, $b_i$, $p$, and $q$ are listed 
+in Tab.~\ref{tab:screen}. Alternatively, $a_i$, $b_i$, and optionally 
+$R_\mathrm{max}$ can be read from a file. If $R_\mathrm{max}$ is given, then 
+$c$ and $d$ are calculated so that $\Phi(0)=1$ and $\Phi(R_\mathrm{max})=0$.
+%
+\begin{table}
+    \caption{Predefined parameters for the screening functions and screening 
+             lengths \label{tab:screen}}
+    \begin{center}
+    \begin{tabular}{cccc}
+        ~\\
+        \multicolumn{4}{c}{Screening functions (Eq.~\ref{eq:Phi})} \\
+        & ZBL \cite{I8512} & KrC \cite{I7702} & Moliere \cite{I4701} \\
+        \hline
+        $a_1$ & 0.18175 & 0.190945 & 0.35 \\
+        $a_2$ & 0.50986 & 0.473674 & 0.55 \\
+        $a_3$ & 0.28022 & 0.335381 & 0.10 \\
+        $a_4$ & 0.02817 &  &  \\
+        $b_1$ & 3.19980 & 0.278544 & 0.3 \\
+        $b_2$ & 0.94229 & 0.637174 & 1.2 \\
+        $b_3$ & 0.40290 & 1.919249 & 6.0 \\
+        $b_4$ & 0.20162 &  &  \\
+        $a_{12}$ (default) & ZBL & Firsov & Firsov \\
+    \end{tabular}
+    \hfill
+    \begin{tabular}{cccc}
+        ~\\
+        \multicolumn{4}{c}{Screening lengths (Eq.~\ref{eq:ascr})}\\
+        & ZBL \cite{I8512} & Firsov \cite{I5801} & Lindhard \cite{I6301} \\
+        \hline
+        p & 0.23 & 1/2 & 2/3 \\
+        q & 1    & 2/3 & 1/2 \\
+    \end{tabular}
+    \end{center}
+\end{table}
+
+The scattering angles and the energy transfer from projectile to recoil are 
+calculated, as usual, from the scattering angle in the center-of-mass system 
+$\theta$. For the ZBL screening function, $\theta$ may be calculated by 
+bicubic interpolation in a table of $\cot(\theta/2)$ \cite{I8730}. Such tables 
+may be set up, in principle, for any interatomic potential. The scattering 
+table file corresponding to the universal ZBL potential is called 
+\texttt{SCATTAB}. Tables for some of the pair-specific potentials are also 
+provided with the program.\footnote{%
+The universal ZBL screening function has been obtained by averaging a large 
+number of ``pair-specific'' interatomic potentials (i.e. for specific
+projectile-recoil atom combinations) \cite{I8512}.} 
+
+Alternatively, $\theta$ can be determined by numerical integration using 
+Gauss-Legendre or Gauss-Mehler quadrature. This allows to use screening
+functions defined numerically or with parameters other than according to
+ZBL. Tables for the screening functions of all pair-specific ZBL or DMol
+\cite{I9757} potentials are provided.
+
+\begin{center}
+\begin{tabular}{lll}
+   parameter \quad & IMSIL name \qquad\qquad & to be specified in record \\
+   \hline
+   $Z_1$           & derived from ion name      & -- \\
+   $M_1$           & derived from ion name or 
+                     \texttt{MASS}              & \texttt{\&ATOMS} \\
+   $Z_2$           & derived from material name & -- \\
+   $M_2$           & derived from material name or
+                     \texttt{MASS}              & \texttt{\&ATOMS} \\
+   numerical 
+   quadrature flag & \texttt{QUAD}              & \texttt{\&SNPAR} \\
+   scattering 
+   table file      & \texttt{SCATFILE}          & \texttt{\&SNPAR} \\
+   screening
+   coefficients    & \texttt{COEFFILE}          & \texttt{\&SNPAR} \\
+   screening 
+   function table  & \texttt{SCRFILE}           & \texttt{\&SNPAR} \\
+   screening
+   length model    & \texttt{SCRLEN}            & \texttt{\&SNPAR} \\
+\end{tabular}
+\end{center}
+
+The formats of the files \texttt{SCATFILE}, \texttt{COEFFILE}, and 
+\texttt{SCRFILE} are described in Section~\ref{s:input}. 
+

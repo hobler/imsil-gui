@@ -1,0 +1,55 @@
+\bigskip
+%
+\begin{center}
+\begin{tabular}{|l|p{0.6\textwidth}|l|}
+\hline
+Name       & File content                                 & flag \\
+\hline
+\tt HIS3   & 3-D histogram of stopped atoms               & \tt LHIS3 \\
+\tt HISEE3 & 3-D histogram of deposited electronic energy & \tt LHISEE3 \\
+\tt HISNE3 & 3-D histogram of deposited nuclear energy    & \tt LHISNE3 \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+
+The 3-D histogram files are written by
+%
+\begin{verbatim}
+      CHARACTER*80 TEXT
+      WRITE (22) TEXT
+      WRITE (22) NSPEC,NBOXX,NBOXY,NBOXZ
+      WRITE (22) (X(IBOXX),IBOXX=1,NBOXX)
+      WRITE (22) (Y(IBOXY),IBOXY=1,NBOXY)
+      WRITE (22) (Z(IBOXZ),IBOXZ=1,NBOXZ)
+      DO, I=1,NSPEC
+         WRITE (22) (((HIST(I,IBOXX,IBOXY,IBOXZ),  &
+                       IBOXX=1,NBOXX),IBOXY=1,NBOXY),IBOXZ=1,NBOXZ)
+      ENDDO
+\end{verbatim}
+%
+\texttt{TEXT} is a character string containing information about the stored
+histogram. \texttt{NBOXX}, \texttt{NBOXY}, and \texttt{NBOXZ} denote the number
+of histogram boxes in $x$, $y$, and $z$ direction, respectively. Regarding
+adaptation of the histogram during the simulation, the same applies as for the
+1-D and 2-D histograms. 
+
+\texttt{X(IBOXX)}, \texttt{Y(IBOXY)}, and \texttt{Z(IBOXZ)} denote the $x$, $y$
+and $z$ coordinate of the center of the histogram box (\texttt{IBOXX},
+\texttt{IBOXY}, \texttt{IBOXZ}). \texttt{HIST(I,IBOXX,IBOXY,IBOXZ)} is the
+concentration of the histogram for species \texttt{I} in the box
+(\texttt{IBOXX},\texttt{IBOXY},\texttt{IBOXZ}).
+
+The units of \texttt{X}, \texttt{Y} and \texttt{Z} are [\AA], while the units of   
+\texttt{HIST} are [cm$^{-3}$] in the \texttt{HIS3} file and [eV/\AA$^3$] in the
+\texttt{HISEE3} and \texttt{HISNE3} files, if the dose is specified as an ion
+count (\texttt{DOSEUNITS='1'}) or can be converted to an ion count. Otherwise, 
+for instance, when the extent of the implant area in both $x$ and $y$ direction 
+equals zero and an area dose is specified, the units are [cm$^{-3}$\AA$^{-2}$]
+in the \texttt{HIS3} file and [eV/\AA$^5$] in the \texttt{HISEE3} and 
+\texttt{HISNE3} files, so when integrated over x[\AA] and y[\AA] one obtains
+[cm$^{-3}$] and [eV/\AA$^3$], respectively. When the default
+$\texttt{DOSE} = 1$ is used, the point response may be interpreted as the yield
+times the probability density function (units [10$^{-24}$\AA$^{-3}$] and
+[eV/\AA$^3$], respectively).

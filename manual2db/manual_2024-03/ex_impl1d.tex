@@ -1,0 +1,108 @@
+The following example shows the \texttt{INP} file for the simulation of an 
+arsenic implantation into (100) silicon through a 10~\AA\ native oxide. 
+All recoils are followed.
+
+\begin{verbatim}
+IMSIL test example
+Point defects after 10 keV As implantation
+ &setup    nr=2 natom=3 nion=10000 /
+ &ions     name='As' energy=10 dose=1e13 tilt=7 rotate=15 diverg=0.3 /
+ &material region=1 name='SiO2' xtal='no' /
+ &material region=2 name='Si' xtal='yes' /
+ &damage   ldam=t lrcoil=t /
+ &geometry posif=-10,0,100000 /
+ &output   lmom=t lhis=t /
+\end{verbatim}
+
+As mentioned in Chapter \ref{k:input}, the first two lines appear outside any
+input record and therefore have no further meaning. They serve as a comment. 
+The third line
+%
+\begin{verbatim}
+ &setup    nr=2 natom=3 nion=10000 /
+\end{verbatim}
+%
+specifies that there are 2 regions and a total of 3 atom species (As ion plus 
+Si and O atoms in the target, see below). Since \texttt{ndim} is not specified,
+its default value \texttt{ndim=1} is taken, and a 1-D geometry is assumed (see
+also the \texttt{\&GEOMETRY} record). 
+10000 projectiles are requested to be simulated. 
+The next line
+%
+\begin{verbatim}
+ &ions     name='As' energy=10 dose=1e13 tilt=7 rotate=15 diverg=0.3 /
+\end{verbatim}
+%
+defines the properties of the ions: 
+The ion species is As (notice the quotes for character input), the energy
+10~keV, the dose $10^{13}~$cm$^{-2}$, the tilt and rotation angles 7$^\circ$
+and $15^\circ$, respectively, and the beam divergence $0.3^\circ$. 
+Since the divergence model is not specified, its default is used, i.e.,
+isotropic within a maximum angle of \texttt{diverg}. 
+The next records
+%
+\begin{verbatim}
+ &material region=1 name='SiO2' xtal='no' /
+ &material region=2 name='Si' xtal='yes' /
+\end{verbatim}
+%
+specify the materials of the target regions, amorphous SiO$_2$ (region
+1) and crystalline Si (region 2). Since the input file contains no
+\texttt{\&CRYSTAL} record, the default crystal structure (diamond) and
+orientation (100) are assumed.
+
+The next record,
+%
+\begin{verbatim}
+ &damage ldam=t lrcoil=t /
+\end{verbatim}
+%
+specifies that damage in the crystalline region shall be taken into account
+dynamically for the simulation of subsequent trajectories, that all recoils
+shall be followed, and that histograms for interstitials and vacancies shall
+be recorded.
+
+Since there are no \texttt{\&SNPAR} and \texttt{\&SEPAR} records, the default
+parameters for the nuclear and electronic stopping are used. The next input
+record 
+%
+\begin{verbatim}
+ &geometry posif=-10,0,100000 /
+\end{verbatim}
+%
+specifies the positions of the interfaces between the target layers
+(a 1-D geometry is already specified by \texttt{ndim} of the \texttt{\&SETUP}
+record). The first layer (SiO$_2$ as specified in the \texttt{\&MATERIAL}
+record) extends from $z=-10$~\AA\ to $z=0$ and the second (Si) from $z=0$ to
+$z=100000$~\AA\ ($=10~\mu$m). Finally,
+%
+\begin{verbatim}
+ &output lmom=t lhis=t /
+\end{verbatim}
+%
+specifies the amount of output: Dopant and damage moments into the {\tt OUT}
+file and 1-D histograms of the dopants and the damage into the \texttt{HIS}
+file.
+
+The \texttt{ldam} flag is set in the \texttt{damage} record (it would also
+be set by default even if it were not specified in the input file). 
+Therefore, by default, damage is dynamically considered during the
+simulation for calculating damage increments and for the selection of collision
+partners in the crystalline region (\texttt{ldamdyn=t}).
+If the program is run with a single thread, the damage histograms are
+continuously updated during the simulation (\texttt{nionhis=0}). 
+This means, as an interstitial or vacancy is generated, the associated damage is
+calculated and the damage distribution is updated, so it can be used immediately
+from the next collision on. 
+If the program is run with multiple threads (\texttt{nthread} threads), damage
+distributions are collected in individual histograms per thread, and merged
+with the overall damage histogram every \texttt{nionhis} collision cascades
+(\texttt{nionhis}/\texttt{nthread} collision cascades per thread). 
+By default, this update occurs after every collision cascade per thread.
+When 1-D histograms of moderate size are used, as in this example, this is a
+good choice, since the computational effort for joining the histograms is low.
+
+If the \texttt{imsil.py} script delivered with the program is used, the input
+file could be named \texttt{as10.inp}. IMSIL would then produce the files
+\texttt{as10.out} and \texttt{as10.his}.
+

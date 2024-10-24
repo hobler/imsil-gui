@@ -1,0 +1,208 @@
+\bigskip
+%
+\begin{center}
+\begin{tabular}{|l|p{0.5\textwidth}|l|l|}
+\hline
+Name      & File content                             & flag          & record \\
+\hline
+\tt BCK   & Backup = data necessary to continue the simulation 
+                                                     & \tt NIONBK    & \tt \&OUTPUT \\
+\ifprivate
+\tt DEF   & Deterministic defects output             & \tt LDEF      & \tt \&OUTPUT \\
+\fi
+\tt PDV   & Vacancy positions after recombination    & \tt LCAP      & \tt \&DAMAGE \\
+          &                                          & \tt LTRA,ITRA & \tt \&OUTPUT \\
+\tt PDI   & Interstitial positions after recombination & \tt LCAP    & \tt \&DAMAGE \\
+          &                                          & \tt LTRA,ITRA & \tt \&OUTPUT \\
+\tt PMAX  & Maximum impact parameters                & \tt LPMAXTAB  & \tt \&SNPAR \\
+\tt POK   & Interstitial positions before melting    & \tt LPOCK     & \tt \&DAMAGE \\
+          &                                          & \tt LTRA,ITRA & \tt \&OUTPUT \\
+\tt SE    & Table of stopping powers                 & \tt LTAB      & \tt \&SEPAR \\
+\tt TRA   & Information about the trajectories       & \tt LTRA,ITRA & \tt \&OUTPUT \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+
+The backup file \texttt{BCK} contains all information about statistic quantities
+at the end of the simulation. It may be loaded by another simulation specifying
+\texttt{USEBK=T} on the \texttt{\&SETUP} record. In new simulations, the backup
+file should only be used for debugging purposes, see the remark towards the end
+of Section~\ref{s:input}.
+
+\ifprivate
+The deterministic defect file \texttt{DEF} is written by the following FORTRAN
+statements:
+%
+\begin{verbatim}
+      WRITE (43,*) ICOLMIN(1:3),ICOLMAX(1:3)
+      WRITE (43,*) NLSDEF
+      DO, ILS=1,NLSDEF
+         WRITE (43,*) IPOS(1:3,ILS)
+         WRITE (43,*) TYPE(ILS)
+         IF (TYPE(ILS)==-1) THEN
+            WRITE (43,*) NATOM(ILS)
+            DO, IA=1,NATOM(ILS)
+               WRITE (43,*) Z(IA,ILS),DPOS(1:3,IA,ILS)
+            END DO
+         ELSE
+            WRITE (43,*) IOR(ILS),Z(1:NATOM(ILS),ILS)
+         END IF
+      END DO
+\end{verbatim}
+%
+It is only intended to be written if the default silicon lattice is used.
+\texttt{ICOLMIN}, \texttt{ICOLMAX} denote the lower/upper $x$, $y$, and $z$
+coordinates of the simulation box containing the defects. Coordinates
+are given in quarter lattice constants. \texttt{NLSDEF} denotes the number of
+lattice site defects. \texttt{IPOS(:,ILS)} are the lattice site coordinates of
+the lattice site defect \texttt{ILS} given in the crystal coordinate system,
+i.e., the coordinate system connected with the [100], [010], and [001] axis of
+the crystal. \texttt{TYPE(ILS)} denotes the defect type (see table below),
+\texttt{NATOM(ILS)} the number of atoms at the lattice site, \texttt{Z(IA,ILS)}
+is the atomic number and \texttt{DPOS(:,IA,ILS)} the displacement vector from
+the lattice site of the \texttt{IA}-th atom at the \texttt{ILS}-th lattice site.
+\texttt{IOR(ILS)} is an integer number between 1 and 24 indexing the symmetry
+equivalent orientations of the lattice.
+
+Possible defect types are:
+%
+\bigskip
+%
+\begin{center}
+\begin{tabular}{|c|p{0.5\textwidth}|}
+\hline
+Defect type & Defect name                               \\
+\hline
+\tt -1      & Arbitrary configuration                   \\
+\tt 1       & Vacancy                                   \\
+\tt 2       & Split-$\langle 110 \rangle$ interstitial  \\
+\tt 3       & Di-interstitial                           \\
+\tt 4       & Tri-interstitial                          \\
+\tt 5       & Hexagonal interstitial                    \\
+\tt 6       & Tetrahedral interstitial                  \\
+\tt 7       & Four interstitial 1. lattice site         \\
+\tt 8       & Four interstitial 2. lattice site         \\
+\tt 9       & Four interstitial 3. lattice site         \\
+\tt 10      & Four interstitial 4. lattice site         \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+\fi
+
+The point defect files \texttt{PDV} and \texttt{PDI} contain the positions of
+vacancies and interstitials, respectively, after recombination when the capture
+radius model is activated (\texttt{LCAP=T}). In addition, the atom index as
+defined in Section~\ref{s:atom} is given for each point defect:
+%
+\begin{verbatim}
+      DO, I=1,N
+         WRITE (34,*) X(I),Y(I),Z(I),ATOM(I)
+      ENDDO
+\end{verbatim}
+%
+where \texttt{N} denotes the number of vacancies and interstitials,
+respectively, in each cascade. These files are only written if \texttt{LCAP=T}
+and \texttt{ITRA=1} and \texttt{ITRA=3} are set, resepectively.
+
+The impact parameter file \texttt{PMAX} is written by the following FORTRAN statements:
+%
+\begin{verbatim}
+      WRITE (122,*) 4,1000
+      WRITE (122,*) 0,0,0,0
+      DO, IE=1,1000
+         WRITE (122,*) E(IE),POUT(IE),PNEAR(IE),PIN(IE)
+      ENDDO
+\end{verbatim}
+%
+\texttt{E} denotes the energy [eV], which is logarithmically distributed between
+the implant energy \texttt{ENERGY} and the cut-off energy for ion trajectories
+\texttt{EF}. \texttt{POUT} is the maximum impact parameter used outside the
+target. \texttt{PNEAR} is the maximum impact parameter used inside the target at
+distances from the surface smaller than \texttt{DNEAR} (see
+Section~\ref{s:sput}). \texttt{PIN} is the maximum impact parameter used inside
+the target at distances from the surface larger than \texttt{DNEAR}. The column
+for \texttt{POUT} is not written unless \texttt{PSIFFP2} is set (see Section
+\ref{s:snpar}). The column for \texttt{PNEAR} is not written if
+\texttt{LSPUT=F}. If not all columns are written, the first two lines of the
+file are modified to reflect the reduced number of columns. Impact pararameter
+tables are written one after the other to the \texttt{PMAX} file for all regions
+(in case of a non-dynamic simulation) and all atom species.
+
+The amorphous pocket file \texttt{POK} contains the positions of the
+interstitials and the melting radius before amorphous pocket formation:
+%
+\begin{verbatim}
+      DO, I=1,N
+         WRITE (34,*) X(I),Y(I),Z(I),RMELT(I)
+      ENDDO
+\end{verbatim}
+%
+where \texttt{N} denotes the number of interstitials in each cascade. This
+file is only written  if the amorphous pocket model is activated
+(\texttt{LPOCK=T}) and if \texttt{ITRA=3} is set.
+
+The electronic stopping power file \texttt{SE} lists for each region, ion atom
+species, and target atom species the electronic energy loss as a function of
+energy. Each block is written by the following FORTRAN statements:
+%
+\begin{verbatim}
+      WRITE (122,*) 3,101
+      WRITE (122,*) 0,0,0
+      DO, IE=0,100
+         WRITE (122,*) E(IE),DEDXNL(IE),DEELOC(IE)
+      ENDDO
+\end{verbatim}
+%
+\texttt{E} denotes the energy [eV], which is logarithmically distributed between
+the implant energy (\texttt{ENERGY} parameter of the \texttt{\&IONS} record) and
+the cut-off energy for ion trajectories (\texttt{EF} parameter of the
+\texttt{SNPAR} record). \texttt{DEDXNL} is the nonlocal energy loss per path
+length [eV/\AA], and \texttt{DEELOC} the local energy loss [eV] at the impact
+parameter specified by \texttt{PTAB} on the \texttt{\&SEPAR} record.
+
+The trajectory file \texttt{TRA} contains information about the trajectories
+depending on the variables \texttt{LTRA} and \texttt{ITRA} of the
+\texttt{\&OUTPUT} record. Each line is written by the following FORTRAN
+statement:
+%
+\begin{verbatim}
+   WRITE (23,*) X,Y,Z,DIRX,DIRY,DIRZ,E,I1,IG,IFLAG
+\end{verbatim}
+%
+\texttt{X}, \texttt{Y}, and \texttt{Z} denote the coordinates in units of [\AA],
+\texttt{DIRX}, \texttt{DIRY}, \texttt{DIRZ} the direction vector
+(\texttt{DIRX**2+DIRY**2+DIRZ**2=1}), and \texttt{E} the energy of the
+projectile in units of [eV]. \texttt{I1} is the atom index of the projectile,
+and \texttt{IG} the index of the recoil generation (\texttt{IG=1} for the ion,
+\texttt{IG=2} for the primary recoils, \texttt{IG=3} for the secondary recoils
+...).  In case of a virtual recoil (see Section \ref{s:sput}), \texttt{I1} is
+replaced by \texttt{-I1}. \texttt{IFLAG} indicates the position of the point in
+the trajectory:
+%
+\bigskip
+%
+\begin{center}
+\begin{tabular}{|c|p{0.65\textwidth}|}
+\hline
+\texttt{IFLAG} & Position in the trajectory                               \\
+\hline
+0              & no trajectory (recoil with subthreshold energy or when \texttt{LRCOIL=F}) \\
+-1, 1          & at the start of a trajectory (where a vacancy is generated) \\
+2              & along a trajectory \\
+3              & at the end of a trajectory inside the target (where an interstitial is 
+                 generated) \\
+4              & at the end of the trajectory of a backscattered ion or recoil \\
+5              & at the end of the trajectory of a transmitted ion or recoil \\
+\hline
+\end{tabular}
+\end{center}
+
+\texttt{IFLAG=-1} writes the position before lattice vibrations and shifts due
+to the time integral. \texttt{IFLAG=1} writes the position after consideration
+of these two shifts. Note that there is a function in the
+\texttt{read\_output.py} script for reading trajectory files (see
+Section~\ref{s:scripts_read}).

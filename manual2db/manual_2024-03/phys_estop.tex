@@ -1,0 +1,217 @@
+The electronic stopping power $S_\mathrm{e}$ of a \textbf{random} 
+(amorphous) material for a projectile is defined by
+%
+\begin{equation}
+    \left( \frac{\mathrm{d}E}{\mathrm{d}x} \right)_\mathrm{e}
+        = N \cdot S_\mathrm{e}
+\end{equation}
+%
+where $(\mathrm{d}E/\mathrm{d}x)_\mathrm{e}$ denotes the energy loss per
+path length due to electronic stopping, and $N$ the atomic density (number 
+of atoms per volume). 
+For compounds, Bragg's rule \cite{w._h._bragg_xxxix._1905} is used, which says
+that the stopping power $S_\mathrm{e}$ of the compound is obtained by a linear 
+superposition of the stopping powers $S_{\mathrm{e}i}$ of the elemental
+materials of atom species $i$
+%
+\begin{equation}
+    \left( \frac{\mathrm{d}E}{\mathrm{d}x} \right)_\mathrm{e}
+        = \sum_i N_i \cdot S_{\mathrm{e}i}
+\end{equation}
+%
+$N_i$ denotes the atomic density of species $i$ in the compound. 
+
+IMSIL provides several choices for $S_\mathrm{e}$ as a function of projectile 
+energy $E$.%
+\footnote{In the following, we drop the index $i$, but we mean the electronic 
+stopping power of an elemental target.}
+\texttt{SEMODEL='Lindhard'} combines a generalization of Lindhard's
+stopping power 
+%
+\begin{equation}
+   S_\mathrm{eL} = k_\mathrm{corr} \cdot k_\mathrm{L} \cdot E^p
+   \label{eq3}
+\end{equation}
+%
+and the slightly modified Bethe-Bloch stopping power \cite{I8001}
+%
+\begin{equation}
+   S_\mathrm{eB} = \frac{B}{E_\mathrm{b}} \cdot
+      \ln \left( {E_\mathrm{b} + c_0 + \frac{c_1}{E_\mathrm{b}}}\right) .
+   \label{eq3a}
+\end{equation}
+%
+With $p = 0.5$, Eq.~(\ref{eq3}) is Lindhard's model \cite{I6101}, where 
+electronic stopping is proportional to the projectile's velocity. 
+$k_\mathrm{L}$ is a factor given in Ref.~\cite{I6101}, which depends on the 
+projectile and target atom species. $k_\mathrm{corr}$ and $p$ can be used to
+adjust the Lindhard model to experimental data. In Eq.~(\ref{eq3a}), $B$, 
+$c_0$, and $c_1$ are ion- and target-dependent prefactor, and 
+$E_\mathrm{b}$ is proportional to the projectile energy $E$ (for details see 
+\cite{I8001}). The two stopping powers are combined by 
+\cite{I8001,simionescu_model_1995}
+%
+\begin{equation}
+   S_\mathrm{e} = \left( {S_\mathrm{eL}}^{-c} + 
+                         {S_\mathrm{eB}}^{-c} \right) ^ {-1/c}
+\end{equation}
+%
+so that $S_\mathrm{e} \approx S_\mathrm{eL}$ at low energies and
+$S_\mathrm{e} \approx S_\mathrm{eB}$ at high energies. $c$ can be used to
+adjust the stopping power around the stopping power maximum, i.e., at
+energies where $S_\mathrm{eL} \approx S_\mathrm{eB}$.
+
+The combined Lindhard and Bethe-Bloch model has been fitted for many 
+projectiles in Si \cite{I0104} and a few other cases. The parameters are
+provided as default values. Where such default values exist, the
+combined Lindhard and Bethe-Bloch model is recommended.
+
+Where no fitted parameters of the combined Lindhard and Bethe-Bloch model
+exist, SRIM-2013 \cite{SRIM} stopping powers (\texttt{SEMODEL='SRIM'}) 
+are recommended. This model evaluates the electronic stopping power by 
+interpolation in tables for all combinations of projectile and target 
+atoms species ($Z = 1 \ldots 92$, $E \le 2$~GeV).\footnote{These tables 
+have been obtained by H.\ Hofsäss, University of Göttingen, by running 
+SRIM-2013 in a double-loop. We thank H.\ Hofsäss for providing the tables.}
+Alternatively, the 1985 version of the TRIM stopping powers \cite{I8512} 
+can be used (\texttt{SEMODEL='ZBL'}). This option is kept for compatibility
+and is generally not recommended. Another unrecommended option for Si targets
+is the model by Konac, Klatt, and Kalbitzer \cite{I9848} 
+(\texttt{SEMODEL='KKK'}).
+
+A last option for an electronic stopping model is reading in a table of 
+energy losses $(\mathrm{d}E/\mathrm{d}x)_\mathrm{e}$ versus energy $E$ 
+(\texttt{SEMODEL='table'} and \texttt{SEFILE}). Such a table can be generated,
+e.g., using SRIM \cite{SRIM} and commenting the header lines. For the format 
+of the \texttt{SEFILE} expected by IMSIL see Section \ref{s:input}. This option 
+is recommended for obtaining accurate stopping powers of compounds conaining 
+light elements \cite{ziegler_srim_2010}.
+
+The electonic stopping of channeled ions is reduced as compared to ions 
+moving in a random direction. This may be taken into account by an impact 
+parameter dependent model. The model implemented in IMSIL is composed of a part
+which is proportional to the path length $L$
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{nl} = 
+      N \cdot S_\mathrm{e} \cdot L \cdot
+      \left[ x^\mathrm{nl} + x^\mathrm{loc} \cdot 
+      \left( 1 + \frac{p_\mathrm{max}}{a} \right)
+             \cdot \exp \left\{ - \frac{p_\mathrm{max}}{a} \right\} \right]
+   \label{eq1}
+\end{equation}
+%
+and a part which depends on the impact parameter $p$ 
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{loc} = 
+      x^\mathrm{loc} \cdot \frac{S_\mathrm{e}}{2 \pi a^2} \cdot
+      \exp \left\{ - \frac{p}{a} \right\}
+   \label{eq2}
+\end{equation}
+%
+where
+%
+\begin{equation}
+    x^\mathrm{nl} + x^\mathrm{loc} = 1 .
+\end{equation}
+%
+$N$ denotes the atomic density of the target, and $0 \le x^\mathrm{nl} \le 1$. 
+For $x^\mathrm{nl} = 0$ and a certain choice of $a$, this is is the model of 
+Oen and Robinson \cite{I7607}. 
+Alternatively, the impact parameter dependence can be chosen by a generalized 
+Firsov model \cite{I5901}, in which case the model reads
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{nl} = 
+      N \cdot S_\mathrm{e} \cdot L \cdot
+      \left[ x^\mathrm{nl} + x^\mathrm{loc} \cdot \frac{
+      1 + (d-1) \frac{p_\mathrm{max}}{a}}{
+      \left( 1 + \frac{p_\mathrm{max}}{a} \right) ^ {d-1}} \right]
+   \label{eq1a}
+\end{equation}
+%
+and
+%
+\begin{equation}
+   \Delta E_\mathrm{e}^\mathrm{loc} = 
+      x^\mathrm{loc} \cdot \frac{S_\mathrm{e}}{2 \pi a^2} \cdot
+      (d-1) (d-2) \left( 1 + \frac{p}{a} \right) ^ {-d}
+   \label{eq2a}
+\end{equation}
+%
+In the original Firsov model $d=5$. We do not use Firsov's prefactor and
+screening length. If desired, Firsov's values can be set by appropriate values
+of $k/k_\mathrm{L}$ and $f$ (see below).
+
+In Eqs.~(\ref{eq2}) and~(\ref{eq2a}), the distance of closest approach $r_0$ 
+in the collision (apsis of the collision) may be used instead of the impact
+parameter $p$. The most significant effect of this choice is a reduction in
+electronic stopping at low energies.
+
+$a$ is the screening length of the impact parameter dependent part, which 
+is expressed by the value $a_\mathrm{OR}=a_\mathrm{ZBL}/0.3$ proposed by Oen and
+Robinson \cite{I7607} with $a_\mathrm{ZBL}$ the screening length of the ZBL
+interatomic potential \cite{I8512}.
+%
+\begin{equation}
+   a = f \cdot a_\mathrm{OR} ~( = f \cdot a_{12} / 0.3 )
+   \label{eq5}
+\end{equation}
+%
+
+$x^\mathrm{nl}$ and $x^\mathrm{loc}$ denote the nonlocal ($L$ dependent) and the
+local ($p$ dependent) fraction of $S_\mathrm{e}$, respectively.
+It has been found that the nonlocal fraction $x^\mathrm{nl}$ is energy
+dependent. The energy dependence can be specified by specifying $x^\mathrm{nl}$
+at different energies $E^\mathrm{nl}$. The actual values are interpolated
+according to
+%
+\begin{equation}
+   x^\mathrm{nl} \sim E^q
+   \label{eq6a}
+\end{equation}
+%
+(models \#1, \'2, and \#5), or
+%
+\begin{equation}
+   x^\mathrm{nl} \sim S_\mathrm{e}(E)^q
+   \label{eq6}
+\end{equation}
+%
+(all other models) where $q$ is determined by the program from
+$x^\mathrm{nl}$ values at two energies. Note that Eq.~(\ref{eq6}) and
+Eq.~(\ref{eq6a}) are equivalent when $S_\mathrm{e} \sim E^p$ such as in the 
+Lindhard like model Eq.~(\ref{eq3}). 
+Default values of the parameters are provided by the program for all ions in
+silicon \cite{hobler_monte_1995, hobler_towards_2000, hobler_boron_1995,
+simionescu_modeling_1995, hobler_electronic_1993, hobler_random_2006}.
+The value of $k$ is specified by a correction factor $k/k_\mathrm{L}$ to the
+Lindhard stopping power. 
+
+Electronic energy loss straggling may be considered according to Konac, Klatt,
+and Kalbitzer \cite{hobler_random_2006, I9848}.
+
+\begin{center}
+\begin{tabular}{lll}
+   parameter \quad & IMSIL name & to be specified in record \\
+   \hline
+   target density $N$                      & {\tt DENSITY}  & {\tt \&MATERIAL} \\
+   stopping power model                    & {\tt SEMODEL}  & {\tt \&SEPAR} \\
+   Lindhard correction factor $k/k_\mathrm{L}$ & {\tt CORLIN} & {\tt \&SEPAR} \\
+   power $p$ in Lindhard stopping          & {\tt POWLIN}   & {\tt \&SEPAR} \\
+   interpolation power $c$                 & {\tt POWINT}   & {\tt \&SEPAR} \\
+   Bethe stopping constant $c_0$           & {\tt C0BETHE}  & {\tt \&SEPAR} \\
+   Bethe stopping constant $c_1$           & {\tt C1BETHE}  & {\tt \&SEPAR} \\
+   random electronic stopping file         & {\tt SEFILE}   & {\tt \&SEPAR} \\
+   nonlocal fraction model                 & {\tt XNLMODEL} & {\tt \&SEPAR} \\
+   nonlocal fraction $x^\mathrm{nl}$       & {\tt XNL}      & {\tt \&SEPAR} \\
+   energy for $x^\mathrm{nl}$, $E^\mathrm{nl}$ & {\tt ENL}  & {\tt \&SEPAR} \\
+   screening length factor $f$             & {\tt FACSCR}   & {\tt \&SEPAR} \\
+   Firsov $p$ dependence flag              & {\tt FIRSOV}   & {\tt \&SEPAR} \\
+   Firsov $p$ dependence power $d$         & {\tt POWFIRS}  & {\tt \&SEPAR} \\
+   apsis flag                              & {\tt LAPSIS}   & {\tt \&SEPAR} \\
+   electronic straggling flag              & {\tt STRAGGLE} & {\tt \&SEPAR} \\
+   electronic straggling kink energy       & {\tt ESTRAG}   & {\tt \&SEPAR} \\
+\end{tabular}
+\end{center}

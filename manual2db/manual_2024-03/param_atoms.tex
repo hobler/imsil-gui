@@ -1,0 +1,199 @@
+This record is used to define the properties of the atoms. Normally, it is not
+necessary to include this record, since the atom properties are defined
+internally, and the atom species are defined on the \texttt{\&IONS} and
+\texttt{\&MATERIAL} records or, if the target is initialized from a
+\texttt{CELL} file, in the \texttt{CELL} file. However, this record can be used
+to change the default values of the atom properties.
+
+All parameters of this record are index variable arrays with the index variable
+\texttt{ATOM}. \texttt{ATOM} is the atom index. The mapping between atom names
+and atom indices is defined by the sequence of occurence of the atom names in
+the ion and material names: First the ion and then the materials from region 1
+to how many regions are defined. Within the ion and material names from left to
+right. Using the same example as in Section~\ref{s:his1d},
+%
+\begin{verbatim}
+ &IONS NAME='B', ... /
+ &MATERIAL REGION=2 NAME='SI3N4' ... /
+ &MATERIAL REGION=1 NAME='SIO2' ... /
+ &MATERIAL REGION=3 NAME='SI' ... /
+\end{verbatim}
+%
+atom indices and names relate as follows:
+
+\begin{tabular}{cc}
+  \texttt{ATOM} & \texttt{NAME} \\
+  \hline
+  1 & \texttt{B} \\
+  2 & \texttt{SI} \\
+  3 & \texttt{O} \\
+  4 & \texttt{N}
+\end{tabular}
+
+Note that material names are ordered according to the \texttt{REGION} index
+rather than their appearance in the input file.
+
+Occasionally, the same atom species may occur in the ion and one or more
+materials. As an example, take
+%
+\begin{verbatim}
+ &IONS NAME='CN', ... /
+ &MATERIAL REGION=1 NAME='C5H8O2' ... /
+ &MATERIAL REGION=2 NAME='C' ... /
+\end{verbatim}
+%
+For a static simulation (\texttt{LDYN=F}), the C atom in the ion is treated as
+separate atom species from the C atoms in the materials:
+
+\begin{tabular}{cc}
+  \texttt{ATOM} & \texttt{NAME} \\
+  \hline
+  1 & \texttt{C} \\
+  2 & \texttt{N} \\
+  3 & \texttt{C} \\
+  4 & \texttt{H} \\
+  5 & \texttt{O}
+\end{tabular}
+
+The C atoms in the ion may be assigned different properties than the C atoms in
+the two materials. On the other hand, in a dynamic simulation (\texttt{LDYN=T}),
+the C atoms in the ion are not distinguished from the C atoms in the materials:
+
+\begin{tabular}{cc}
+  \texttt{ATOM} & \texttt{NAME} \\
+  \hline
+  1 & \texttt{C} \\
+  2 & \texttt{N} \\
+  3 & \texttt{H} \\
+  4 & \texttt{O}
+\end{tabular}
+
+When a \texttt{CELL} file is read rather than regions being defined, the atom
+incides are defined by the order as the atomic numbers appear in line 2 of the
+\texttt{CELL} file (cf.\ Section~\ref{s:his1d}). The ion atoms as specified in
+the \texttt{\&IONS} record must appear in the \texttt{CELL} file first and in
+the same order as in the \texttt{\&NAME} parameter. That means, in the current
+version of IMSIL, the ion atom species in a dynamic simulation must already be
+in the target when the target is read from a \texttt{CELL} file. If necessary,
+the \texttt{CELL} file must be prepared by an external tool (script) to include
+the new ion species atom(s).
+
+$1 \le \texttt{ATOM} \le \texttt{NATOM}$ is required, where \texttt{NATOM}
+denotes the number of atom species in the simulation.
+
+\begin{keydescription}{\texttt{DENSITY} --- Atom density}
+%
+  This parameter specifies the number of target atoms per cm$^3$ in a pure material.
+  
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of real \\
+    Default: \> depending on \texttt{NAME} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{EFAKE} --- Energies for fake thermal vibrations}
+%
+  This parameter specifies the ion energies where the pseudo-temperatures 
+  \texttt{TEMPFAKE} are defined. See \texttt{TEMPFAKE} for further information.
+  The units of \texttt{EFAKE} are keV.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of simple array (2) of real \\
+    Default: \> ~ -- \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ESURF} --- Surface binding energy}
+%
+  This parameter specifies the surface binding energy of the pure material in
+  eV. Default values are at least 0.1~eV, since lower surface binding energies 
+  lead to excessive simulation times. The user may explicitly set any 
+  positive surface binding energies, though, in the input file.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of real \\
+    Default: \> from internally tabluated values \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{MASS} --- Atom mass}
+%
+  This parameter specifies the mass of the atom in units of the
+  atomic mass unit.  It overwrites the default values determined by
+  the atom names. NOTE: Due to a limitation of the code, ion atom
+  masses specified on \texttt{\&ATOMS} are currently ignored. Use 
+  \texttt{MASS} on the \texttt{\&IONS} record instead to define ion
+  atom masses.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of real \\
+    Default: \> determined from \texttt{NAME} \\
+    Range: \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NAME} --- Name of atom}
+%
+  This parameter specifies the chemical formula of the atom.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of character(2) \\
+    Default: \> ~ -- ~~~ (obligatory) \\
+    Range:   \> any chemical name of an atom
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{TDEBYE} --- Debye temperature}
+%
+  This parameter specifies the Debye temperature of the pure material. It is used
+  for calculation of vibrational amplitude using Debye function.  
+  \texttt{TDEBYE=0} means a thermal vibration amplitude of 0.083 will be used. 
+  Note that some internally tabulated values (e.g. for noble gases) are zero.
+  The units of \texttt{TDEBYE} are K.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of real \\
+    Default: \> internally tabulated values \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{TEMPFAKE} --- Temperatures for fake thermal vibrations}
+%
+  This parameter specifies the pseudo-temperatures to be used for the 
+  calculation of the amplitudes of the fake thermal vibrations. Each value 
+  corresponds to an ion energy as specified by the parameter \texttt{EFAKE}.
+  If for an atom index \texttt{ATOM} no value of \texttt{TEMPFAKE} is 
+  specified, fake thermal vibrations are disabled. If for an atom index 
+  \texttt{ATOM} only one value of \texttt{TEMPFAKE} is specified, the 
+  amplitude of the fake thermal vibrations is constant. If two values are
+  specified, the amplitude of the fake thermal vibrations is assumed to
+  depend on the ion energy $E$ according to a power law such that for 
+  $E=$\texttt{EFAKE(1)} the amplitude corresponds to a temperature 
+  \texttt{TEMPFAKE(1)} and for $E=$\texttt{EFAKE(2)} the amplitude 
+  corresponds to a temperature \texttt{TEMPFAKE(2)} according to the
+  Debye model. Thus, if two values of \texttt{TEMPFAKE} are given,
+  two values of \texttt{EFAKE} must be specified as well. Note that the
+  larger of the physical and fake thermal vibration amplitude is used and
+  fake thermal vibrations are ignored in amorphous materials. The units of 
+  \texttt{TEMPFAKE} are K.
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of simple array (2) of real \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{EFAKE} is defined) \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{VIB} --- Thermal vibration amplitude}
+%
+  This parameter specifies the mean square amplitude in \AA\ of
+  vibrating lattice atoms in a given direction. The displacements of
+  the atoms from their lattice sites is Gaussian distributed.
+%
+  \begin{keytab}
+    Type:    \> index variable array (\texttt{ATOM}) of real \\
+    Default: \> Calculated from \texttt{TDEBYE} \\
+    Range:   \> $\ge 0$
+  \end{keytab}
+\end{keydescription}

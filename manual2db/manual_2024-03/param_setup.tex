@@ -1,0 +1,617 @@
+This record is used to specify some basic parameters of the
+simulation.  It has to appear in each input file.  It has no index
+variables.
+
+\begin{keydescription}{\texttt{ATOM1} --- Atom index of histogram file}
+%
+  This variable specifies the index of the atom in the histogram file 
+  \texttt{HISFILE} whose concentration will be used to initialize the
+  concentration of atoms with index \texttt{ATOM2}. Relevant only if 
+  \texttt{USEHIS=T}.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{USEHIS=T} ) \\
+    Range:   \>  $\texttt{ATOM1} > 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{ATOM2} --- Atom index of atom species}
+%
+  This variable specifies atom index of atom species which concentration will
+  initilized with \texttt{ATOM1} concentration from histogram file
+  \texttt{HISFILE}. 
+  \ifprivate
+  If \texttt{USEBK=T} and \texttt{LDET=T} distribution of
+  \texttt{ATOM2} from from backup histogram file file \texttt{BKFILE} will be
+  used to create simulation cell. 
+  \fi
+  Relevant only if \texttt{USEHIS=T} 
+  \ifprivate
+  or \texttt{USEBK=T}
+  \fi
+  .
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{USEHIS=T} ) \\
+    Range:   \>  $1 <= \texttt{ATOM2} < \texttt{NATOM}$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{BKFILE} --- Backup file name}
+%
+  This variable specifies the name of the backup file to be used to continue 
+  a previous simulation. Relevant only if \texttt{USEBK=T}.
+%
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> \texttt{BCK} \\
+    Range:   \> Any name ($\le 80$ characters) of an IMSIL backup file 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{CELLFILE} --- Cell file name}
+%
+  This parameter specifies the name of the file containing the atom
+  densities in the 1-D target cells for dynamic simulation
+  (\texttt{LDYN=T}). The format of the file is described in
+  Chapter~\ref{k:files}). Relevant only if \texttt{USECELL=T}.
+  
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{USECELL=T}) \\
+    Range:   \> any name ($\le 80$ characters) of an IMSIL cell file
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{CELLREC} --- Record to be read from
+cell file}
+%
+  This variable specifies the index of the record to be read from the
+  \texttt{CELL} or \texttt{CELL2} file, where record means the
+  data describing one snapshot of the cells. \texttt{CELLREC=0} means the last
+  record will be read.
+
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 0 \\
+    Range:   \> $\texttt{CELLREC} \ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{DEFFILE} --- Defects file name}
+%
+  This parameter specifies the name of the file containing the defects to be
+  used. The format of the file is described in Chapter~\ref{k:files}). Relevant
+  only if \texttt{USEDEF=T}.
+  
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{USEDEF=T}) \\
+    Range:   \> any name ($\le 80$ characters) of an IMSIL defects file
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{EQUICELL} --- Equidistant cell grid flag}
+%
+  This parameter specifies whether in a 1-D dynamic simulation (\texttt{LDYN=T}) 
+  the cell contents are interpolated back to an equidistant grid.  Note that
+  this will introduce artificial diffusion.  \texttt{EQUICELL} is ignored
+  for a 2-D simulation, since 2-D simulations are always done on equidistant
+  grid. \texttt{EQUICELL=T} can be set to make a 1-D simulation
+  consistent with a 2-D simulation. Otherwise, \texttt{EQUICELL=F} is 
+  recommended.
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{HISFILE} --- Histogram file name}
+%
+  This variable specifies the name of the histogram file to be used to create
+  a damage profile for subsequent simulation. The format of the histogram file
+  (\texttt{HIS}) is described in file in Chapter~\ref{k:files}). Relevant only
+  if \texttt{USEHIS=T}.
+%
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{USEHIS=T}) \\
+    Range:   \> Any name ($\le 80$ characters) of an IMSIL histogram file 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{IARAND} --- Seed of random number generator}
+%
+  This variable specifies one of the integer numbers defining the seed of
+  the random number generator.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 15678 \\
+    Range:   \> $1 \le \texttt{IARAND} \le 70000$ for \texttt{RNG='Haas'} \\
+             \> $1 \le \texttt{IARAND} \le 131071$ otherwise
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{IBRAND} --- Seed of random number generator}
+%
+  This variable specifies one of the integer numbers defining the seed of
+  the random number generator.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 67638 \\
+    Range:   \> $1 \le \texttt{IBRAND} \le 90000$ for \texttt{RNG='Haas'} \\
+             \> $1 \le \texttt{IBRAND} \le 262143$ otherwise
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{IRAND} --- Seed of random number generator}
+%
+  This variable specifies one of the integer numbers defining the seed of
+  the random number generator. Note that changing only \texttt{IRAND}
+  may result in an identical series of random numbers after a
+  relatively small number of numbers. 
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 5421 \\
+    Range:   \> $1 \le \texttt{IRAND} \le 10000$ for \texttt{RNG='Haas'} \\
+             \> $1 \le \texttt{IRAND} \le 16383$ otherwise
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LDAMDYN} --- Dynamic damage consideration flag}
+%
+  This variable specifies whether damage accumulated during the simulation is
+  considered for recombination with new damage and/or for selecting the
+  collision partners in a crystalline region.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{LDAM} of the \texttt{\&DAMAGE} record \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LDYN} --- Dynamic simulation flag}
+%
+  This variable specifies whether the target densities shall be
+  updated in a spatially resolved, cell-based target description.  In
+  the dynamic mode the cell densities are updated during the simulation
+  and subsequently used in the selection of collision partners.  The cell 
+  densities can be output to the \texttt{CELL*} files (see 
+  Section~\ref{k:files}) using \texttt{LCELL=T} on the \texttt{\&OUTPUT}
+  record.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{LSPUT} --- Sputtering simulation flag}
+%
+  This variable specifies whether accurate sputtering simulation is to be
+  performed. If \texttt{LSPUT=T} the surface binding energy is
+  considered. In addition, ``virtual'' recoils are generated (see 
+  Section~\ref{s:sput}). Also the free flight paths in amorphous target are 
+  adjusted such that no collision with energy transfer larger than the surface 
+  binding energy is missed.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{MRAND} --- Seed of random number generator}
+%
+  This variable specifies one of the integer numbers defining the seed of
+  the random number generator.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 6103 \\
+    Range:   \> $1 \le \texttt{MRAND} \le 8000$ for \texttt{RNG='Haas'} \\
+             \> $1 \le \texttt{MRAND} \le 16383$ otherwise
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NATOM} --- Number of atom species}
+%
+  This variable specifies the number of atom species contained in the
+  ion and the target regions. E.g. for BF$_2$ implantation in a
+  two-layer structure of SiO$_2$ and Si, \texttt{NATOM=4} corresponding
+  to the atom species B, F, Si, and O.  A target atom is always
+  considered different from an ion atom, even if the same chemical
+  element is specified.  E.g., for Si implantation into bare Si
+  \texttt{NATOM=2}.  This is because by default the mass of an ion
+  atom is set to the mass of the most abundant isotope while the
+  default mass of the target atom is set to the atom mass averaged
+  over all isotopes weighted with their natural abundance.  Also, it
+  allows to ``label'' the ion atoms so they can be distinguished from
+  the target atoms.
+  
+  If the target information is read from a \texttt{CELL} or \texttt{CELL2}
+  file (\texttt{USECELL=T}), \texttt{NATOM} depends on whether a dynamic
+  simulation is performed: If \texttt{LDYN=T}, \texttt{NATOM} must equal
+  the number of atom species stored in the \texttt{CELL*} file.  If 
+  \texttt{LDYN=F}, \texttt{NATOM} must equal the number of ion atoms (e.g., 2
+  for BF$_2$) plus the number of atom species  stored in the \texttt{CELL*} 
+  file.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> ~ -- ~~~ (obligatory) \\
+    Range:   \> must equal the number of atoms in ion and target
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NDIM} --- Number of dimensions}
+%
+  This variable specifies the number of dimension of the geometry.
+  Depending on \texttt{NDIM}, the geometry is defined by the position of
+  the interface (for \texttt{NDIM=1}), or by polygons (for
+  \texttt{NDIM=2}) defined by corner points (interface points). 
+  Alternatively, for 2-D and 3-D targets (\texttt{NDIM=2} or 
+  \texttt{NDIM=3}) the geometry may be specified by signed distance
+  functions. See the \texttt{\&GEOMETRY} record
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 1 \\
+    Range:   \> 1, 2, 3
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NION} --- Number of simulated ions}
+%
+  This parameter specifies the number of ions to be simulated. The
+  simulation time will be roughly proportional to \texttt{NION} while
+  statistical errors decrease with the square root of \texttt{NION}.
+  In case of the continuation of a previous run (\texttt{USEBK=T}),
+  \texttt{NION} specifies the total number of ions including those
+  read from the backup file. If \texttt{NION} is not a multiple of
+  \texttt{NTHREAD}, it is adjusted to the next higher multiple 
+  of \texttt{NTHREAD}.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> ~ -- ~~~(obligatory) \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONBK} --- Number of ions for backup}
+	%
+	This parameter specifies that a backup file shall be written/updated 
+	after every	\texttt{NIONBK} ions. \texttt{NIONBK=0} means that no backup 
+	file shall be written. In case \texttt{NIONBK>NION}, a backup file is 
+	written	after the last ion. \texttt{NIONBK} cannot be specified in case 
+	of a dynamic simulation (\texttt{LDYN=T}). If \texttt{NIONBK} is not a
+	multiple of \texttt{NIONCHUNK}, it is adjusted to the next higher multiple of
+	\texttt{NIONCHUNK}. Note that only updated histograms are stored in the
+	simulation. Therefore, temporary ion and damage distributions are lost if
+	\texttt{NIONHIS>0} and \texttt{NIONBK} is not a multiple of \texttt{NIONHIS}.
+	\begin{keytab}
+		Type:    \> integer \\
+		Default: \> 0  \\
+		Range:   \> $\ge 0$
+	\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONCHUNK} --- Number of simulated ions per
+chunk}
+%
+  This parameter specifies the number of ions to be simulated in one ``chunk''.
+  Larger chunks slightly reduce the simulation time, while smaller chunks
+  allow more refined damage and/or geometry updates and/or output on the backup
+  file (see \texttt{NIONHIS}, \texttt{NIONGEOM}, and \texttt{NIONBK}), since
+  these actions can only be done after integer multiples of \texttt{NIONCHUNK}
+  simulated ions, and at the end of the simulation.
+  If \texttt{NIONCHUNK} is not a multiple of \texttt{NTHREAD}, it is 
+  adjusted to the next higher multiple of \texttt{NTHREAD}.
+  Usually, the default value of \texttt{NIONCHUNK} can be used, therefore it 
+  often is not necessary to specify this parameter in the input file.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> \texttt{NIONHIS}, if \texttt{LDAMDYN=T} or \texttt{LDYN=T},
+                and \texttt{NIONHIS>0} \\ 
+    		 \> \texttt{NIONGEOM} otherwise, if \texttt{LDYN=T} \\
+    		 \> \texttt{NION} otherwise \\
+    		 \> greatest common factor of value above and \texttt{NIONTRA}, 
+    		    if \texttt{ITRA} or \\
+    		 \>  \texttt{LTRA} specified on \texttt{\&OUTPUT} record \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONGEOM} --- Number of ions for geometry updates}
+%
+  This parameter specifies the number of implanted ions after which the
+  cells are checked for necessary geometry updates in a dynamic simulation
+  (\texttt{LDYN=T}). See also \texttt{FRACUPD} of the \texttt{\&GEOMETRY}
+  record. Note that updating the geometry requires some computational effort in
+  1D, and considerable computational effort in 2D. This effort decreases with 
+  larger \texttt{NIONGEOM} at the expense of accuracy. On the other hand, too
+  infrequent geometry updates affect the simulation results if \texttt{LDYN=T}.
+  If \texttt{NIONGEOM} is not a multiple of \texttt{NIONHIS}, it is adjusted 
+  to the next higher multiple of \texttt{NIONHIS}. \texttt{NIONGEOM} is ignored 
+  if \texttt{LDYN=F}.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> \texttt{NIONHIS}, if \texttt{NIONHIS} is defined and $> 0$ \\
+    		 \> \texttt{NIONCHUNK} otherwise, if \texttt{NIONCHUNK} is defined \\
+    		 \> \texttt{NTHREAD} otherwise \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONHIS} --- Number of ions for histogram updates}
+%
+  If greater than zero, this parameter specifies the number of implanted ions
+  after which the ion and damage histograms (\texttt{LDAMDYN=T}) or the cell
+  densities (\texttt{LDYN=F}) are updated. All other histograms (e.g., the 
+  histograms of backscattered and transmitted atoms) are not affected
+  by \texttt{NIONHIS}; they are only updated at the end of the simulation. 
+  \texttt{NIONHIS=0} means that the histograms or cell densities are 
+  updated whenever an event leads to a contribution to a histogram or cell
+  density during the development of a collision cascade. This is only
+  allowed when \texttt{NTHREAD=1}. Note that updating histograms requires some
+  additional computational effort, in particular in parallel processing. This 
+  effort decreases with larger \texttt{NIONHIS} at the expense of accuracy. On
+  the other hand, too infrequent damage updates affect the simulation results
+  if \texttt{LDAMDYN=T}. If \texttt{NIONHIS} is not a multiple of
+  \texttt{NIONCHUNK}, it is adjusted to the next higher multiple of
+  \texttt{NIONCHUNK}. \texttt{NIONHIS} is ignored if \texttt{LDAMDYN=F} and
+  \texttt{LDYN=F}.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 0, if $\texttt{NTHREAD} = 1$ \\
+             \> \texttt{NIONCHUNK}, if $\texttt{NTHREAD} > 1$ and
+                \texttt{NIONCHUNK} is defined \\
+             \> \texttt{NTHREAD}, if $\texttt{NTHREAD} > 1$ and
+                \texttt{NIONCHUNK} is not defined \\
+    Range:   \> $0 \le \texttt{NIONHIS} \le \texttt{NION}$, if
+                $\texttt{NTHREAD} = 1$ \\
+             \> $1 \le \texttt{NIONHIS} \le \texttt{NION}$, if 
+                $\texttt{NTHREAD} > 1$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONOUT} --- Number of ions for output}
+%
+  This parameter specifies the number of ions after which output is 
+  written to the \texttt{CELL}, \texttt{CELL2}, and \texttt{SURF} file
+  in case of a dynamic simulation (\texttt{LDYN=T}). \texttt{NIONOUT} is
+  rounded to the next lowert integer multiple of \texttt{NIONGEOM} (after
+  any adjustments to \texttt{NIONGEOM}). In addition, $\texttt{NIONOUT}
+  \ge \texttt{NIONGEOM}$ is enforced. If \texttt{NION} is not an 
+  integer multiple of \texttt{NIONOUT}, an additional data record is 
+  written at the end of the simulation.
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> \texttt{NIONGEOM} \\
+    Range:   \> $> 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NIONTRA} --- Number of ions for trajectory output}
+	%
+	This parameter specifies that trajectories shall be written to the 
+	\texttt{TRA} file for every \texttt{NIONTRA}th ion. 
+	\texttt{NIONTRA=1} means that trajectory output shall be written for every 
+	ion.  
+	If \texttt{NIONTRA} is not a multiple of \texttt{NIONCHUNK}, it is 
+	adjusted to the next higher multiple of \texttt{NIONCHUNK}. 
+    This parameter can be used for reducing the amount of output to the 
+	\texttt{TRA} file. 
+    \texttt{NIONTRA} is ignored unless \texttt{ITRA}
+	or \texttt{LTRA} of the \texttt{\&OUTPUT} record is set.
+	\begin{keytab}
+		Type:    \> integer \\
+		Default: \> 1  \\
+		Range:   \> $> 0$
+	\end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NR} --- Number of regions}
+%
+  This variable specifies the number of target regions. It is ignored when
+  the target geometry is defined by cells (\texttt{USECELL=T}).
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> ~ -- ~~~ (obligatory if \texttt{USECELL=F}) \\
+    Range:   \> $\texttt{NR} > 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{NTHREAD} --- Number of threads}
+%
+  This variable specifies the number of threads. It overwrites the number of
+  threads specified as an environment variable or during compilation. It
+  is ignored when the code is compiled without multiprocessing or in the
+  coarray version of the code. 
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> as specified by an environment variable or during compilation \\
+    Range:   \> $\texttt{NTHREAD} > 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{RANDSKIP} --- Number of random numbers to be skipped}
+%
+  This variable specifies the number of random number evaluations before the start 
+  of the simulation. Thus, the first \texttt{RANDSKIP} generated numbers of the 
+  random number generator are ignored. This is a simpler alternative to specifying
+  \texttt{IRAND}, \texttt{IARAND}, \texttt{IBRAND}, and \texttt{MRAND}. The use of 
+  \texttt{RANDSKIP} is problematic for amorphous targets.
+%
+  \begin{keytab}
+    Type:    \> integer \\
+    Default: \> 0 \\
+    Range:   \> $\texttt{RANDSKIP} \ge 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{RNG} --- Random number generator}
+%
+  This variable specifies the random number generator used to generate uniform
+  random numbers in the range [0,1]. \texttt{'Haas'} uses the ``The multiple 
+  prime random number generator'' (ACM Trans.\ Math.\ Software 13 (4) 368-381, 
+  1987). \texttt{'Fortran'} uses the default Fortran random number generator 
+  \texttt{RANDOM\_NUMBER()}. \texttt{'Knuth'} uses ``Knuth's subtractive random 
+  number generator'' as described in W.H. Press et al., Numerical Recipes, 3rd 
+  edition, Cambridge University Press, 2007; p.354. Note that the seed of the
+  random number generator may be set by \texttt{MRAND}, \texttt{IARAND}, 
+  \texttt{IBRAND}, and \texttt{IRAND}. The seed does not completely specify 
+  the internal state of Knuth's random number generator. It is therefore not
+  possible to report \texttt{MRAND}, \texttt{IARAND}, \texttt{IBRAND}, and
+  \texttt{IRAND} at the end of the simulation. However, different seeds lead
+  to different random number sequences of Knuth's random number generator.
+%
+  \begin{keytab}
+    Type:    \> character string \\
+    Default: \> \texttt{'Knuth'} \\
+    Range:   \> \texttt{'Haas'}, \texttt{'Fortran'}, \texttt{'Knuth'} 
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{REFLECT} --- Initial condition reflection flag}
+%
+  This variable specifies whether distributions read from \texttt{HIS} or
+  \texttt{CELL} files are reflected at the origin. If \texttt{SHIFTTO} is also
+  specified, reflection is performed after shifting.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{SHIFTTO} --- Shifted surface position for intial condition}
+%
+  This variable specifies the position the surface of distributions read from
+  \texttt{HIS} or \texttt{CELL} files should be shifted to. If \texttt{REFLECT} 
+  is also specified, reflection is performed after shifting.
+
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> -- (corresponding to no shift)
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{TEMP} --- Temperature of the target}
+%
+  This variable specifies the temperature of the target in Kelvin. It is used 
+  for the calculation of the vibrational amplitude using the Debye
+  function. See also \texttt{TDEBYE}
+
+  \begin{keytab}
+    Type:    \> real \\
+    Default: \> 300. \\
+    Range:   \> $\texttt{TEMP} > 0$
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{USEBK} --- Use-backup-file flag}
+%
+  This variable specifies whether a backup file shall be used to
+  continue a previous simulation. If \texttt{USEBK=T}, the backup file
+  specified by \texttt{BKFILE} must exist. If \texttt{USEION=T}, the
+  input file must specify a larger dose \texttt{DOSE} and a larger
+  number of ions \texttt{NION} on the \texttt{\&IONS} record than
+  those stored in the backup file. The continued simulation starts
+  with the ion and damage histograms stored in the backup file and
+  performs a simulation with a number of ions corresponding to the
+  difference of the numbers specified in the input and backup files
+  and a dose corresponding to the difference of the doses specified in
+  the input and backup files.  It is not recommended that other
+  parameters than \texttt{NION} and \texttt{DOSE} be changed in the
+  input file between the previous and the continued run when
+  \texttt{USEION=T}.  If \texttt{USEION=F}, a new simulation is
+  started from scratch except that the damage histograms are read in
+  from the backup file at the beginning of the simulation.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{USECELL} --- Use-cell-file flag}
+%
+  This variable specifies whether the target information shall be read from
+  a cell file as specified by the \texttt{CELLFILE} parameter. If
+  \texttt{USECELL=T}, the cell file specified by \texttt{CELLFILE} must exist,
+  and the material and geometry specifications in the \texttt{\&MATERIAL} and
+  \texttt{\&GEOMETRY} records are ignored.  The cell file must be a
+  \texttt{CELL} file (see Section~\ref{k:files}). If \texttt{USECELL=T} and
+  \texttt{LDYN=T}, the atomic numbers of the ion atoms stored in the cell file
+  must be consistent with the atom species given in the ion name (\texttt{NAME}
+  parameter of the \texttt{\&IONS} record).
+
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\ifprivate
+\begin{keydescription}{\texttt{USEDEF} --- Use-deterministic-defect-file flag}
+%
+  This variable specifies whether a deterministic defect file \texttt{DEFFILE}
+  shall be used in the simulation. If \texttt{USEDEF=T}, the defect file 
+  specified by \texttt{DEFFILE} must exist.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+\fi
+
+\begin{keydescription}{\texttt{USEHIS} --- Use-histogram-file flag}
+%
+  This variable specifies whether a histogram shall be used to initialize the 
+  damage distribution. If \texttt{USEHIS=T}, the histogram file specified by
+  \texttt{HISFILE} must exist. 
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{F} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+
+\begin{keydescription}{\texttt{USEION} --- Use-ion-distribution-from-backup-file
+                       flag}
+%
+  This variable specifies whether the ion distribution stored on the
+  backup file shall be used as initial values. If \texttt{USEION=F}, only
+  the damage distribution is taken from the backup file and the ion
+  distribution is set to zero. See also \texttt{USEBK}.
+%
+  \begin{keytab}
+    Type:    \> logical \\
+    Default: \> \texttt{T} \\
+    Range:   \> \texttt{T}, \texttt{F}
+  \end{keytab}
+\end{keydescription}
+

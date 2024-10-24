@@ -1,0 +1,176 @@
+There are two scripts for running IMSIL: \texttt{imsil.py} for running a
+single simulation from one input file, and \texttt{mimsil.py} for running
+multiple simulations whose input files are generated automatically from a
+template and a parameters file. It is also possible to pass several input files
+to \texttt{imsil.py} or several pairs of template and parameters files to
+\texttt{mimsil.py}.
+
+\texttt{imsil.py} takes a file with extension \texttt{.inp} (the input file),
+copies it to a directory with the same name but without the extension,
+renames it to \texttt{INP}, runs IMSIL there and copies any output files back to
+the directory where the original version of the input file resides. The output
+files are again renamed so their names are converted to lowercase and become
+their file extension. E.g., if \texttt{imsil.py} is run with the input file
+\texttt{example.inp}, a directory \texttt{example} is created, the input file is
+copied to \texttt{example/INP}, IMSIL is run in the directory \texttt{example},
+generates \texttt{example/OUT}, and, e.g., \texttt{example/HIS}. These files are
+then copied to \texttt{example.out} and \texttt{example.his}, and the directory
+\texttt{example} is deleted.
+
+A typical call of IMSIL from the directory where the input file
+\texttt{example.inp} resides, reads
+%
+\begin{verbatim}
+   <path-to-imsil.py> -i example.inp
+\end{verbatim}
+%
+This uses the shebang (=first) line of the \texttt{imsil.py} script to call the
+Python 3 interpreter (otherwise you have to call the Python interpreter with
+the above line as arguments). The extension \texttt{.inp} in the specification
+of the input file may be omitted. \texttt{-i} is one of several possible flags
+and causes IMSIL to run interactively in the foreground. (The default is to run
+IMSIL in the background, so you can continue to use your command window.)
+
+You can also start several simulations at once:
+%
+\begin{verbatim}
+   <path-to-imsil.py> -p 2 example1.inp example2.inp
+\end{verbatim}
+%
+\texttt{-p 2} causes the two simulations to run in parallel. Without the
+\texttt{-p} option they will run one after the other. More generally,
+\texttt{-p} defines the maximum number of simulations that run in parallel. If
+there are more input files than specified by the \texttt{-p} option, the
+remaining simulations have to wait until a previous simulation terminates.
+
+To call the parallel version of IMSIL, enter
+%
+\begin{verbatim}
+   <path-to-imsil.py> -t 2 example.inp
+\end{verbatim}
+%
+In this case, the parallel version with 2 threads is called. If used together 
+with the \texttt{-p} flag, the total number of simultaneous threads is the 
+product of the arguments of the \texttt{-t} and \texttt{-p} flags. E.g.,
+\texttt{-t 8 -p 4} implies 32 simultaneous threads. \texttt{-t 0}, which is 
+the default, invokes the sequential version of IMSIL.
+
+If you have a passwordless ssh connection to a remote host, you can also
+delegate the simulation to the remote host:
+%
+\begin{verbatim}
+   <path-to-imsil.py> -r <remote-hostname> example.inp
+\end{verbatim}
+%
+Replace \texttt{<remote-hostname>} with the IP address or hostname of the
+remote host. For this to work, the remote host must be reachable from the local
+host with \texttt{ssh <remote-hostname>}, and from the remote host the local
+host must be reachable with \texttt{ssh <local-hostname>}. The ssh connection
+must be passwordless in both directions. In addition, the shebang line of
+\texttt{imsil.py} must be valid on the remote host, i.e., the Python 3
+interpreter must be called on the remote host with the same command as on the
+local host. During the operation, the IMSIL executable is copied to the remote
+host. IMSIL therefore need not be installed on the remote host, but the
+executable must be compatible with the remote host's processor. In addition,
+there are some requirements on installed libraries on the remote host,
+which vary between zero (serial version of IMSIL, same version of same 
+operating system) to significant (OpenMP version, different operating system). 
+
+A file with the same name as the input file but extension \texttt{.post} can
+be provided. It must contain valid Python code. If such a file exists,
+\texttt{imsil.py} runs the code after the IMSIL simulation has completed.
+It can be used to extract parameters from the output data such as the sputter
+yield. 
+
+For a full list of options to the \texttt{imsil.py} script see its docstring.
+
+For \texttt{mimsil.py}, a template file with extension \texttt{.tem} and a
+parameters file with extension \texttt{.par} must be provided. The template file
+is an input file where the parameters to be varied between the simulations are 
+replaced by variables. Variables are defined by hash signs prepended and
+appended to their names. Usually, the names are taken identical to the parameter 
+names. E.g., to vary the tilt angle, one writes \texttt{tilt=\#tilt\#} on the
+\texttt{\&ions} record. The tilt angle may then be referenced by \texttt{tilt}
+in the parameters file.
+
+The parameters file contains the definition of the parameters and of the input
+file name for each simulation. There are two formats of the parameters
+file. In the first format the parameters are defined as a list under each file
+name:
+%
+\begin{verbatim}
+   FILE: <filename1>
+   <parname11>=<value11>
+   <parname12>=<value12>
+   ...
+   FILE: <filename2>
+   <parname21>=<value21>
+   <parname22>=<value22>
+   ...
+   ...
+\end{verbatim}
+%
+Here, \texttt{filename<i>} denotes the filename of the input and output files
+without extension, \texttt{parname<ij>} the variable names as defined in the
+template file, and \texttt{value<ij>} the values to be substituted for the
+variables. As an example, let's assume that two simulations are to be
+performed, one for a tilt angle of 0\textdegree\ and one for a tilt angle of
+10\textdegree. The template and parameters file are \texttt{example.tem} and
+\texttt{example.par}, respectively. The parameters file may read
+%
+\begin{verbatim}
+    FILE: example_0
+    tilt=0
+    FILE: example_10
+    tilt=10
+\end{verbatim}
+%
+\texttt{mimsil.py} produces the input files \texttt{example\_0.inp} and
+\texttt{example\_10.inp}, where the variable \texttt{\#tilt\#} of the template
+file is replaced by \texttt{0} and \texttt{10}, respectively, and runs the two
+simulations.
+
+The alternative format of the parameters file defines a Python function
+\texttt{get\_params} whose single argument is a dictionary which defines the
+filenames and parameters. In the above example, the parameters file could
+alternatively read 
+%
+\begin{verbatim}
+    def get_params(param):
+        for tilt in (0, 10):
+            fname = 'example_' + str(tilt)
+            param[fname] = {}
+            param[fname]['tilt'] = str(tilt)
+\end{verbatim}
+%
+On entry, \texttt{param} is an empty ordered dictionary. Within the function,
+the elements of the dictionary must be defined as dictionaries with the keys equal
+to the parameter names and values equal to the parameter values, converted to
+strings. The outer dictionary has the file names as keys. Note that the
+\texttt{def} statement must be the first in the file, otherwise the format will
+not be correctly identified by \texttt{mimsil.py}. Therefore, e.g., imports such
+as \texttt{import math} must be made inside the function. This second format of
+the parameters file is useful when the number of simulations to be defined is
+great.
+
+In both cases, \texttt{mimsil.py} is run with \texttt{example.tem} and
+\texttt{example.par} as template and parameters file by
+%
+\begin{verbatim}
+    <path-to-mimsil.py> example.tem
+\end{verbatim}
+%
+Similar as before, \texttt{<path-to-mimsil.py>} denotes the path to the
+\texttt{mimsil.py} script. The extension \texttt{.tem} may be omitted or
+replaced by \texttt{.par}.
+
+The \texttt{mimsil.py} script imports \texttt{imsil.py} as a module and passes
+its options to the main function of \texttt{imsil.py}. The \texttt{-p} and
+\texttt{-r} options may therefore be used just as with \texttt{imsil.py}.
+
+A template file with extension \texttt{.ptem} can also be provided for
+postprocessing. The \texttt{.ptem} file contains Python code to be run after
+each simulation. The same variables as in the \texttt{.tem} file (in the
+above example \texttt{\#tilt\#}) can be defined and will be replaced by the
+values defined in the \texttt{.par} file. The resulting code will be
+saved in a \texttt{.post} file for each input (\texttt{.inp}) file.

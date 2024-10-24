@@ -1,0 +1,38 @@
+This example demonstrates a static sputtering simulation of Si by Ar ions.
+``Static'' means that the target is not modified during the simulation.
+
+The input file reads:
+
+\begin{verbatim}
+Sputtering of a-Si, static mode
+Ar on a-Si, 10keV, 60 tilt
+ &setup    ndim=1 natom=2 nr=1 ldyn=f lsput=t nion=100000 /
+ &ions     name='Ar' energy=10 dose=1 tilt=60 diverg=0 /
+ &material region=1 name='Si' xtal='no' /
+ &snpar    chkffpcyl=t /
+ &damage   ldam=f lrcoil=t esurf=4.1 ed=15 /
+ &geometry posif=0,1000 /
+ &output   lhis=t wbox=20 nbox=200 lmomab=t lhisab=t wboxa=1 /
+\end{verbatim}
+
+On the \texttt{\&SETUP} record, \texttt{lsput=t} is specified, indicating that
+accurate sputtering simulation is requested. On the \texttt{\&DAMAGE} record,
+the surface binding energy and the displacement energy are specified. Since
+accurate sputtering simulation is requested, free flight paths will be chosen
+such that no recoils with energy larger than the surface binding energy are
+disregarded near the surface. Deeper in the bulk, larger free flight paths are
+chosen, as recoils with energy up to the displacement energy can be neglected.
+
+Since accurate damage distributions are not of interest in this case,
+\texttt{ldam=f} is set on the \texttt{\&DAMAGE} record. As a consequence, damage
+distributions are calculated individually by each thread in a multi-threaded run
+and merged only at the end of the simulation. This does not affect the results,
+as the implantation dose of $1~\mathrm{cm}^{-2}$ is (unrealistically) low and
+damage remains weak throughout the simulation. As a benefit, since the merging
+of the histograms is done only at the end of the simulation, the computational
+overhead of the merge operation is largely avoided.
+
+The sputter yield is written to the \texttt{OUT} file. In addition, the angular
+distribution of the backward sputtered atoms is written to the \texttt{HISAB}
+file (\texttt{lhisab=t}). The box width of the histogram is 1\textdegree\
+(\texttt{wboxa=1}).

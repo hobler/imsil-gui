@@ -1,0 +1,284 @@
+\documentclass[twoside,12pt]{book}
+
+\usepackage{gensymb}
+\usepackage[resetlabels]{multibib}
+\newcites{imsil}{Full list of publications using IMSIL and its precursors}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{multirow}
+%\usepackage{natbib}
+%\newcommand{\ifprivate}{\iftrue}     % activate this line for a private version
+\newcommand{\ifprivate}{\iffalse}    % activate this line for a public version
+
+%%% The input of manualf is for better display on the PC screen:
+\input{manualstyle}
+%%%
+\sloppy\raggedbottom
+\newenvironment{keydescription}[1]{
+                \vspace{1.5\baselineskip} \begin{minipage}{\textwidth}
+                   {\large\bf #1} \vspace{\baselineskip} \\ }{
+                \end{minipage}}
+\newenvironment{keytab}{
+                \vspace{.5\baselineskip} \begin{tabbing} 
+                   ~~ \= Default:~ \=  \+  \kill}{
+                \end{tabbing}}
+%\renewcommand{\mathrm}[1]{{\rm #1}}
+%
+\pagestyle{headings}
+% 
+\begin{document}
+%
+%\bibliographystyle{/pd/tex/libtex/macros/bib/unsrt}
+%\bibliographystyle{unsrt}
+\bibliographystyle{unsrt}
+\bibliographystyleimsil{unsrt}
+%
+%%%%%%%%%%%%%
+% Titlepage %       Remark: for printing the titlepage font cmr17 scaled
+%%%%%%%%%%%%%               \magstep7 is required.
+%
+\begin{titlepage}
+\input{titlepage.tex}
+\end{titlepage}
+%
+%%%%%%%%%%%%%%%%%%%%%%
+% Inhaltsverzeichnis %
+%%%%%%%%%%%%%%%%%%%%%%
+%
+\tableofcontents
+\thispagestyle{empty}
+%
+%%%%%%%%%%%%%
+% Chapter 1 %
+%%%%%%%%%%%%%
+%
+\chapter{Introduction}
+\label{k:intro}
+%\setcounter{page}{1}
+\input{introduction.tex}
+%
+%%%%%%%%%%%%%
+% Chapter 2 %
+%%%%%%%%%%%%%
+%
+\chapter{Ion and Target Specification}
+\label{k:obj}
+\input{iontarget.tex}
+%
+\section{Ion Beam}
+\label{s:beam}
+\input{iontarg_beam.tex}
+%
+\section{Material}
+\label{s:mater}
+\input{iontarg_material.tex}
+%
+\section{Geometry}
+\label{s:geometry}
+\input{iontarg_geometry.tex}
+%
+\section{Dynamic Target Updates}
+\label{s:updates}
+\input{iontarg_updates.tex}
+%
+%%%%%%%%%%%%%
+% Chapter 3 %
+%%%%%%%%%%%%%
+%
+\chapter{Physical Models}
+\label{k:phys}
+\input{physics.tex}
+%
+\section{Selection of Collision Partners}
+\label{s:coll}
+\input{phys_collisions.tex}
+%
+\section{Interatomic Potential}
+\label{s:pot}
+\input{phys_potential.tex}
+%
+\section{Implantation Damage}
+\label{s:dam}
+\input{phys_damage.tex}
+%
+\section{Backscattering, Transmission, and Sputtering}
+\label{s:sput}
+\input{phys_sputter.tex}
+%
+\section{Electronic Stopping}
+\label{s:stop}
+\input{phys_estop.tex}
+%
+\section{Rutherford Backscattering / Channeling}
+\label{s:RBS}
+\input{phys_rbs.tex}
+%
+\iffalse
+\section{Deterministic damage model}
+\label{s:det}
+\input{phys_det.tex}
+\fi
+%
+%%%%%%%%%%%%%
+% Chapter 4 %
+%%%%%%%%%%%%%
+%
+\chapter{Input and Output Files}
+\label{k:files}
+\input{files.tex}
+%
+\newpage    % we need this to avoid newpage before big table
+\section{Input Files}
+\label{s:input}
+\input{fil_input.tex}
+%
+\newpage
+\section{The Output File \texttt{OUT}}
+\label{s:out}
+\input{fil_out.tex}
+%
+\newpage
+\section{1-D Histogram Files}
+\label{s:his1d}
+\input{fil_his1d.tex}
+%
+\newpage
+\section{2-D Histogram Files}
+\label{s:his2d}
+\input{fil_his2d.tex}
+%
+\newpage
+\section{3-D Histogram Files}
+\label{s:his3d}
+\input{fil_his3d.tex}
+%
+\newpage
+\section{Miscellaneous Output Files}
+\label{s:filesmisc}
+\input{fil_misc.tex}
+%
+%%%%%%%%%%%%%
+% Chapter 5 %
+%%%%%%%%%%%%%
+%
+\chapter{Input Parameters}
+\label{k:input}
+\input{parameters.tex}
+%
+\newpage
+\section{\texttt{\&SETUP} ~}
+\label{s:setup}
+\input{param_setup.tex}
+%
+\newpage
+\section{\texttt{\&GEOMETRY} ~}
+\label{s:geom}
+\input{param_geometry.tex}
+%
+\newpage
+\section{\texttt{\&ATOMS} ~}
+\label{s:atom}
+\input{param_atoms.tex}
+%
+\newpage
+\section{\texttt{\&IONS} ~}
+\label{s:ion}
+\input{param_ions.tex}
+%
+\newpage
+\section{\texttt{\&CRYSTAL} ~}
+\label{s:xtal}
+\input{param_crystal.tex}
+%
+\newpage
+\section{\texttt{\&MATERIAL} ~}
+\label{s:target}
+\input{param_material.tex}
+%
+\newpage
+\section{\texttt{\&DAMAGE} ~}
+\label{s:damage}
+\input{param_damage.tex}
+%
+\newpage
+\section{\texttt{\&SNPAR} ~}
+\label{s:snpar}
+\input{param_snpar.tex}
+%
+\newpage
+\section{\texttt{\&SEPAR} ~}
+\label{s:separ}
+\input{param_separ.tex}
+%
+\newpage
+\section{\texttt{\&OUTPUT} ~}
+\label{s:output}
+\input{param_output.tex}
+%
+%%%%%%%%%%%%%
+% Chapter 6 %
+%%%%%%%%%%%%%
+%
+\chapter{Auxiliary Scripts}
+\label{k:scripts}
+\input{scripts.tex}
+%
+\section{Scripts for Running IMSIL}
+\label{s:scripts_run}
+\input{scr_run.tex}
+%
+\section{Scripts for Reading and Plotting Results}
+\label{s:scripts_read}
+\input{scr_read.tex}
+%
+%%%%%%%%%%%%%
+% Chapter 7 %
+%%%%%%%%%%%%%
+%
+\chapter{Examples}
+\label{k:ex}
+%
+\section{Ion Implantation into a Flat Target}
+\label{s:ex_impl1d}
+\input{ex_impl1d.tex}
+%
+\section{Ion Implantation into a Trench}
+\input{ex_impl2d.tex}
+% trench
+
+\section{Ion Implantation into a Multilayer Structure}
+\input{ex_multi.tex}
+% trick for having more than 1 crystalline layer
+
+\section{Spot Burn}
+\input{ex_spot.tex}
+% many output options
+
+\section{Static Sputtering}
+\input{ex_sput_stat.tex}
+% Ar
+
+\section{Dynamic Sputtering}
+\input{ex_sput_dyn.tex}
+% krdyn
+
+\section{RBS}
+\input{ex_rbs.tex}
+
+\ifprivate
+\section{Example 2}
+\footnote{This example is currently not functional.}
+\input{ex2.tex}
+\fi
+%
+%%%%%%%%%%%%%%
+% Literature %
+%%%%%%%%%%%%%%
+%
+%\input{ref.tex}
+\bibliography{manual,imsil}
+%
+\input{imsilnocite}
+\bibliographyimsil{imsil}
+%
+\end{document}
