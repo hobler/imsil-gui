@@ -32,7 +32,7 @@ def get_full_manual_paths(filenames, manual_path):
                                                           filename)))
     return filenames_abs
 
-def get_param_filenames(manuak_path):
+def get_param_filenames(manual_path):
     """
     Return list of the filenames in the parameters section of the manual.
     
