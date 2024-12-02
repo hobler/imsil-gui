@@ -373,7 +373,11 @@ def replace_math_symbols(string):
     """
     
     # Use the latex command to be raplced as the key and the replacement as the value
-    symbols = {"\\le": "≤", "\\ge": "≥", "\\times": "×", "\\infty": "∞", "\\ldots": "…"}
+    # Note that order matters, ie. ^\\circ must be replaced before \\circ
+    symbols = {"\\le": "≤", "\\ge": "≥", "\\times": "×",
+               "\\infty": "∞", "\\ldots": "…", "\\langle": "⟨",
+               "\\rangle": "⟩", "^\\circ": "°", "\\circ": "∘",
+               "\\pi": "π", "\\AA": "Å"}
     
     for symbol in symbols:
         string = string.replace(symbol, symbols[symbol])
