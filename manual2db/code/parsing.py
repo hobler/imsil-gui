@@ -377,7 +377,9 @@ def replace_math_symbols(string):
     symbols = {"\\le": "≤", "\\ge": "≥", "\\times": "×",
                "\\infty": "∞", "\\ldots": "…", "\\langle": "⟨",
                "\\rangle": "⟩", "^\\circ": "°", "\\circ": "∘",
-               "\\pi": "π", "\\AA": "Å"}
+               "\\pi": "π", "\\AA": "Å", "\\delta": "δ",
+               "\\Delta": "Δ", "\\cdot": "·", "\\rm": "",
+               "\\lambda": "λ"}
     
     for symbol in symbols:
         string = string.replace(symbol, symbols[symbol])
