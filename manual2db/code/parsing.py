@@ -381,7 +381,8 @@ def replace_math_symbols(string):
                "\\rangle": "⟩", "^\\circ": "°", "\\circ": "∘",
                "\\pi": "π", "\\AA": "Å", "\\delta": "δ",
                "\\Delta": "Δ", "\\cdot": "·", "\\rm": "",
-               "\\lambda": "λ"}
+               "\\lambda": "λ", "\\sqrt": "√", "_2": "₂",
+               "^2": "²", "^{-2}": "⁻²", "^3": "³", "^{-3}": "⁻³"}
     
     for symbol in symbols:
         string = string.replace(symbol, symbols[symbol])
@@ -407,8 +408,8 @@ def remove_curly_brackets(string):
     :param string: String with curly brackets
     :return: String without curly brackets
     """
-    # Don't remove the brackets if they are after ^, _, \frac, \sqrt, \begin, \end, "}"
-    symbols_before = ["^", "_", "c", "t", "n", "d", "}"]
+    # Don't remove the brackets if they are after ^, _, \frac, √, \begin, \end, "}"
+    symbols_before = ["^", "_", "c", "√", "n", "d", "}"]
     # Also don't remove if brackets are before "\n"
     symbols_after = ["\n"]
     
