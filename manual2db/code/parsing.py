@@ -58,13 +58,13 @@ def parse_file(filename, tablename, parse_private):
 
             # Get short_desc
             short_desc = entry.split('---')[1]
-            short_desc = short_desc.split('}')[0].strip()
+            short_desc = short_desc.split('}\n')[0].strip()
             short_desc = ' '.join(short_desc.split())
             short_desc = short_desc.replace('\\', '\\\\')
 
             # Get long_desc
             long_desc = entry.split('---')[1]
-            long_desc = long_desc.split('}', 1)[1]
+            long_desc = long_desc.split('}\n', 1)[1]
             long_desc = long_desc.split(r"\begin{keytab}")[0]
             long_desc = ' '.join(long_desc.split())
             long_desc = long_desc.replace('\\', '\\\\')
