@@ -42,6 +42,8 @@ def parse_file(filename, tablename, parse_private):
         content = replace_references(content)
         content = repair_rest_warnings(content)
         content = replace_math_symbols(content)
+        content = remove_inline_math_environment(content)
+        content = remove_curly_brackets(content)
 
         # List of the parameters to be returned
         parameters = []
@@ -385,4 +387,57 @@ def replace_math_symbols(string):
         string = string.replace(symbol, symbols[symbol])
     
     return string
+
+def remove_inline_math_environment(string):
+    """
+    Remove inline math environment, ie. $x$ -> x, from a string.
+    
+    :param string: String with inline math environment
+    :return: String without inline math environment
+    """
+    
+    return string.replace("$", "")
+
+def remove_curly_brackets(string):
+    """
+    Remove curly brackets from a string.
+    
+    Does take into account that brackets might have a mathematical meaning.
+    
+    :param string: String with curly brackets
+    :return: String without curly brackets
+    """
+    # Don't remove the brackets if they are after ^, _, \frac, \sqrt, \begin, \end, "}"
+    symbols_before = ["^", "_", "c", "t", "n", "d", "}"]
+    # Also don't remove if brackets are before "\n"
+    symbols_after = ["\n"]
+    
+    return_string = [None]*len(string)
+    
+    # To remember what happened to the last matching bracket
+    brackets = []
+    
+    # Build the string char by char, checking if the brackets should be added or not
+    for i in range(len(string)):
+        
+        match string[i]:
+            case "{":
+                # Skip first bracket
+                if i == 0:
+                    brackets.append("skip")
+                else:
+                    if string[i-1] in symbols_before:
+                        return_string[i] = string[i]
+                        brackets.append("add")
+                    else:
+                        brackets.append("skip")
+                    
+            case "}":
+                if (brackets and brackets.pop() == "add") or string[i+1] in symbols_after:
+                    return_string[i] = string[i]
+            
+            case _:
+                return_string[i] = string[i]
+        
+    return "".join(filter(None, return_string))
 
