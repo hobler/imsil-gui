@@ -12,7 +12,7 @@ from code.parameter import Parameter
 import re
 
 
-def parse_file(filename, tablename, parse_private):
+def parse_file(filename, tablename, parse_private, manual_path):
     r"""Parse the .tex files from the manual.
 
     This function uses all \keydescription environments to create new instances
@@ -40,7 +40,12 @@ def parse_file(filename, tablename, parse_private):
         content = replace_tt(content)
         content = replace_citations(content)
         content = replace_mathrm(content)
-        content = replace_references(content)
+        
+        # aux file is needed to find reference bindings
+        with open(manual_path.replace(".tex", ".aux"), 'r') as aux_file:
+            manual_aux = aux_file.read()
+        
+        content = replace_references(content, manual_aux)
         content = repair_rest_warnings(content)
 
         # List of the parameters to be returned
@@ -231,7 +236,7 @@ def repair_rest_warnings(inp):
     return output
 
 
-def replace_references(inp):
+def replace_references(inp, manual_aux):
     r"""This function converts the references from LaTeX to reStructuredText
 
     See project report for detailed information
@@ -244,9 +249,17 @@ def replace_references(inp):
         begin, end = inp.split(r'\ref{', 1)
         name, end = end.split('}', 1)
 
-        name = name.replace(':', '_')
-        output = begin + ' :ref:`' + name + '`' + end
-        return replace_references(output)
+        manual_pattern = r'\{' + name + r'\}\{\{(\d+(?:\.\d+)?)\}'
+        manual_match = re.search(manual_pattern, manual_aux)
+
+        if manual_match:
+            name = manual_match.group(1)
+            output = begin + name + ' of the manual' + end
+        else:
+            name = name.replace(':', '_')
+            output = begin + ' :ref:`' + name + '`' + end
+            
+        return replace_references(output, manual_aux)
     else:
         return inp
 
