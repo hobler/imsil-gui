@@ -9,6 +9,7 @@ as separate functions if the type of operation is used multiple times.
 """
 
 from code.parameter import Parameter
+import re
 
 
 def parse_file(filename, tablename, parse_private):
@@ -56,16 +57,17 @@ def parse_file(filename, tablename, parse_private):
             title = ' '.join(title.split())
 
             # Get short_desc
-            short_desc = entry.split('---')[1]
-            short_desc = short_desc.split('}')[0].strip()
-            short_desc = ' '.join(short_desc.split())
+            sd_pattern = r'(?<=---\s)(.*?)(?=}(?:\n\t%\n\t|\n  | \n  |\n))'
+            sd_regex = re.compile(sd_pattern, re.DOTALL)
+            sd_match = sd_regex.search(entry)
+            short_desc = sd_match.group(1)
             short_desc = short_desc.replace('\\', '\\\\')
 
             # Get long_desc
-            long_desc = entry.split('---')[1]
-            long_desc = long_desc.split('}', 1)[1]
-            long_desc = long_desc.split(r"\begin{keytab}")[0]
-            long_desc = ' '.join(long_desc.split())
+            ld_pattern = r'(?:}\n\t%\n\t|}\n  |} \n  |}\n|} \n)(.*?)(?:\\begin\{keytab\}|\\end\{keydescription\})'
+            ld_regex = re.compile(ld_pattern, re.DOTALL)
+            ld_match = ld_regex.search(entry)
+            long_desc = ld_match.group(1)
             long_desc = long_desc.replace('\\', '\\\\')
 
             # Get keytab
