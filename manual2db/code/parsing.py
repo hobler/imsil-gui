@@ -41,7 +41,6 @@ def parse_file(filename, tablename, parse_private):
         content = replace_mathrm(content)
         content = replace_references(content)
         content = repair_rest_warnings(content)
-        content = replace_math_symbols(content)
 
         # List of the parameters to be returned
         parameters = []
@@ -362,25 +361,3 @@ def process_table(inp):
         return begin + table_str + end
     else:
         return inp
-    
-
-def replace_math_symbols(string):
-    """
-    Replace latex math symbols with their unicode equivalent.
-    
-    :param string: String with latex math symbols
-    :return: String with unicode math symbols
-    """
-    
-    # Use the latex command to be raplced as the key and the replacement as the value
-    # Note that order matters, ie. ^\\circ must be replaced before \\circ
-    symbols = {"\\le": "≤", "\\ge": "≥", "\\times": "×",
-               "\\infty": "∞", "\\ldots": "…", "\\langle": "⟨",
-               "\\rangle": "⟩", "^\\circ": "°", "\\circ": "∘",
-               "\\pi": "π", "\\AA": "Å"}
-    
-    for symbol in symbols:
-        string = string.replace(symbol, symbols[symbol])
-    
-    return string
-
