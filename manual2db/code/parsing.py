@@ -61,6 +61,7 @@ def parse_file(filename, tablename, parse_private):
             sd_regex = re.compile(sd_pattern, re.DOTALL)
             sd_match = sd_regex.search(entry)
             short_desc = sd_match.group(1)
+            short_desc = ' '.join(short_desc.split())
             short_desc = short_desc.replace('\\', '\\\\')
 
             # Get long_desc
@@ -68,6 +69,7 @@ def parse_file(filename, tablename, parse_private):
             ld_regex = re.compile(ld_pattern, re.DOTALL)
             ld_match = ld_regex.search(entry)
             long_desc = ld_match.group(1)
+            long_desc = ' '.join(long_desc.split())
             long_desc = long_desc.replace('\\', '\\\\')
 
             # Get keytab
