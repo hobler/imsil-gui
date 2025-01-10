@@ -50,9 +50,11 @@ def get_param_filenames(manual_path):
 
 ##### Start of script #####
 
-# Generate the filepath for the manual.tex file
-manual_subfolder = "manual_2024-03"
-manual_filename = "manual.tex"
+# Generate the filepath for the manual.tex file from manual file
+with open('manual_version', 'r') as file:
+    manual_subfolder = file.read().strip()
+    manual_filename = manual_subfolder.split("_")[0] + '.tex'
+    
 current_file_location = os.path.dirname(__file__)
 manual_path = os.path.join(current_file_location, manual_subfolder, manual_filename)
 
