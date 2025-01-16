@@ -1,0 +1,42 @@
+\contentsline {chapter}{\numberline {1}Introduction}{5}{}%
+\contentsline {chapter}{\numberline {2}Ion and Target Specification}{9}{}%
+\contentsline {section}{\numberline {2.1}Ion Beam}{10}{}%
+\contentsline {section}{\numberline {2.2}Material}{13}{}%
+\contentsline {section}{\numberline {2.3}Geometry}{14}{}%
+\contentsline {section}{\numberline {2.4}Dynamic Target Updates}{15}{}%
+\contentsline {chapter}{\numberline {3}Physical Models}{17}{}%
+\contentsline {section}{\numberline {3.1}Selection of Collision Partners}{17}{}%
+\contentsline {section}{\numberline {3.2}Interatomic Potential}{19}{}%
+\contentsline {section}{\numberline {3.3}Implantation Damage}{20}{}%
+\contentsline {section}{\numberline {3.4}Backscattering, Transmission, and Sputtering}{23}{}%
+\contentsline {section}{\numberline {3.5}Electronic Stopping}{25}{}%
+\contentsline {section}{\numberline {3.6}Rutherford Backscattering / Channeling}{27}{}%
+\contentsline {chapter}{\numberline {4}Input and Output Files}{29}{}%
+\contentsline {section}{\numberline {4.1}Input Files}{31}{}%
+\contentsline {section}{\numberline {4.2}The Output File \texttt {OUT}}{35}{}%
+\contentsline {section}{\numberline {4.3}1-D Histogram Files}{36}{}%
+\contentsline {section}{\numberline {4.4}2-D Histogram Files}{41}{}%
+\contentsline {section}{\numberline {4.5}3-D Histogram Files}{43}{}%
+\contentsline {section}{\numberline {4.6}Miscellaneous Output Files}{44}{}%
+\contentsline {chapter}{\numberline {5}Input Parameters}{47}{}%
+\contentsline {section}{\numberline {5.1}\texttt {\&SETUP} ~}{49}{}%
+\contentsline {section}{\numberline {5.2}\texttt {\&GEOMETRY} ~}{60}{}%
+\contentsline {section}{\numberline {5.3}\texttt {\&ATOMS} ~}{68}{}%
+\contentsline {section}{\numberline {5.4}\texttt {\&IONS} ~}{72}{}%
+\contentsline {section}{\numberline {5.5}\texttt {\&CRYSTAL} ~}{79}{}%
+\contentsline {section}{\numberline {5.6}\texttt {\&MATERIAL} ~}{82}{}%
+\contentsline {section}{\numberline {5.7}\texttt {\&DAMAGE} ~}{86}{}%
+\contentsline {section}{\numberline {5.8}\texttt {\&SNPAR} ~}{98}{}%
+\contentsline {section}{\numberline {5.9}\texttt {\&SEPAR} ~}{106}{}%
+\contentsline {section}{\numberline {5.10}\texttt {\&OUTPUT} ~}{112}{}%
+\contentsline {chapter}{\numberline {6}Auxiliary Scripts}{133}{}%
+\contentsline {section}{\numberline {6.1}Scripts for Running IMSIL}{133}{}%
+\contentsline {section}{\numberline {6.2}Scripts for Reading and Plotting Results}{136}{}%
+\contentsline {chapter}{\numberline {7}Examples}{139}{}%
+\contentsline {section}{\numberline {7.1}Ion Implantation into a Flat Target}{139}{}%
+\contentsline {section}{\numberline {7.2}Ion Implantation into a Trench}{141}{}%
+\contentsline {section}{\numberline {7.3}Ion Implantation into a Multilayer Structure}{142}{}%
+\contentsline {section}{\numberline {7.4}Spot Burn}{144}{}%
+\contentsline {section}{\numberline {7.5}Static Sputtering}{145}{}%
+\contentsline {section}{\numberline {7.6}Dynamic Sputtering}{145}{}%
+\contentsline {section}{\numberline {7.7}RBS}{147}{}%

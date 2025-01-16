@@ -90,7 +90,7 @@ if __name__ == '__main__':
     # Parse parameters
     parameters = []
     for filename, tablename in zip(filenames, tablenames):
-        parameters.extend(parse_file(filename, tablename, parse_private))
+        parameters.extend(parse_file(filename, tablename, parse_private, manual_path))
 
     # Create and write into database
     if os.path.exists(db_name):
