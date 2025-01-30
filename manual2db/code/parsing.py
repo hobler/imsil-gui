@@ -48,8 +48,8 @@ def parse_file(filename, tablename, parse_private, manual_path):
         
         content = replace_references(content, manual_aux)
         content = repair_rest_warnings(content)
-        content = remove_inline_math_environment(content)
         content = remove_curly_brackets(content)
+        content = remove_inline_math_environment(content)
         content = replace_math_symbols(content)
 
         # List of the parameters to be returned
