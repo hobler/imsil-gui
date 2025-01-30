@@ -117,9 +117,12 @@ def parse_file(filename, tablename, parse_private, manual_path):
                 p_range = p_range.replace(' ldots ', '...')
                 p_range = p_range.replace('\\', '\\\\')
                 p_range = process_list(p_range)
+                
+            # Get string condition
+            condition = 'TODO' # TODO
 
             parameters.append(Parameter(record, title, short_desc, long_desc,
-                                        p_type, default_value, p_range))
+                                        p_type, default_value, p_range, condition))
 
     return parameters
 
