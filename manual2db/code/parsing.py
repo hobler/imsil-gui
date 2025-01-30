@@ -10,6 +10,7 @@ as separate functions if the type of operation is used multiple times.
 
 from code.parameter import Parameter
 import re
+import os
 
 
 def parse_file(filename, tablename, parse_private, manual_path):
@@ -49,6 +50,7 @@ def parse_file(filename, tablename, parse_private, manual_path):
         content = repair_rest_warnings(content)
         content = remove_inline_math_environment(content)
         content = remove_curly_brackets(content)
+        content = replace_math_symbols(content)
 
         # List of the parameters to be returned
         parameters = []
@@ -381,6 +383,7 @@ def process_table(inp):
     else:
         return inp
 
+
 def remove_inline_math_environment(string):
     """
     Remove inline math environment, ie. $x$ -> x, from a string.
@@ -390,6 +393,7 @@ def remove_inline_math_environment(string):
     """
     
     return string.replace("$", "")
+
 
 def remove_curly_brackets(string):
     """
@@ -433,3 +437,159 @@ def remove_curly_brackets(string):
                 return_string[i] = string[i]
         
     return "".join(filter(None, return_string))
+
+
+def apply_modifier(text, modifier, symbols):
+    """
+    Called by replace_math_symbols() to apply the modifier to the given text.
+    Used to replace latex subscripts and superscript characters with their unicode equivalent.
+    This function was modifed from https://github.com/ypsu/latex-to-unicode
+    
+    :param text: The text to apply the modifier to.
+    :param modifier: The modifier to search for, "_" or "^".
+    :param symbols: The dictionary of symbols to replace the modifier with.
+    :return: The text with unicode subscripts or superscripts.
+    """
+	
+    return_text = ""
+    new_text = ""
+    
+    # tags that should not be replaced with subscript or superscript
+    exclude_tags = ["keytab", "keydescription"]
+    
+    mode_normal, mode_modified, mode_long = range(3)
+    mode = mode_normal
+    
+    for ch in text:
+        
+        # enter modified mode. don't save the modifier
+        if mode == mode_normal and ch == modifier:
+            mode = mode_modified
+            continue
+        
+        elif mode == mode_modified:
+            
+            # modify entire parantehsis
+            if ch == '{':
+                new_text += ch
+                mode = mode_long
+            
+            # modify only one char
+            else:
+                nch = symbols.get(ch)
+                return_text += nch if nch else ch
+                mode = mode_normal
+        
+        # exit modified mode. save the modifier and the string if applicable
+        elif mode == mode_long and ch == '}':
+            new_text += ch
+            mode = mode_normal
+            
+            # don't check for sub and super replacements when the tag is excluded
+            if new_text[1:-1] in exclude_tags:
+                return_text += new_text
+                new_text = ""
+                mode = mode_normal
+                continue
+            
+            # check if new_text can be modified and applied
+            replace_text = ""
+            for nch in new_text:
+                
+                if nch in ["{", "}"]:
+                    continue
+                
+                nch = symbols.get(nch)
+                
+                if nch:
+                    replace_text += nch
+                else:
+                    return_text += modifier + new_text
+                    new_text = ""
+                    break
+            else:
+                return_text += replace_text
+                new_text = ""
+                continue
+
+            continue
+        
+        elif mode == mode_long:
+            new_text += ch
+            continue
+        
+        else:
+            return_text += ch
+    
+    return return_text
+
+
+def replace_fractions(text):
+    """
+    Replace latex fractions with parantheses and a division sign.
+    
+    :param text: The text to replace fractions in.
+    :return: The text with the fractions replaced.
+    """
+    
+    # Pattern to match \frac{STR1}{STR2} with nested braces
+    pattern = r'\\frac\{((?:[^{}]|\{[^{}]*\})*)\}\{((?:[^{}]|\{[^{}]*\})*)\}'
+    
+    text_match = re.search(pattern, text)
+    
+    while text_match:
+        nom = f"({text_match.group(1)})" if len(text_match.group(1)) > 1 else f"{text_match.group(1)}"
+        denom = f"({text_match.group(2)})" if len(text_match.group(2)) > 1 else f"{text_match.group(2)}"
+        text = text.replace(text_match.group(0), f"{nom}/{denom}")
+        text_match = re.search(pattern, text)
+    
+    return text
+    
+
+def replace_math_symbols(input_string):
+    """
+    Replace latex math symbols with their unicode equivalent, also in subscripts and superscripts.
+    This function was modifed from https://github.com/ypsu/latex-to-unicode
+    
+    :param string: String with latex math symbols
+    :return: String with unicode math symbols
+    """
+    
+    filepath = os.path.dirname(__file__)
+    
+    # Dictionary of latex math symbols and their unicode equivalent
+    # Symbol list found at https://github.com/ypsu/latex-to-unicode
+    with open(f"{filepath}\symbols", "r", encoding="utf-8") as file:
+        symbols_raw = file.read()
+        
+    with open(f"{filepath}\superscripts", "r", encoding="utf-8") as file:
+        superscripts_raw = file.read()
+        
+    with open(f"{filepath}\subscripts", "r", encoding="utf-8") as file:
+        subscripts_raw = file.read()
+        
+    # Save the symbols in dictionaries to be used in the apply_modifier function
+    superscripts_dict = {}
+    subscripts_dict = {}
+    
+    for line in superscripts_raw.split("\n"):
+        if line:
+            latex, unicode = line.split(" ")
+            superscripts_dict[latex] = unicode
+            
+    for line in subscripts_raw.split("\n"):
+        if line:
+            latex, unicode = line.split(" ")
+            subscripts_dict[latex] = unicode
+            
+    # Replace latex symbols at once
+    for line in symbols_raw.split("\n"):
+        if line:
+            latex, unicode = line.split(" ", maxsplit=1)
+            input_string = input_string.replace(latex, unicode)
+    
+    input_string = apply_modifier(input_string, "^", superscripts_dict)
+    #input_string = apply_modifier(input_string, "_", subscripts_dict)
+    input_string = replace_fractions(input_string)
+    
+    return input_string
