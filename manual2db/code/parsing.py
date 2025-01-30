@@ -589,7 +589,7 @@ def replace_math_symbols(input_string):
             input_string = input_string.replace(latex, unicode)
     
     input_string = apply_modifier(input_string, "^", superscripts_dict)
-    #input_string = apply_modifier(input_string, "_", subscripts_dict)
+    input_string = apply_modifier(input_string, "_", subscripts_dict)
     input_string = replace_fractions(input_string)
     
     return input_string
