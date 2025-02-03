@@ -21,7 +21,10 @@ viewing projects in a directory (Author: Konstantinos Zafeiris)
 ### Used libraries
 The following libraries need to be installed in order to run the application.
 -	`Pmw`: used to create tooltips
--	`f90nml` **(Version &ge; 1.4.0)**: used to load and save IMSIL input files.
+
+In addition, the `f90nml`package is used to load and save IMSIL input files. 
+To avoid installation problems, the source code   **(Version &ge; 1.4.4)** has
+been added to the project.
 
 ### Running the program
 
