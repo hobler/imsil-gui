@@ -119,7 +119,7 @@ def parse_file(filename, tablename, parse_private, manual_path):
                 p_range = process_list(p_range)
                 
             # Get string condition
-            condition = 'TODO' # TODO
+            condition = get_range_condition(title, p_range)
 
             parameters.append(Parameter(record, title, short_desc, long_desc,
                                         p_type, default_value, p_range, condition))
@@ -596,3 +596,53 @@ def replace_math_symbols(input_string):
     input_string = replace_fractions(input_string)
     
     return input_string
+
+def get_range_condition(parameter, range):
+    """
+    Parse the range string to get a condition for the database
+    that can be used with eval() to check if a value is within the range.
+    
+    :param parameter: The name of the parameter
+    :param range: The range string from the manual
+    :return: The condition string
+    """
+    
+    # simple conditons, like "< 0". need to replace ≥ with >=
+    pattern = r'^\s*(\d+\s*[><≥≤]\s*\d*|\d*\s*[><≥≤]\s*\d+)\s*\.?\s*$'
+    search = re.search(pattern, range)
+    
+    if search:
+        condition = range.replace("≤", "<=").replace("≥", ">=").replace(".", "").replace(" ", "")
+        
+        if condition[0].isnumeric():
+            return f"{condition}{parameter}"
+        else:
+            return f"{parameter}{condition}"
+    
+    # longer conditions like 0 ≤ NRAD2 ≤ 32
+    pattern = r'\s*(\w+)\s*([><≥≤])\s*(\w+)\s*([><≥≤])\s*(\w+)\s*'
+    search = re.search(pattern, range)
+    
+    if search:
+        condition = range.replace("≤", "<=").replace("≥", ">=").replace(" ", "")
+        
+        return f"{condition}"
+        
+    # simple true and false condition such as "T,F"
+    pattern = r'\s*T\s*,\s*F\s*'
+    search = re.findall(pattern, range)
+    
+    if search:
+        return f"{parameter} is True or {parameter} is False"
+    
+    # lists of names, like 'wurtzite', 'wurzite', '2H'
+        # only match "pure" lists without extra conditions
+    if range[0] == "'" and range.rstrip(".")[-1] == "'":
+        pattern = r"'([^']+)'(?:\s*[,\n-]\s*|\s+)?+"
+        search = re.findall(pattern, range)
+        
+        if search:
+            return f"{parameter} in {search}"
+    
+    # "no range defined in manual"
+    return "No condition parsed"
