@@ -607,11 +607,12 @@ def get_range_condition(parameter, range):
     :return: The condition string
     """
     
-    # simple conditons, like "< 0". need to replace ≥ with >=
+    # conditions with only one bound such as "< 0"
     pattern = r'^\s*(\d+\s*[><≥≤]\s*\d*|\d*\s*[><≥≤]\s*\d+)\s*\.?\s*$'
     search = re.search(pattern, range)
     
     if search:
+        # replace for eval() to function
         condition = range.replace("≤", "<=").replace("≥", ">=").replace(".", "").replace(" ", "")
         
         if condition[0].isnumeric():
@@ -619,30 +620,74 @@ def get_range_condition(parameter, range):
         else:
             return f"{parameter}{condition}"
     
-    # longer conditions like 0 ≤ NRAD2 ≤ 32
-    pattern = r'\s*(\w+)\s*([><≥≤])\s*(\w+)\s*([><≥≤])\s*(\w+)\s*'
+    # condition with the parameter present like "DAMAMO > 0"
+    pattern = r'^\s*(\w+)\s*([><≥≤])\s*(\w+)\s*$'
+    search = re.search(pattern, range)
+    
+    if search:
+        condition = range.replace("≤", "<=").replace("≥", ">=").replace(" ", "")
+        return condition
+    
+    # conditions with upper and lower bounds such as 0 ≤ NRAD2 ≤ 32
+    pattern = r'^\s*(\w+)\s*([><≥≤])\s*(\w+)\s*([><≥≤])\s*(\w+)\s*$'
     search = re.search(pattern, range)
     
     if search:
         condition = range.replace("≤", "<=").replace("≥", ">=").replace(" ", "")
         
-        return f"{condition}"
+        return condition
         
-    # simple true and false condition such as "T,F"
-    pattern = r'\s*T\s*,\s*F\s*'
+    # true and false condition such as "T,F" strictly without extra conditions
+    pattern = r'^\s*T\s*,\s*F\s*$'
     search = re.findall(pattern, range)
     
     if search:
-        return f"{parameter} is True or {parameter} is False"
+        return f"{parameter}.lower() in ['true', 'false']"
     
     # lists of names, like 'wurtzite', 'wurzite', '2H'
-        # only match "pure" lists without extra conditions
-    if range[0] == "'" and range.rstrip(".")[-1] == "'":
+        # strictly match list of names without extra conditions
+    if range.lstrip("- ")[0] == "'" and range.rstrip(".")[-1] == "'":
         pattern = r"'([^']+)'(?:\s*[,\n-]\s*|\s+)?+"
         search = re.findall(pattern, range)
         
         if search:
-            return f"{parameter} in {search}"
+            return f"{parameter}.lower() in {[x.lower() for x in search]}"
+        
+    # condition is "arbitrary" or "any"
+    if range.strip("- ").lower() in ["arbitrary", "any"]:
+        return "True"
+    
+    # special cases
+    if parameter == "IARAND":
+            return "1 ≤ IARAND ≤ 70000 if RNG.lower() == 'haas' else 1 ≤ IARAND ≤ 131071"
+        
+    elif parameter == "NAME":
+        if range.strip() == "any chemical name of an atom":
+            return f"NAME.lower() in {get_chemical_elements()}"
+        else:
+            return "NAME.lower() in ['sc', 'bcc', 'fcc', 'zincblende', '3c', 'wurtzite', 'wurzite', '2h', '4h', '6h']"
+
+    elif range.strip() == "any real number":
+        return f"{parameter}.replace('.', '').replace(',', '').isnumeric()"
+    
+    elif parameter == "NDAMDIM":
+        return "1<=NDAMDIM<=3"
+    
+    elif parameter == "LAMZON":
+        #  T if LDAMDYN=T \\\\ T, F otherwise
+        return "LAMZON.lower() == 'true' if LDAMDYN.lower() == 'true' else LAMZON.lower() in ['true', 'false']"
+    
+    elif parameter == "XTAL":
+        return "len(XTAL) <= 80"
     
     # "no range defined in manual"
     return "No condition parsed"
+
+def get_chemical_elements():
+    """Returns a list of chemical element names in lowercase."""
+    elements = [
+        'h', 'he', 'li', 'be', 'b', 'c', 'n', 'o', 'f', 'ne',
+        'na', 'mg', 'al', 'si', 'p', 's', 'cl', 'ar', 'k', 'ca',
+        'sc', 'ti', 'v', 'cr', 'mn', 'fe', 'co', 'ni', 'cu', 'zn',
+        'ga', 'ge', 'as', 'se', 'br', 'kr', 'rb', 'sr', 'y', 'zr']
+    return elements
