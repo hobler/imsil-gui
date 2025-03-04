@@ -535,7 +535,7 @@ def replace_fractions(text):
     :return: The text with the fractions replaced.
     """
     
-    # Pattern to match \frac{STR1}{STR2} with nested braces
+    # Pattern to match \frac{STR1}{STR2} with nested brackets
     pattern = r'\\frac\{((?:[^{}]|\{[^{}]*\})*)\}\{((?:[^{}]|\{[^{}]*\})*)\}'
     
     text_match = re.search(pattern, text)
@@ -562,13 +562,13 @@ def replace_math_symbols(input_string):
     
     # Dictionary of latex math symbols and their unicode equivalent
     # Symbol list found at https://github.com/ypsu/latex-to-unicode
-    with open(f"{filepath}\symbols", "r", encoding="utf-8") as file:
+    with open(f"{filepath}/symbols", "r", encoding="utf-8") as file:
         symbols_raw = file.read()
         
-    with open(f"{filepath}\superscripts", "r", encoding="utf-8") as file:
+    with open(f"{filepath}/superscripts", "r", encoding="utf-8") as file:
         superscripts_raw = file.read()
         
-    with open(f"{filepath}\subscripts", "r", encoding="utf-8") as file:
+    with open(f"{filepath}/subscripts", "r", encoding="utf-8") as file:
         subscripts_raw = file.read()
         
     # Save the symbols in dictionaries to be used in the apply_modifier function
