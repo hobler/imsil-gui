@@ -282,7 +282,7 @@ def process_list(inp):
     if len(elements) > 1:
         list_rst = ''
         for elem in elements:
-            list_rst = list_rst + '- ' + elem.strip().strip(r'\\\\') + '\n'
+            list_rst = list_rst + elem.strip().strip(r'\\\\') + '\n'
 
         list_rst = list_rst + '\n'
         return list_rst
