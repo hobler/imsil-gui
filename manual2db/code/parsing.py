@@ -48,8 +48,8 @@ def parse_file(filename, tablename, parse_private, manual_path):
         
         content = replace_references(content, manual_aux)
         content = repair_rest_warnings(content)
-        content = remove_inline_math_environment(content)
         content = replace_math_symbols(content)
+        content = remove_inline_math_environment(content)
         content = remove_curly_brackets(content)
         
 
@@ -389,12 +389,33 @@ def process_table(inp):
 def remove_inline_math_environment(string):
     """
     Remove inline math environment, ie. $x$ -> x, from a string.
+    Also removes any whitespaces in formulas
     
     :param string: String with inline math environment
     :return: String without inline math environment
     """
     
-    return string.replace("$", "")
+    return_string = string
+    replacement_string = ""
+    in_math = False
+    
+    for ch in string:
+        if ch == "$":
+            
+            if in_math:
+                return_string = return_string.replace(f"${replacement_string}$", replacement_string.replace(" ", ""))
+                replacement_string = ""
+                in_math = False
+            else:
+                in_math = True
+                
+        else:
+            
+            if in_math:
+                replacement_string += ch
+        
+    
+    return return_string
 
 
 def remove_curly_brackets(string):
@@ -479,11 +500,7 @@ def apply_modifier(text, modifier, symbols):
             else:
                 nch = symbols.get(ch)
                 # if no replacement exists, the modifier should be kept
-                # but remove the char if it's a whitespace, e.g. "^ " -> "^"
-                if modifier == "^":
-                    return_text += nch if nch else f"{modifier}{ch}".replace(" ", "")
-                else:
-                    return_text += nch if nch else ch
+                return_text += nch if nch else f"{modifier}{ch}"
                     
                 mode = mode_normal
         
@@ -595,7 +612,6 @@ def replace_math_symbols(input_string):
         if line:
             latex, unicode = line.split(" ", maxsplit=1)
             # First replace symbols with optional whitespace
-            input_string = input_string.replace(latex + " ", unicode)
             input_string = input_string.replace(latex, unicode)
     
     input_string = apply_modifier(input_string, "^", superscripts_dict)
