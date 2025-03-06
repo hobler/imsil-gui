@@ -48,9 +48,10 @@ def parse_file(filename, tablename, parse_private, manual_path):
         
         content = replace_references(content, manual_aux)
         content = repair_rest_warnings(content)
-        content = remove_curly_brackets(content)
         content = remove_inline_math_environment(content)
         content = replace_math_symbols(content)
+        content = remove_curly_brackets(content)
+        
 
         # List of the parameters to be returned
         parameters = []
@@ -110,12 +111,13 @@ def parse_file(filename, tablename, parse_private, manual_path):
                 p_range = keytab.split('Range:')[1]
                 p_range = p_range.split(r'\end{keytab}')[0].strip()
             except IndexError:
-                p_range = 'no range defined in manual'
+                p_range = 'No range defined in manual'
             else:
                 p_range = ' '.join(p_range.split())
                 p_range = p_range.strip(r'\>')
                 p_range = p_range.replace(' ldots ', '...')
                 p_range = p_range.replace('\\', '\\\\')
+                p_range = p_range.rstrip("}")
                 p_range = process_list(p_range)
                 
             # Get string condition
@@ -407,8 +409,8 @@ def remove_curly_brackets(string):
     :param string: String with curly brackets
     :return: String without curly brackets
     """
-    # Don't remove the brackets if they are after ^, _, \frac, \sqrt, \begin, \end, "}"
-    symbols_before = ["^", "_", "c", "t", "n", "d", "}"]
+    # Don't remove the brackets if they are after ^, _, √, \begin, \end, "}"
+    symbols_before = ["^", "_", "√", "t", "n", "d", "}"]
     # Also don't remove if brackets are before "\n"
     symbols_after = ["\n"]
     
@@ -468,7 +470,6 @@ def apply_modifier(text, modifier, symbols):
         # enter modified mode. don't save the modifier
         if mode == mode_normal and ch == modifier:
             mode = mode_modified
-            continue
         
         elif mode == mode_modified:
             
@@ -480,7 +481,13 @@ def apply_modifier(text, modifier, symbols):
             # modify only one char
             else:
                 nch = symbols.get(ch)
-                return_text += nch if nch else ch
+                # if no replacement exists, the modifier should be kept
+                # but remove the char if it's a whitespace, e.g. "^ " -> "^"
+                if modifier == "^":
+                    return_text += nch if nch else f"{modifier}{ch}".replace(" ", "")
+                else:
+                    return_text += nch if nch else ch
+                    
                 mode = mode_normal
         
         # exit modified mode. save the modifier and the string if applicable
@@ -517,10 +524,11 @@ def apply_modifier(text, modifier, symbols):
 
             continue
         
+        # Inside curly brackets, add characters
         elif mode == mode_long:
             new_text += ch
-            continue
-        
+                
+        # Normal mode, add characters
         else:
             return_text += ch
     
@@ -589,6 +597,8 @@ def replace_math_symbols(input_string):
     for line in symbols_raw.split("\n"):
         if line:
             latex, unicode = line.split(" ", maxsplit=1)
+            # First replace symbols with optional whitespace
+            input_string = input_string.replace(latex + " ", unicode)
             input_string = input_string.replace(latex, unicode)
     
     input_string = apply_modifier(input_string, "^", superscripts_dict)
