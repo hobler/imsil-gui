@@ -49,6 +49,7 @@ def parse_file(filename, tablename, parse_private, manual_path):
         
         content = replace_references(content, manual_aux)
         content = repair_rest_warnings(content)
+        content = reformat_square_roots(content)
         content = replace_math_symbols(content)
         content = remove_inline_math_environment(content)
         content = remove_curly_brackets(content)
@@ -633,6 +634,58 @@ def removeComments(string):
     :return: String without comments
     """
     return re.sub(r'(?<!\\)%.*', '', string)
+
+def reformat_square_roots(string):
+    """
+    Takes a string with square roots and reformat them to the correct syntax.
+    
+    :param string: The string to reformat.
+    :return: The reformatted string.
+    """
+    
+    return_string = string
+    
+    # First find all math environments
+    math_pattern = r'\$(.*?)\$'
+    math_matches = list(re.finditer(math_pattern, string, re.DOTALL))
+    
+    # Process each math environment separately
+    for math_match in math_matches:
+        full_math = math_match.group(0)  # Complete $...$ expression
+        math_content = math_match.group(1)  # Just the content inside $...$
+        
+        # First square root expression
+        pattern_1 = r'\\sqrt(?:\[([^\]]+)\])?\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}'
+        matches_1 = list(re.finditer(pattern_1, math_content))
+        
+        new_math_content = math_content
+        for match in matches_1:
+            if match.group(0) and match.group(1):
+                a, b = match.group(1), match.group(2)
+                a = "" if a == "2" else f"^{{{a}}}" # Remove "2" from simple square roots
+                b = a.lstrip("(").rstrip(")")
+                replacement = f"{a}\\sqrt{{{b}}}"
+                new_math_content = new_math_content.replace(match.group(0), replacement, 1)
+        
+        # Second square root expression
+        pattern_2 = r'(\{[^{}]*\}|\([^()]*\)|\[[^\[\]]*\]|[^\s^{}()\[\]]+)\^\{([^/]+)/([^}]+)\}'
+        matches_2 = list(re.finditer(pattern_2, new_math_content))
+        
+        for match in matches_2:
+            if match.group(0) and match.group(1) and match.group(2):
+                a, b, c = match.groups()
+                a = a.lstrip("(").rstrip(")")
+                c = "" if c == "2" else f"^{{{c}}}" # Remove "2" from simple square roots
+                b = "" if b == "1" else b # Remove "1" from simple square roots
+                replacement = f"{c}\\sqrt{{{{{a}}}^{{{b}}}}}"
+                new_math_content = new_math_content.replace(match.group(0), replacement, 1)
+        
+        # Replace the original math environment with the processed one
+        if new_math_content != math_content:
+            new_full_math = f"${new_math_content}$"
+            return_string = return_string.replace(full_math, new_full_math, 1)
+    
+    return return_string
 
 def get_range_condition(parameter, range):
     """
