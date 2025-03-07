@@ -619,3 +619,13 @@ def replace_math_symbols(input_string):
     input_string = replace_fractions(input_string)
     
     return input_string
+
+def removeComments(string):
+    """
+    Remove comments from a string. 
+    Anything between a "%" (without a backslach before) and a newline is removed.
+    
+    :param string: String with comments
+    :return: String without comments
+    """
+    return re.sub(r'(?<!\\)%.*', '', string)
