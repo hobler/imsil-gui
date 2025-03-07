@@ -35,6 +35,7 @@ def parse_file(filename, tablename, parse_private, manual_path):
         content = replace_texttt_mathwrapper(content)
         content = parse_private_sections(content, private=parse_private)
         content = remove_iffalse(content)
+        content = removeComments(content)
         content = replace_latex_macros(content, {r'\&': '&', r'\AA': r'$\AA$',
                                                '~': ' ', r'\%': '%'})
         content = content.replace(r'\ ', ' ')
@@ -717,3 +718,14 @@ def get_chemical_elements():
         'sc', 'ti', 'v', 'cr', 'mn', 'fe', 'co', 'ni', 'cu', 'zn',
         'ga', 'ge', 'as', 'se', 'br', 'kr', 'rb', 'sr', 'y', 'zr']
     return elements
+
+def removeComments(string):
+    """
+    Remove comments from a string. 
+    Anything between a "%" (without a backslach before) and a newline is removed.
+    
+    :param string: String with comments
+    :return: String without comments
+    """
+    return re.sub(r'(?<!\\)%.*', '', string)
+    
