@@ -1,7 +1,7 @@
 """This Module handles the actual parsing of the .tex files.
 
 After parsing the file and converting the latex specific syntax to
-reStructuredText, the function parse_file returns a list of the collected
+Unicode, the function parse_file returns a list of the collected
 parameters.
 
 The parseFile function uses mostly string operations some of which are defined
@@ -254,7 +254,7 @@ def repair_rest_warnings(inp):
 
 
 def replace_references(inp, manual_aux):
-    r"""This function converts the references from LaTeX to reStructuredText
+    r"""This function converts the references from LaTeX to Unicode
 
     See project report for detailed information
 
@@ -337,7 +337,7 @@ def remove_iffalse(inp):
 
 
 def replace_latex_macros(inp, macros):
-    r"""Replaces special latex characters with the reStrucuredText pendant.
+    r"""Replaces special latex characters with Unicode.
 
     E.g. \\% gets replaced with %
 
@@ -353,7 +353,7 @@ def replace_latex_macros(inp, macros):
 
 
 def replace_citations(inp):
-    r"""Convert the references from LaTeX to reStructuredText
+    r"""Convert the references from LaTeX to Unicode
 
     See project report for detailed information
 
