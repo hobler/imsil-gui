@@ -21,6 +21,8 @@ def parse_file(filename, tablename, parse_private, manual_path):
 
     :param filename: File name with abspath
     :param tablename: Name of record = name of sqlite table
+    :param parse_private: Boolean flag to parse private sections
+    :param manual_path: Path to the manual.tex file
     :return: List of Parameter objects
     """
     print('>>>>>> Filename: ', filename)
@@ -140,7 +142,7 @@ def replace_texttt(inp, replace=''):
     NOTE: There might be some interferences with the reST syntax if the string
           replace is not empty
 
-    :param inp: String string to be processed
+    :param inp: String to be processed
     :param replace: Optional string that replaces '\texttt{' as well as '}'
     :return: Processed string
     """
@@ -162,7 +164,7 @@ def replace_texttt_mathwrapper(inp, replace=''):
     occurrences of \texttt{} must be changed to {}.
 
     :param inp: String to be processed
-    :param replace: optinal string that replaces '\texttt{' as well as '}'
+    :param replace: Optional string that replaces '\texttt{' as well as '}'
     :return: Processed string
     """
     chunks = inp.split('$')
@@ -253,6 +255,7 @@ def replace_references(inp, manual_aux):
     See project report for detailed information
 
     :param inp: String to be processed
+    :param manual_aux: Content of the manual's .aux file
     :return: Processed string
     """
     output = ''
@@ -592,7 +595,7 @@ def replace_math_symbols(input_string):
     also in subscripts and superscripts.
     This function was modifed from https://github.com/ypsu/latex-to-unicode
     
-    :param string: String with latex math symbols
+    :param input_string: String with latex math symbols
     :return: String with unicode math symbols
     """
     
