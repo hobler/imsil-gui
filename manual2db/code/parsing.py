@@ -30,6 +30,8 @@ def parse_file(filename, tablename, parse_private, manual_path):
         # Remove comments
         for line in fp:
             if line[0] is not '%':
+                # this also removes comments that begin after other characters
+                line = re.sub(r'(?<!\\)%.*$', '', line)
                 content += line
         
         content = replace_texttt_mathwrapper(content)
@@ -77,7 +79,9 @@ def parse_file(filename, tablename, parse_private, manual_path):
             short_desc = short_desc.replace('\\', '\\\\')
 
             # Get long_desc
-            ld_pattern = r'(?:}\n\t%\n\t|}\n  |} \n  |}\n|} \n)(.*?)(?:\\begin\{keytab\}|\\end\{keydescription\})'
+            ld_pattern = (r'(?:}\n\t%\n\t|}\n  |} \n  |}\n|} \n)(.*?)'
+            r'(?:\\begin\{keytab\}|\\end\{keydescription\})')
+            
             ld_regex = re.compile(ld_pattern, re.DOTALL)
             ld_match = ld_regex.search(entry)
             long_desc = ld_match.group(1)
@@ -408,7 +412,8 @@ def remove_inline_math_environment(string):
         if ch == "$":
             
             if in_math:
-                return_string = return_string.replace(f"${replacement_string}$", replacement_string.replace(" ", ""))
+                return_string = return_string.replace(f"${replacement_string}$",
+                                            replacement_string.replace(" ", ""))
                 replacement_string = ""
                 in_math = False
             else:
@@ -442,7 +447,8 @@ def remove_curly_brackets(string):
     # To remember what happened to the last matching bracket
     brackets = []
     
-    # Build the string char by char, checking if the brackets should be added or not
+    # Build the string char by char, 
+    # checking if the brackets should be added or not
     for i in range(len(string)):
         
         match string[i]:
@@ -458,7 +464,9 @@ def remove_curly_brackets(string):
                         brackets.append("skip")
                     
             case "}":
-                if (brackets and brackets.pop() == "add") or string[i+1] in symbols_after:
+                if ((brackets and brackets.pop() == "add") or
+                    string[i+1] in symbols_after):
+                    
                     return_string[i] = string[i]
             
             case _:
@@ -470,7 +478,8 @@ def remove_curly_brackets(string):
 def apply_modifier(text, modifier, symbols):
     """
     Called by replace_math_symbols() to apply the modifier to the given text.
-    Used to replace latex subscripts and superscript characters with their unicode equivalent.
+    Used to replace latex subscripts and superscript characters,
+    with their unicode equivalent.
     This function was modifed from https://github.com/ypsu/latex-to-unicode
     
     :param text: The text to apply the modifier to.
@@ -514,7 +523,7 @@ def apply_modifier(text, modifier, symbols):
             new_text += ch
             mode = mode_normal
             
-            # don't check for sub and super replacements when the tag is excluded
+            # dont check for sub and super replacements when the tag is excluded
             if new_text[1:-1] in exclude_tags:
                 return_text += new_text
                 new_text = ""
@@ -568,8 +577,13 @@ def replace_fractions(text):
     text_match = re.search(pattern, text)
     
     while text_match:
-        nom = f"({text_match.group(1)})" if len(text_match.group(1)) > 1 else f"{text_match.group(1)}"
-        denom = f"({text_match.group(2)})" if len(text_match.group(2)) > 1 else f"{text_match.group(2)}"
+        
+        nom = (f"({text_match.group(1)})" 
+               if len(text_match.group(1)) > 1 else f"{text_match.group(1)}")
+        
+        denom = (f"({text_match.group(2)})" 
+                 if len(text_match.group(2)) > 1 else f"{text_match.group(2)}")
+        
         text = text.replace(text_match.group(0), f"{nom}/{denom}")
         text_match = re.search(pattern, text)
     
@@ -578,7 +592,8 @@ def replace_fractions(text):
 
 def replace_math_symbols(input_string):
     """
-    Replace latex math symbols with their unicode equivalent, also in subscripts and superscripts.
+    Replace latex math symbols with their unicode equivalent, 
+    also in subscripts and superscripts.
     This function was modifed from https://github.com/ypsu/latex-to-unicode
     
     :param string: String with latex math symbols
@@ -625,16 +640,6 @@ def replace_math_symbols(input_string):
     
     return input_string
 
-def removeComments(string):
-    """
-    Remove comments from a string. 
-    Anything between a "%" (without a backslach before) and a newline is removed.
-    
-    :param string: String with comments
-    :return: String without comments
-    """
-    return re.sub(r'(?<!\\)%.*', '', string)
-
 def reformat_square_roots(string):
     """
     Takes a string with square roots and reformat them to the correct syntax.
@@ -662,13 +667,16 @@ def reformat_square_roots(string):
         for match in matches_1:
             if match.group(0) and match.group(1):
                 a, b = match.group(1), match.group(2)
-                a = "" if a == "2" else f"^{{{a}}}" # Remove "2" from simple square roots
+                 # Remove "2" from simple square roots
+                a = "" if a == "2" else f"^{{{a}}}"
                 b = a.lstrip("(").rstrip(")")
                 replacement = f"{a}\\sqrt{{{b}}}"
-                new_math_content = new_math_content.replace(match.group(0), replacement, 1)
+                new_math_content = new_math_content.replace(match.group(0), 
+                                                            replacement, 1)
         
         # Second square root expression
-        pattern_2 = r'(\{[^{}]*\}|\([^()]*\)|\[[^\[\]]*\]|[^\s^{}()\[\]]+)\^\{([^/]+)/([^}]+)\}'
+        pattern_2 = (r'(\{[^{}]*\}|\([^()]*\)|\[[^\[\]]*\]|'
+                     r'[^\s^{}()\[\]]+)\^\{([^/]+)/([^}]+)\}')
         matches_2 = list(re.finditer(pattern_2, new_math_content))
         
         for match in matches_2:
@@ -678,7 +686,8 @@ def reformat_square_roots(string):
                 c = "" if c == "2" else f"^{{{c}}}" # Remove "2" from simple square roots
                 b = "" if b == "1" else b # Remove "1" from simple square roots
                 replacement = f"{c}\\sqrt{{{{{a}}}^{{{b}}}}}"
-                new_math_content = new_math_content.replace(match.group(0), replacement, 1)
+                new_math_content = new_math_content.replace(match.group(0), 
+                                                            replacement, 1)
         
         # Replace the original math environment with the processed one
         if new_math_content != math_content:
