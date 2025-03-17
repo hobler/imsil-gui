@@ -1,7 +1,7 @@
 """Main entry point for the project. 
 
 Parse parameters from the .tex files in the filenames list and store them in an
-SQLite database as reStructuredText.
+SQLite database as Unicode.
 
 The name of the database (db_name) and the path to the manual (manual_path) are 
 specified in this module.
