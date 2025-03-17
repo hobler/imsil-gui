@@ -1,7 +1,7 @@
 """Main entry point for the project. 
 
 Parse parameters from the .tex files in the filenames list and store them in an
-SQLite database as reStructuredText.
+SQLite database as Unicode.
 
 The name of the database (db_name) and the path to the manual (manual_path) are 
 specified in this module.
@@ -56,7 +56,9 @@ with open('manual_version', 'r') as file:
     manual_filename = manual_subfolder.split("_")[0] + '.tex'
     
 current_file_location = os.path.dirname(__file__)
-manual_path = os.path.join(current_file_location, manual_subfolder, manual_filename)
+manual_path = os.path.join(current_file_location, 
+                           manual_subfolder, 
+                           manual_filename)
 
 # Path to the database
 #db_name = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..',
@@ -90,7 +92,10 @@ if __name__ == '__main__':
     # Parse parameters
     parameters = []
     for filename, tablename in zip(filenames, tablenames):
-        parameters.extend(parse_file(filename, tablename, parse_private))
+        parameters.extend(parse_file(filename, 
+                                     tablename, 
+                                     parse_private, 
+                                     manual_path))
 
     # Create and write into database
     if os.path.exists(db_name):

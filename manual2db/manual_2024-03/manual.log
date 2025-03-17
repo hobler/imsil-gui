@@ -1,0 +1,1149 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.11.5)  16 JAN 2025 09:44
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**"c:/Users/Marcus/OneDrive - Chalmers/imsil-gui/manual2db/manual_2024-03/manual.tex"
+(c:/Users/Marcus/OneDrive - Chalmers/imsil-gui/manual2db/manual_2024-03/manual.tex
+LaTeX2e <2024-06-01> patch level 2
+L3 programming layer <2024-09-10>
+(C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/base\book.cls
+Document Class: book 2024/02/08 v1.4n Standard LaTeX document class
+(C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/base\bk12.clo
+File: bk12.clo 2024/02/08 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count194
+\c@chapter=\count195
+\c@section=\count196
+\c@subsection=\count197
+\c@subsubsection=\count198
+\c@paragraph=\count199
+\c@subparagraph=\count266
+\c@figure=\count267
+\c@table=\count268
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen141
+) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/gensymb\gensymb.sty
+Package: gensymb 2022/10/17 v1.0.2 (KJH)
+) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/multibib\multibib.sty
+Package: multibib 2008/12/10 v1.4 Multiple bibliographies for one document.
+\mb@biblabelwidth=\count269
+)
+\@auxoutimsil=\write3
+
+No file imsil.aux.
+\openout3 = `imsil.aux'.
+
+(C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
+) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+ (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks17
+) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+Package: graphics 2024/05/23 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+ (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+ (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+File: pdftex.def 2024/04/13 v1.2c Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen142
+\Gin@req@width=\dimen143
+) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.sty
+Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
+\multirow@colwidth=\skip51
+\multirow@cntb=\count270
+\multirow@dima=\skip52
+\bigstrutjot=\dimen144
+) (manualstyle.tex) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
+File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count271
+\l__pdf_internal_box=\box52
+) (manual.aux)
+\openout1 = `manual.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 29.
+LaTeX Font Info:    ... okay on input line 29.
+LaTeX Info: Redefining \celsius on input line 29.
+Package gensymb Info: Faking symbols for \degree and \celsius on input line 29.
+
+
+Package gensymb Warning: Not defining \perthousand.
+
+LaTeX Info: Redefining \ohm on input line 29.
+Package gensymb Info: Using \Omega for \ohm on input line 29.
+
+Package gensymb Warning: Not defining \micro.
+
+(C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count272
+\scratchdimen=\dimen145
+\scratchbox=\box53
+\nofMPsegments=\count273
+\nofMParguments=\count274
+\everyMPshowfont=\toks18
+\MPscratchCnt=\count275
+\MPscratchDim=\dimen146
+\MPnumerator=\count276
+\makeMPintoPDFobject=\count277
+\everyMPtoPDFconversion=\toks19
+) (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+ (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
+)) (titlepage.tex)
+
+[1
+
+
+{C:/Users/Marcus/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+
+[2
+
+]
+No file manual.toc.
+\tf@toc=\write4
+\openout4 = `manual.toc'.
+
+
+
+[3]
+
+[4
+
+]
+Chapter 1.
+(introduction.tex
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 3.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 3.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 3.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 18.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 18.
+
+
+LaTeX Warning: Citation `hobler_monte_1995' on page 5 undefined on input line 33.
+
+
+LaTeX Warning: Citation `hobler_effect_1992' on page 5 undefined on input line 35.
+
+
+LaTeX Warning: Citation `hobler_channeling_1999' on page 5 undefined on input line 35.
+
+
+LaTeX Warning: Citation `hobler_monte_1989' on page 5 undefined on input line 37.
+
+
+LaTeX Warning: Citation `hobler_simulation_2003' on page 5 undefined on input line 37.
+
+
+LaTeX Warning: Citation `simionescu_two-dimensional_1993' on page 5 undefined on input line 41.
+
+
+LaTeX Warning: Citation `hobler_two-dimensional_1988' on page 5 undefined on input line 44.
+
+
+LaTeX Warning: Citation `Moe85' on page 5 undefined on input line 46.
+
+
+
+[5]
+
+LaTeX Warning: Citation `hobler_monte_1995' on page 6 undefined on input line 64.
+
+
+LaTeX Warning: Citation `simionescu_model_1995' on page 6 undefined on input line 64.
+
+
+LaTeX Warning: Citation `hobler_towards_2000' on page 6 undefined on input line 64.
+
+
+LaTeX Warning: Citation `hobler_status_2003' on page 6 undefined on input line 64.
+
+
+LaTeX Warning: Citation `hobler_acceleration_1995' on page 6 undefined on input line 66.
+
+
+LaTeX Warning: Citation `kovac_investigation_2006' on page 6 undefined on input line 70.
+
+
+LaTeX Warning: Citation `hobler_multiscale_2005' on page 6 undefined on input line 72.
+
+
+LaTeX Warning: Citation `otto_coupled_2005' on page 6 undefined on input line 72.
+
+
+LaTeX Warning: Citation `g._hobler_simulation_2018' on page 6 undefined on input line 78.
+
+
+LaTeX Warning: Citation `schlueter_absence_2020' on page 6 undefined on input line 80.
+
+
+LaTeX Warning: Citation `schlueter_absence_2020' on page 6 undefined on input line 81.
+
+
+LaTeX Warning: Citation `ebm_assessment_2009' on page 6 undefined on input line 87.
+
+
+LaTeX Warning: Citation `hobler_assessment_2013' on page 6 undefined on input line 87.
+
+
+LaTeX Warning: Citation `lindsey_simple_2017' on page 6 undefined on input line 89.
+
+
+LaTeX Warning: Citation `hobler_dynamic_2011' on page 6 undefined on input line 90.
+
+
+LaTeX Warning: Citation `urbassek_sputtering_2018' on page 6 undefined on input line 95.
+
+
+LaTeX Warning: Citation `bradley_second_2021' on page 6 undefined on input line 95.
+
+
+LaTeX Warning: Citation `hobler_dynamic_2011' on page 6 undefined on input line 99.
+
+
+LaTeX Warning: Citation `hobler_combined_2015' on page 6 undefined on input line 99.
+
+
+
+[6])
+
+[7]
+
+[8
+
+]
+Chapter 2.
+(iontarget.tex) (iontarg_beam.tex
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2.
+ (C:\Users\Marcus\AppData\Local\Programs\MiKTeX\tex/latex/base\t1cmtt.fd
+File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+
+[9]
+
+pdfTeX warning: pdflatex (file ./coordinate_systems-crop.pdf): PDF inclusion: found PDF version <1.7>, but at most version <1.5> allowed
+<coordinate_systems-crop.pdf, id=42, 215.80624pt x 192.72pt>
+File: coordinate_systems-crop.pdf Graphic file (type pdf)
+<use coordinate_systems-crop.pdf>
+Package pdftex.def Info: coordinate_systems-crop.pdf  used on input line 34.
+(pdftex.def)             Requested size: 215.80571pt x 192.71951pt.
+
+LaTeX Warning: Reference `fig:coord' on page 10 undefined on input line 45.
+
+
+LaTeX Warning: Reference `fig:coord' on page 10 undefined on input line 49.
+
+
+
+[10]
+
+LaTeX Warning: Reference `eq:rotation_matrix' on page 11 undefined on input line 92.
+
+
+LaTeX Warning: Reference `fig:coord' on page 11 undefined on input line 111.
+
+
+
+[11 <./coordinate_systems-crop.pdf>]
+<diverg_y-crop.pdf, id=65, 405.515pt x 316.18124pt>
+File: diverg_y-crop.pdf Graphic file (type pdf)
+<use diverg_y-crop.pdf>
+Package pdftex.def Info: diverg_y-crop.pdf  used on input line 121.
+(pdftex.def)             Requested size: 324.41243pt x 252.94533pt.
+
+
+LaTeX Warning: Reference `fig:diverg' on page 12 undefined on input line 134.
+
+
+
+[12 <./diverg_y-crop.pdf>]) (iontarg_material.tex
+
+[13]) (iontarg_geometry.tex
+
+LaTeX Warning: Reference `s:updates' on page 14 undefined on input line 23.
+
+
+
+[14]
+
+LaTeX Warning: Citation `bradley_second_2021' on page 15 undefined on input line 37.
+
+
+LaTeX Warning: Citation `lindsey_simple_2017' on page 15 undefined on input line 51.
+
+) (iontarg_updates.tex
+
+[15])
+
+[16]
+Chapter 3.
+(physics.tex) (phys_collisions.tex
+
+LaTeX Warning: Citation `hobler_acceleration_1995' on page 17 undefined on input line 21.
+
+
+
+[17
+
+]
+
+LaTeX Warning: Citation `hobler_role_1993' on page 18 undefined on input line 76.
+
+
+LaTeX Warning: Citation `hobler_verification_1996' on page 18 undefined on input line 76.
+
+
+LaTeX Warning: Citation `hobler_study_1997' on page 18 undefined on input line 82.
+
+
+LaTeX Warning: Citation `hobler_modeling_1997' on page 18 undefined on input line 82.
+
+
+LaTeX Warning: Citation `hobler_useful_2001' on page 18 undefined on input line 82.
+
+
+LaTeX Warning: Citation `gartner_round_1995' on page 18 undefined on input line 91.
+
+
+LaTeX Warning: Citation `schlueter_absence_2020' on page 18 undefined on input line 92.
+
+
+LaTeX Warning: Citation `hobler_channeling_2019' on page 18 undefined on input line 92.
+
+
+
+[18]) (phys_potential.tex
+
+LaTeX Warning: Reference `tab:screen' on page 19 undefined on input line 30.
+
+
+LaTeX Warning: Reference `eq:Phi' on page 19 undefined on input line 40.
+
+
+LaTeX Warning: Citation `I7702' on page 19 undefined on input line 41.
+
+
+LaTeX Warning: Citation `I4701' on page 19 undefined on input line 41.
+
+
+LaTeX Warning: Reference `eq:ascr' on page 19 undefined on input line 56.
+
+
+LaTeX Warning: Citation `I5801' on page 19 undefined on input line 57.
+
+
+LaTeX Warning: Citation `I6301' on page 19 undefined on input line 57.
+
+
+LaTeX Warning: Citation `I9757' on page 19 undefined on input line 81.
+
+
+
+[19]
+Overfull \hbox (22.21198pt too wide) in paragraph at lines 84--104
+ [] 
+ []
+
+
+LaTeX Warning: Reference `s:input' on page 20 undefined on input line 107.
+
+) (phys_damage.tex
+
+[20]
+
+LaTeX Warning: Citation `hobler_net_1996' on page 21 undefined on input line 22.
+
+
+
+[21]
+
+LaTeX Warning: Citation `hobler_boron_1995' on page 22 undefined on input line 120.
+
+
+LaTeX Warning: Citation `hobler_net_1996' on page 22 undefined on input line 121.
+
+
+LaTeX Warning: Citation `herzog_monte_1995' on page 22 undefined on input line 121.
+
+
+LaTeX Warning: Citation `hobler_net_1996' on page 22 undefined on input line 121.
+
+
+LaTeX Warning: Citation `simionescu_modeling_1995' on page 22 undefined on input line 121.
+
+
+LaTeX Warning: Citation `hobler_net_1996' on page 22 undefined on input line 122.
+
+
+LaTeX Warning: Citation `simionescu_monte_1995' on page 22 undefined on input line 122.
+
+
+LaTeX Warning: Citation `hobler_verification_1996' on page 22 undefined on input line 124.
+
+
+LaTeX Warning: Citation `simionescu_comparison_1995' on page 22 undefined on input line 124.
+
+
+LaTeX Warning: Citation `hobler_modeling_1997' on page 22 undefined on input line 127.
+
+
+LaTeX Warning: Citation `simionescu_comparison_1995' on page 22 undefined on input line 139.
+
+
+LaTeX Warning: Citation `hobler_amorphous_2003' on page 22 undefined on input line 145.
+
+
+
+[22]
+
+LaTeX Warning: Citation `I9766' on page 23 undefined on input line 160.
+
+) (phys_sputter.tex
+
+[23]
+
+LaTeX Warning: Citation `I6909' on page 24 undefined on input line 38.
+
+
+LaTeX Warning: Citation `hobler_assessment_2013' on page 24 undefined on input line 40.
+
+) (phys_estop.tex
+
+[24]
+
+LaTeX Warning: Citation `w._h._bragg_xxxix._1905' on page 25 undefined on input line 12.
+
+
+Underfull \hbox (badness 2626) in paragraph at lines 24--31
+[]\T1/cmr/m/n/12 IMSIL pro-vides sev-eral choices for $\OML/cmm/m/it/12 S[]$ \T1/cmr/m/n/12 as a func-tion of pro-jec-tile en-ergy $\OML/cmm/m/it/12 E$\T1/cmr/m/n/12 .[]
+ []
+
+
+LaTeX Warning: Citation `I6101' on page 25 undefined on input line 44.
+
+
+LaTeX Warning: Citation `I6101' on page 25 undefined on input line 46.
+
+
+LaTeX Warning: Citation `simionescu_model_1995' on page 25 undefined on input line 52.
+
+
+LaTeX Warning: Citation `I9848' on page 25 undefined on input line 79.
+
+
+
+[25]
+
+LaTeX Warning: Reference `s:input' on page 26 undefined on input line 86.
+
+
+LaTeX Warning: Citation `ziegler_srim_2010' on page 26 undefined on input line 88.
+
+
+
+[26]
+
+LaTeX Warning: Citation `hobler_monte_1995' on page 27 undefined on input line 188.
+
+
+LaTeX Warning: Citation `hobler_towards_2000' on page 27 undefined on input line 188.
+
+
+LaTeX Warning: Citation `hobler_boron_1995' on page 27 undefined on input line 188.
+
+
+LaTeX Warning: Citation `simionescu_modeling_1995' on page 27 undefined on input line 188.
+
+
+LaTeX Warning: Citation `hobler_electronic_1993' on page 27 undefined on input line 188.
+
+
+LaTeX Warning: Citation `hobler_random_2006' on page 27 undefined on input line 188.
+
+
+LaTeX Warning: Citation `hobler_random_2006' on page 27 undefined on input line 193.
+
+
+LaTeX Warning: Citation `I9848' on page 27 undefined on input line 193.
+
+) (phys_rbs.tex
+
+[27])
+
+[28]
+Chapter 4.
+(files.tex
+
+LaTeX Warning: Reference `s:scripts_run' on page 29 undefined on input line 10.
+
+)
+
+[29
+
+]
+
+[30] (fil_input.tex
+Underfull \hbox (badness 1248) in paragraph at lines 22--23
+[]\T1/cmr/m/n/12 Random elec-tronic stop-ping file (used if
+ []
+
+
+
+[31]
+
+LaTeX Warning: Reference `eq:ascr' on page 32 undefined on input line 114.
+
+
+LaTeX Warning: Reference `eq:Phi' on page 32 undefined on input line 134.
+
+
+
+[32]
+
+LaTeX Warning: Reference `eq:Phi' on page 33 undefined on input line 150.
+
+
+LaTeX Warning: Reference `eq:Phi' on page 33 undefined on input line 150.
+
+
+LaTeX Warning: Reference `eq:Phi' on page 33 undefined on input line 170.
+
+
+
+[33])
+
+[34]
+LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 136.
+ (fil_out.tex
+
+LaTeX Warning: Reference `k:scripts' on page 35 undefined on input line 62.
+
+)
+Underfull \hbox (badness 10000) in paragraph at lines 45--140
+\T1/cmtt/m/n/12 moments of stopped atoms and vacancies\T1/cmr/m/n/12 /\T1/cmtt/m/n/12 Lateral x-moments\T1/cmr/m/n/12 /\T1/cmtt/m/n/12 std.dev. \T1/cmr/m/n/12 and/or
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 45--140
+\T1/cmtt/m/n/12 Spatial moments of stopped atoms and vacancies\T1/cmr/m/n/12 /\T1/cmtt/m/n/12 Lateral y-moments\T1/cmr/m/n/12 /\T1/cmtt/m/n/12 std.dev.\T1/cmr/m/n/12 .
+ []
+
+
+
+[35] (fil_his1d.tex
+
+[36]
+
+[37]
+
+[38]
+
+LaTeX Warning: Citation `hobler_crater_2018' on page 39 undefined on input line 206.
+
+
+LaTeX Warning: Citation `hobler_continuum_1999' on page 39 undefined on input line 224.
+
+
+
+[39])
+
+[40] (fil_his2d.tex
+
+LaTeX Warning: Command \r invalid in math mode on input line 62.
+
+Missing character: There is no Å in font cmr12!
+
+
+[41])
+
+[42] (fil_his3d.tex)
+
+[43] (fil_misc.tex
+
+LaTeX Warning: Reference `s:input' on page 44 undefined on input line 32.
+
+
+
+[44]
+
+[45]
+
+LaTeX Warning: Reference `s:scripts_read' on page 46 undefined on input line 208.
+
+)
+
+[46]
+Chapter 5.
+(parameters.tex
+
+[47
+
+])
+
+[48] (param_setup.tex
+LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 5.
+
+
+[49]
+
+[50]
+
+[51]
+
+[52]
+
+[53]
+
+[54]
+
+[55]
+
+[56]
+
+[57]
+
+[58])
+
+[59] (param_geometry.tex
+
+[60]
+
+[61]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 168.
+
+
+[62]
+
+[63]
+
+[64]
+
+[65]
+
+[66])
+
+[67] (param_atoms.tex
+
+[68]
+
+[69]
+
+[70])
+Underfull \hbox (badness 10000) in paragraph at lines 188--183
+
+ []
+
+
+
+[71] (param_ions.tex
+
+LaTeX Warning: Reference `s:beam' on page 72 undefined on input line 9.
+
+
+
+[72]
+
+[73]
+
+[74]
+
+[75]
+
+[76]
+
+[77])
+
+[78] (param_crystal.tex
+
+[79]
+
+[80])
+
+[81] (param_material.tex
+
+[82]
+
+[83]
+
+[84])
+
+[85] (param_damage.tex
+
+[86]
+
+[87]
+
+[88]
+
+[89]
+
+[90]
+
+[91]
+
+[92]
+
+[93]
+
+[94]
+
+[95]
+
+[96])
+
+[97] (param_snpar.tex
+
+[98]
+
+[99]
+
+[100]
+Underfull \hbox (badness 1014) in paragraph at lines 200--210
+\T1/cmr/m/n/12 This pa-ram-e-ter spec-i-fies whether the free flight paths are cal-cu-lated sta-tis-ti-cally
+ []
+
+
+
+[101]
+
+[102]
+
+[103]
+
+[104]
+
+LaTeX Warning: Command \r invalid in math mode on input line 470.
+
+Missing character: There is no Å in font cmr12!
+)
+
+[105] (param_separ.tex
+
+[106]
+
+[107]
+
+[108]
+
+[109]
+
+[110])
+
+[111] (param_output.tex
+
+[112]
+
+[113]
+
+[114]
+
+[115]
+
+[116]
+
+[117]
+
+[118]
+
+[119]
+
+[120]
+
+[121]
+
+[122]
+
+[123]
+
+[124]
+
+[125]
+
+[126]
+Underfull \hbox (badness 1303) in paragraph at lines 781--785
+\T1/cmr/m/n/12 This pa-ram-e-ter spec-i-fies the max-i-mum or-der of the cal-cu-lated lat-eral mo-ments.
+ []
+
+
+
+[127]
+
+[128]
+
+[129]
+
+[130]
+Underfull \hbox (badness 1337) in paragraph at lines 958--968
+\T1/cmr/m/n/12 This pa-ram-e-ter spec-i-fies the ini-tial box width of all en-ergy his-tograms for the
+ []
+
+)
+
+[131]
+
+[132
+
+]
+Chapter 6.
+(scripts.tex) (scr_run.tex
+
+[133]
+
+[134]
+
+[135]) (scr_read.tex
+
+[136])
+
+[137]
+
+[138
+
+]
+Chapter 7.
+(ex_impl1d.tex
+
+[139]) (ex_impl2d.tex
+
+[140]
+Overfull \hbox (32.46182pt too wide) in paragraph at lines 44--44
+[] \T1/cmtt/m/n/12 &geometry region=1 points=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 /[] 
+ []
+
+
+
+[141]
+
+LaTeX Warning: Reference `s:ex_impl1d' on page 142 undefined on input line 77.
+
+) (ex_multi.tex
+
+[142]
+<ex_multilayer-crop.pdf, id=543, 512.91624pt x 298.11375pt>
+File: ex_multilayer-crop.pdf Graphic file (type pdf)
+<use ex_multilayer-crop.pdf>
+Package pdftex.def Info: ex_multilayer-crop.pdf  used on input line 33.
+(pdftex.def)             Requested size: 307.75212pt x 178.86963pt.
+
+
+LaTeX Warning: Reference `fig:multilayer' on page 143 undefined on input line 41.
+
+) (ex_spot.tex
+
+[143 <./ex_multilayer-crop.pdf>])
+
+[144] (ex_sput_stat.tex) (ex_sput_dyn.tex
+
+[145]
+
+[146]) (ex_rbs.tex
+Underfull \hbox (badness 10000) in paragraph at lines 18--29
+[]\T1/cmr/m/n/12 The his-togram file is read on the \T1/cmtt/m/n/12 &SETUP \T1/cmr/m/n/12 record (\T1/cmtt/m/n/12 usehis=t
+ []
+
+
+
+[147])
+No file manual.bbl.
+(imsilnocite.tex
+
+LaTeX Warning: Citation `hobler_efficient_1987' undefined on input line 1.
+
+
+LaTeX Warning: Citation `hobler_two-dimensional_1988' undefined on input line 2.
+
+
+LaTeX Warning: Citation `hobler_monte_1989' undefined on input line 3.
+
+
+LaTeX Warning: Citation `hobler_empirical_1991' undefined on input line 4.
+
+
+LaTeX Warning: Citation `hobler_simulation_1991' undefined on input line 5.
+
+
+LaTeX Warning: Citation `hobler_two-dimensional_1991' undefined on input line 6.
+
+
+LaTeX Warning: Citation `hobler_effect_1992' undefined on input line 7.
+
+
+LaTeX Warning: Citation `hobler_electronic_1993' undefined on input line 8.
+
+
+LaTeX Warning: Citation `hobler_role_1993' undefined on input line 9.
+
+
+LaTeX Warning: Citation `simionescu_monte_1994' undefined on input line 10.
+
+
+LaTeX Warning: Citation `gartner_round_1995' undefined on input line 11.
+
+
+LaTeX Warning: Citation `herzog_monte_1995' undefined on input line 12.
+
+
+LaTeX Warning: Citation `hobler_boron_1995' undefined on input line 13.
+
+
+LaTeX Warning: Citation `hobler_monte_1995' undefined on input line 14.
+
+
+LaTeX Warning: Citation `simionescu_comparison_1995' undefined on input line 15.
+
+
+LaTeX Warning: Citation `simionescu_modeling_1995' undefined on input line 16.
+
+
+LaTeX Warning: Citation `simionescu_model_1995' undefined on input line 17.
+
+
+LaTeX Warning: Citation `simionescu_monte_1995' undefined on input line 18.
+
+
+LaTeX Warning: Citation `hobler_acceleration_1995' undefined on input line 19.
+
+
+LaTeX Warning: Citation `hobler_critical_1996' undefined on input line 20.
+
+
+LaTeX Warning: Citation `hobler_net_1996' undefined on input line 21.
+
+
+LaTeX Warning: Citation `hobler_theoretical_1996' undefined on input line 22.
+
+
+LaTeX Warning: Citation `hobler_verification_1996' undefined on input line 23.
+
+
+LaTeX Warning: Citation `hobler_modeling_1997' undefined on input line 24.
+
+
+LaTeX Warning: Citation `hobler_study_1997' undefined on input line 25.
+
+
+LaTeX Warning: Citation `nikulin_model-independent_1997' undefined on input line 26.
+
+
+LaTeX Warning: Citation `criegern_verification_1998' undefined on input line 27.
+
+
+LaTeX Warning: Citation `hobler_channeling_1999' undefined on input line 28.
+
+
+LaTeX Warning: Citation `hobler_continuum_1999' undefined on input line 29.
+
+
+LaTeX Warning: Citation `hobler_modeling_1999' undefined on input line 30.
+
+
+LaTeX Warning: Citation `hobler_dose_2000' undefined on input line 31.
+
+
+LaTeX Warning: Citation `hobler_towards_2000' undefined on input line 32.
+
+
+LaTeX Warning: Citation `boxleitner_fibsim_2001' undefined on input line 33.
+
+
+LaTeX Warning: Citation `boxleitner_dynamic_2001' undefined on input line 34.
+
+
+LaTeX Warning: Citation `hobler_initial_2001' undefined on input line 35.
+
+
+LaTeX Warning: Citation `hobler_useful_2001' undefined on input line 36.
+
+
+LaTeX Warning: Citation `palmetshofer_range_2001' undefined on input line 37.
+
+
+LaTeX Warning: Citation `hobler_amorphous_2003' undefined on input line 38.
+
+
+LaTeX Warning: Citation `hobler_simulation_2003' undefined on input line 39.
+
+
+LaTeX Warning: Citation `hobler_status_2003' undefined on input line 40.
+
+
+LaTeX Warning: Citation `lugstein_method_2003' undefined on input line 41.
+
+
+LaTeX Warning: Citation `otto_coupled_2003' undefined on input line 42.
+
+
+LaTeX Warning: Citation `otto_dose-rate_2005' undefined on input line 43.
+
+
+LaTeX Warning: Citation `kovac_modeling_2005' undefined on input line 44.
+
+
+LaTeX Warning: Citation `hobler_multiscale_2005' undefined on input line 45.
+
+
+LaTeX Warning: Citation `otto_coupled_2005' undefined on input line 46.
+
+
+LaTeX Warning: Citation `zahel_atomistic_2005' undefined on input line 47.
+
+
+LaTeX Warning: Citation `hobler_random_2006' undefined on input line 48.
+
+
+LaTeX Warning: Citation `kovac_investigation_2006' undefined on input line 49.
+
+
+LaTeX Warning: Citation `otto_is_2006' undefined on input line 50.
+
+
+LaTeX Warning: Citation `kim_simulation_2007' undefined on input line 51.
+
+
+LaTeX Warning: Citation `otto_amorphous_2007' undefined on input line 52.
+
+
+LaTeX Warning: Citation `ebm_simulation_2009' undefined on input line 53.
+
+
+LaTeX Warning: Citation `ebm_assessment_2009' undefined on input line 54.
+
+
+LaTeX Warning: Citation `ebm_ion_2009' undefined on input line 55.
+
+
+LaTeX Warning: Citation `kovac_amorphous_2009' undefined on input line 56.
+
+
+LaTeX Warning: Citation `ebm_quantitative_2011' undefined on input line 57.
+
+
+LaTeX Warning: Citation `hobler_dynamic_2011' undefined on input line 58.
+
+
+LaTeX Warning: Citation `kim_sputter-redeposition_2011' undefined on input line 59.
+
+
+LaTeX Warning: Citation `kim_simulation_2012' undefined on input line 60.
+
+
+LaTeX Warning: Citation `lindsey_significance_2012' undefined on input line 61.
+
+
+LaTeX Warning: Citation `hobler_assessment_2013' undefined on input line 62.
+
+
+LaTeX Warning: Citation `lindsey_sputtering_2013' undefined on input line 63.
+
+
+LaTeX Warning: Citation `lindsey_inverse_2014' undefined on input line 64.
+
+
+LaTeX Warning: Citation `hobler_combined_2015' undefined on input line 65.
+
+
+LaTeX Warning: Citation `hobler_probing_2016' undefined on input line 66.
+
+
+LaTeX Warning: Citation `hobler_sputtering_2016' undefined on input line 67.
+
+
+LaTeX Warning: Citation `lindsey_simple_2017' undefined on input line 68.
+
+
+LaTeX Warning: Citation `g._hobler_simulation_2018' undefined on input line 69.
+
+
+LaTeX Warning: Citation `hobler_crater_2018' undefined on input line 70.
+
+
+LaTeX Warning: Citation `m._current_channeled_2018' undefined on input line 71.
+
+
+LaTeX Warning: Citation `urbassek_sputtering_2018' undefined on input line 72.
+
+
+LaTeX Warning: Citation `hobler_channeling_2019' undefined on input line 73.
+
+
+LaTeX Warning: Citation `hobler_ion_2019' undefined on input line 74.
+
+
+LaTeX Warning: Citation `m._current_aspects_2019' undefined on input line 75.
+
+
+LaTeX Warning: Citation `schlueter_absence_2020' undefined on input line 76.
+
+
+LaTeX Warning: Citation `bradley_second_2021' undefined on input line 77.
+
+
+LaTeX Warning: Citation `bradley_sputter_2023' undefined on input line 78.
+
+
+LaTeX Warning: Citation `titze_measurement_2023' undefined on input line 79.
+
+
+LaTeX Warning: Citation `wilhelm_missing_2023' undefined on input line 80.
+
+)
+No file imsil.bbl.
+
+
+[148] (manual.aux)
+ ***********
+LaTeX2e <2024-06-01> patch level 2
+L3 programming layer <2024-09-10>
+ ***********
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 2255 strings out of 473899
+ 39378 string characters out of 5726028
+ 424913 words of memory out of 5000000
+ 24990 multiletter control sequences out of 15000+600000
+ 575680 words of font info for 75 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 57i,11n,65p,418b,333s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1440.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1000.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1728.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecst1200.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1200.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1728.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1000.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0700.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm0800.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecsl1200.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2488.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\Users\Marcus\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/Marcus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on manual.pdf (148 pages, 1031972 bytes).
+PDF statistics:
+ 1206 PDF objects out of 1440 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+
