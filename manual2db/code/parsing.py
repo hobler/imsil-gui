@@ -17,7 +17,7 @@ def parse_file(filename, tablename, parse_private, manual_path):
     r"""Parse the .tex files from the manual.
 
     This function uses all \keydescription environments to create new instances
-    of the parameter class. Additionally, the text is converted to reST.
+    of the parameter class. Additionally, the text is converted to Unicode.
 
     :param filename: File name with abspath
     :param tablename: Name of record = name of sqlite table
@@ -51,7 +51,7 @@ def parse_file(filename, tablename, parse_private, manual_path):
             manual_aux = aux_file.read()
         
         content = replace_references(content, manual_aux)
-        content = repair_rest_warnings(content)
+        content = replace_quotes(content)
         content = reformat_square_roots(content)
         content = replace_math_symbols(content)
         content = remove_inline_math_environment(content)
@@ -139,7 +139,7 @@ def replace_texttt(inp, replace=''):
     It recursively replaces all occurrences of \texttt that the inp text
     contains.
 
-    NOTE: There might be some interferences with the reST syntax if the string
+    NOTE: There might be some interferences with the syntax if the string
           replace is not empty
 
     :param inp: String to be processed
@@ -189,7 +189,7 @@ def replace_tt(inp, replace=''):
     It recursively replaces all occurrences of {\tt that the inp string
     contains.
 
-    NOTE: There might be some interferences with the reST syntax if the string
+    NOTE: There might be some interferences with the syntax if the string
           replace is not empty
 
     :param inp: String to be processed
@@ -236,10 +236,8 @@ def replace_nodefault(inp):
         return inp
 
 
-def repair_rest_warnings(inp):
-    r"""This Function deals with problems regarding the reST Syntax
-
-    For example changing single quotes with double quotes
+def replace_quotes(inp):
+    r"""This function replaces quote characters in the string.
 
     :param inp: string to be processed
     :return: returns processed string
@@ -372,7 +370,7 @@ def process_table(inp):
     NOTE: This function cannot parse all tables
 
     :param inp: String containing table
-    :return: Input string with table formatted in reStructured text
+    :return: Input string with table formatted in Unicode text
     """
     if r'begin{tabular}' in inp:
         begin, table = inp.split(r'begin{tabular}', 1)
