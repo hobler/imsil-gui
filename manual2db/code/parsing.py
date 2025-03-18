@@ -684,7 +684,7 @@ def reformat_square_roots(string):
             if match.group(0) and match.group(1) and match.group(2):
                 a, b, c = match.groups()
                 a = a.lstrip("(").rstrip(")")
-                 # Remove "2" from simple square roots
+                # Remove "2" from simple square roots
                 c = "" if c == "2" else f"^{{{c}}}"
                 # Remove "1" from simple square roots
                 b = "" if b == "1" else b 
@@ -791,9 +791,11 @@ def get_range_condition(parameter, range):
 
 def get_chemical_elements():
     """Returns a list of chemical element names in lowercase."""
+    
     elements = [
         'h', 'he', 'li', 'be', 'b', 'c', 'n', 'o', 'f', 'ne',
         'na', 'mg', 'al', 'si', 'p', 's', 'cl', 'ar', 'k', 'ca',
         'sc', 'ti', 'v', 'cr', 'mn', 'fe', 'co', 'ni', 'cu', 'zn',
         'ga', 'ge', 'as', 'se', 'br', 'kr', 'rb', 'sr', 'y', 'zr']
+    
     return elements
