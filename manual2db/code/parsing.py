@@ -126,9 +126,13 @@ def parse_file(filename, tablename, parse_private, manual_path):
                 p_range = p_range.replace('\\', '\\\\')
                 p_range = p_range.rstrip("}")
                 p_range = process_list(p_range)
+                
+            # Get string condition
+            condition = get_range_condition(title, p_range)
 
             parameters.append(Parameter(record, title, short_desc, long_desc,
-                                        p_type, default_value, p_range))
+                                        p_type, default_value, p_range, 
+                                        condition))
 
     return parameters
 
@@ -680,8 +684,10 @@ def reformat_square_roots(string):
             if match.group(0) and match.group(1) and match.group(2):
                 a, b, c = match.groups()
                 a = a.lstrip("(").rstrip(")")
-                c = "" if c == "2" else f"^{{{c}}}" # Remove "2" from simple square roots
-                b = "" if b == "1" else b # Remove "1" from simple square roots
+                # Remove "2" from simple square roots
+                c = "" if c == "2" else f"^{{{c}}}"
+                # Remove "1" from simple square roots
+                b = "" if b == "1" else b 
                 replacement = f"{c}\\sqrt{{{{{a}}}^{{{b}}}}}"
                 new_math_content = new_math_content.replace(match.group(0), 
                                                             replacement, 1)
@@ -692,3 +698,178 @@ def reformat_square_roots(string):
             return_string = return_string.replace(full_math, new_full_math, 1)
     
     return return_string
+
+def get_range_condition(parameter, inpRange):
+    """
+    Parse the range string to get a condition for the database
+    that can be used with eval() to check if a value is within the range.
+    
+    :param parameter: The name of the parameter
+    :param inpRange: The range string from the manual
+    :return: The condition string
+    """
+    
+    # conditions with only one bound such as "< 0"
+    pattern = r'^\s*(\d+\s*[><≥≤]\s*\d*|\d*\s*[><≥≤]\s*\d+)\s*\.?\s*$'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        # replace for eval() to function
+        condition = (inpRange.replace("≤", "<=").replace("≥", ">=")
+                     .replace(".", "").replace(" ", ""))
+        
+        if condition[0].isnumeric():
+            return f"{condition}{parameter}"
+        else:
+            return f"{parameter}{condition}"
+    
+    # bound condition with the parameter present like "DAMAMO > 0"
+    pattern = r'^\s*(\w+)\s*([><≥≤])\s*(\w+)\s*$'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        condition = inpRange.replace("≤", "<=").replace("≥", ">=").replace(" ", "")
+        return condition
+    
+    # conditions with upper and lower bounds such as 0 ≤ NRAD2 ≤ 32
+    pattern = r'^\s*([-\w]+)\s*([><≥≤])\s*(\w+)\s*([><≥≤])\s*([-\w]+)\s*$'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        condition = inpRange.replace("≤", "<=").replace("≥", ">=").replace(" ", "")
+        
+        return condition
+        
+    # true and false condition such as "T,F" strictly without extra conditions
+    pattern = r'^\s*T\s*,\s*F\s*$'
+    search = re.findall(pattern, inpRange)
+    
+    if search:
+        return f"{parameter}.lower() in ['true', 'false']"
+    
+    # true and false conditions with extra conditions
+    pattern = r'\s*([TF])\s+if\s+(\w+=[TF])\s*,\s*([TF])\s*'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        pbool1 = "true" if search.group(1) == "T" else "false"
+        pbool2 = "false" if pbool1 == "true" else "true"
+        cvar, cbool = search.group(2).split("=")
+        cbool = "true" if cbool == "T" else "false"
+        
+        condition = (f"{parameter}.lower()=='{pbool1}' if {cvar}.lower()=='{cbool}'"
+                      f" else {parameter}.lower()=='{pbool2}'")
+        
+        return condition
+    
+    # lists of names, like 'wurtzite', 'wurzite', '2H'
+        # strictly match list of names without extra conditions
+    if inpRange.lstrip("- ")[0] == "'" and inpRange.rstrip(".")[-1] == "'":
+        pattern = r"'([^']+)'(?:\s*[,\n-]\s*|\s+)?+"
+        search = re.findall(pattern, inpRange)
+        
+        if search:
+            return f"{parameter}.lower() in {[x.lower() for x in search]}"
+        
+    # condition is "arbitrary" or "any"
+    if inpRange.strip("- ").lower() in ["arbitrary", "any"]:
+        return "True"
+    
+    # file names without extra conditions
+    if ("80 characters" in inpRange.lower() and
+        " if " not in inpRange.lower() and
+        " or " not in inpRange.lower()):
+        return f"len({parameter})<=80"
+    
+    ########## special cases ##########
+    if parameter == "IARAND":
+        return ("1<=IARAND<=70000 if RNG.lower() == 'haas' "
+                    "else 1<=IARAND<=131071")
+            
+    elif parameter == "IBRAND":
+        return ("1<=IBRAND<=90000 if RNGlower()=='haas' "
+                    "else 1<=IBRAND<=262143")
+
+    elif parameter == "IRAND":
+        return ("1<=IRAND<=10000 for RNG.lower()=='haas' "
+                "else 1<=IRAND<=16383")
+
+    elif parameter == "MRAND":
+        return ("1<=MRAND<=8000 for RNG.lower()=='haas' "
+                "else 1<=MRAND<=16383")
+   
+    elif parameter == "NAME":
+        if inpRange.strip() == "any chemical name of an atom":
+            return f"NAME.lower() in {get_chemical_elements()}"
+        else:
+            return ("NAME.lower() in ['sc', 'bcc', 'fcc', 'zincblende', '3c', "
+                    "'wurtzite', 'wurzite', '2h', '4h', '6h']")
+
+    elif inpRange.strip() == "any real number":
+        return f"{parameter}.replace('.', '').replace(',', '').isnumeric()"
+    
+    elif parameter == "NDAMDIM":
+        return "1<=NDAMDIM<=3"
+    
+    elif parameter == "LAMZON":
+        #  T if LDAMDYN=T \\\\ T, F otherwise
+        return ("LAMZON.lower() == 'true' if LDAMDYN.lower() == 'true' "
+                "else LAMZON.lower() in ['true', 'false']")
+    
+    elif parameter == "XTAL":
+        return "len(XTAL) <= 80"
+    
+    elif parameter == "SCATFILE":
+        list = ['BSI', 'SISI', 'PSI', 'ASSI', 'BO', 
+                'ERSI', 'SCATTAB', 'SCATTAB_big']
+        condition = f"{parameter} in {list} or len({parameter})<=80"
+        return condition
+    
+    elif parameter == "COEFFILE":
+        return f"{parameter}=='ZBLspec' or len({parameter})<=80"
+    
+    elif parameter == "XPER":
+        return "XPER[2]>=XPER[1]"
+    
+    elif parameter == "POSIF":
+        return "all(POSIF[i]<=POSIF[i+1] for i in range(len(POSIF)-1))"
+    
+    elif parameter == "MODDIV":
+        return "MODDIV in [1, 2]"
+    
+    elif parameter == "XINIT":
+        return "XINIT[2]>=XINIT[1]"
+    
+    elif parameter == "YINIT":
+        return "YINIT[2]>=YINIT[1]"
+    
+    elif parameter == "ZINIT":
+        return "ZINIT[2]>=ZINIT[1]"
+    
+    elif parameter == "MCOORD":
+        return "MCOORD in [1, 2, 3, 4, 5]"
+    
+    elif parameter == "ENL":
+        return ("all(ENL[i]<=ENL[i+1] for i in range(len(ENL)-1)) and "
+                "all(ENL[i]>=0 for i in range(len(ENL)-1)))")
+        
+    elif parameter == "NDIM":
+        return "NDIM in [1, 2, 3]"
+    
+    elif parameter == "NIONHIS":
+        return ("0<=NIONHIS<=NION if NTHREAD==1 "
+                "1<=NIONHIS<=NION if NTHREAD>1")
+    
+    # "no range defined in manual"
+    return "No condition parsed"
+
+def get_chemical_elements():
+    """Returns a list of chemical element names in lowercase."""
+    
+    elements = [
+        'h', 'he', 'li', 'be', 'b', 'c', 'n', 'o', 'f', 'ne',
+        'na', 'mg', 'al', 'si', 'p', 's', 'cl', 'ar', 'k', 'ca',
+        'sc', 'ti', 'v', 'cr', 'mn', 'fe', 'co', 'ni', 'cu', 'zn',
+        'ga', 'ge', 'as', 'se', 'br', 'kr', 'rb', 'sr', 'y', 'zr']
+    
+    return elements

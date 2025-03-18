@@ -9,10 +9,11 @@ class Parameter:
         type (str): Type of the input parameter (e.g. real)
         default_value (str): Default value of the parameter (e.g. 0)
         range (str): Range (e.g. 0 < TILT < 90)
+        condition (str): String condition for validation, based on range value
     """
 
     def __init__(self, record, name, short_desc, long_desc, type, default_value,
-                 range):
+                 range, condition):
         self.record = record
         self.name = name
         self.short_desc = short_desc
@@ -20,6 +21,7 @@ class Parameter:
         self.type = type
         self.defaultValue = default_value
         self.range = range
+        self.condition = condition
 
     def get_dict(self):
         """Generate dictionary with all attributes of the parameter
@@ -33,6 +35,7 @@ class Parameter:
                   'long_desc': self.long_desc,
                   'type': self.type,
                   'defaultValue': self.defaultValue,
-                  'range': self.range
+                  'range': self.range,
+                  'condition': self.condition
                  }
         return p_dict
