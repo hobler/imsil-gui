@@ -39,7 +39,6 @@ def parse_file(filename, tablename, parse_private, manual_path):
         content = replace_texttt_mathwrapper(content)
         content = parse_private_sections(content, private=parse_private)
         content = remove_iffalse(content)
-        content = removeComments(content)
         content = replace_latex_macros(content, {r'\&': '&', r'\AA': r'$\AA$',
                                                '~': ' ', r'\%': '%'})
         content = content.replace(r'\ ', ' ')
@@ -132,7 +131,8 @@ def parse_file(filename, tablename, parse_private, manual_path):
             condition = get_range_condition(title, p_range)
 
             parameters.append(Parameter(record, title, short_desc, long_desc,
-                                        p_type, default_value, p_range, condition))
+                                        p_type, default_value, p_range, 
+                                        condition))
 
     return parameters
 
@@ -684,7 +684,8 @@ def reformat_square_roots(string):
             if match.group(0) and match.group(1) and match.group(2):
                 a, b, c = match.groups()
                 a = a.lstrip("(").rstrip(")")
-                c = "" if c == "2" else f"^{{{c}}}" # Remove "2" from simple square roots
+                # Remove "2" from simple square roots
+                c = "" if c == "2" else f"^{{{c}}}" 
                 b = "" if b == "1" else b # Remove "1" from simple square roots
                 replacement = f"{c}\\sqrt{{{{{a}}}^{{{b}}}}}"
                 new_math_content = new_math_content.replace(match.group(0), 
@@ -713,7 +714,8 @@ def get_range_condition(parameter, range):
     
     if search:
         # replace for eval() to function
-        condition = range.replace("≤", "<=").replace("≥", ">=").replace(".", "").replace(" ", "")
+        condition = (range.replace("≤", "<=").replace("≥", ">=")
+                     .replace(".", "").replace(" ", ""))
         
         if condition[0].isnumeric():
             return f"{condition}{parameter}"
@@ -757,15 +759,17 @@ def get_range_condition(parameter, range):
     if range.strip("- ").lower() in ["arbitrary", "any"]:
         return "True"
     
-    # special cases
+    ########## special cases ##########
     if parameter == "IARAND":
-            return "1 ≤ IARAND ≤ 70000 if RNG.lower() == 'haas' else 1 ≤ IARAND ≤ 131071"
+            return ("1 ≤ IARAND ≤ 70000 if RNG.lower() == 'haas' "
+                    "else 1 ≤ IARAND ≤ 131071")
         
     elif parameter == "NAME":
         if range.strip() == "any chemical name of an atom":
             return f"NAME.lower() in {get_chemical_elements()}"
         else:
-            return "NAME.lower() in ['sc', 'bcc', 'fcc', 'zincblende', '3c', 'wurtzite', 'wurzite', '2h', '4h', '6h']"
+            return ("NAME.lower() in ['sc', 'bcc', 'fcc', 'zincblende', '3c', "
+                    "'wurtzite', 'wurzite', '2h', '4h', '6h']")
 
     elif range.strip() == "any real number":
         return f"{parameter}.replace('.', '').replace(',', '').isnumeric()"
@@ -775,7 +779,8 @@ def get_range_condition(parameter, range):
     
     elif parameter == "LAMZON":
         #  T if LDAMDYN=T \\\\ T, F otherwise
-        return "LAMZON.lower() == 'true' if LDAMDYN.lower() == 'true' else LAMZON.lower() in ['true', 'false']"
+        return ("LAMZON.lower() == 'true' if LDAMDYN.lower() == 'true' "
+                "else LAMZON.lower() in ['true', 'false']")
     
     elif parameter == "XTAL":
         return "len(XTAL) <= 80"
