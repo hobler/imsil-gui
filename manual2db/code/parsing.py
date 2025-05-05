@@ -709,6 +709,109 @@ def get_range_condition(parameter, inpRange):
     :return: The condition string
     """
     
+    ########## special cases ##########
+    # Has to be checked first as some special cases contain range values
+    # that can accidentaly match a general condition
+    if parameter == "IARAND":
+        return ("1<=IARAND<=70000 if RNG.lower() == 'haas' "
+                    "else 1<=IARAND<=131071")
+            
+    elif parameter == "IBRAND":
+        return ("1<=IBRAND<=90000 if RNGlower()=='haas' "
+                    "else 1<=IBRAND<=262143")
+
+    elif parameter == "IRAND":
+        return ("1<=IRAND<=10000 for RNG.lower()=='haas' "
+                "else 1<=IRAND<=16383")
+
+    elif parameter == "MRAND":
+        return ("1<=MRAND<=8000 for RNG.lower()=='haas' "
+                "else 1<=MRAND<=16383")
+   
+    elif parameter == "NAME":
+        # NAME in ATOMS
+        if inpRange.strip() == "any chemical name of an atom":
+            return f"NAME.lower() in {get_chemical_elements()}"
+        
+        # NAME in CRYSTAL. 
+        # Assume that no other name has "diamond2" in its range...
+        elif "diamond2" in inpRange:
+            return ("NAME.lower() in ['', 'diamond', 'diamond2', "
+                    "'sc', 'bcc', 'fcc', 'zincblende', '3c', "
+                    "'wurtzite', 'wurzite', '2h', '4h', '6h'] or len(NAME)<=80")
+            
+        # NAME in  IONS and MATERIAL
+        # Let these match a general condition
+        else:
+            pass
+
+    elif inpRange.strip() == "any real number":
+        return f"{parameter}.replace('.', '').replace(',', '').isnumeric()"
+    
+    elif parameter == "NDAMDIM":
+        return ("(1<=NDAMDIM<=3) and "
+                "((NDAMDIM<=1 and DOSEUNITS='cm-2' and XINIT[1]=XINIT[2]) or "
+                "(NDAMDIM<=2 and (DOSEUNITS='cm-2' and XINIT[1]>XINIT[2] and "
+                    "YINIT[1]=YINIT[2]) or "
+                "(DOSEUNITS='cm-1' and YINIT[1]=YINIT[2])))")
+    
+    elif parameter == "LAMZON":
+        #  T if LDAMDYN=T \\\\ T, F otherwise
+        return ("LAMZON.lower() == 'true' if LDAMDYN.lower() == 'true' "
+                "else LAMZON.lower() in ['true', 'false']")
+    
+    elif parameter == "XTAL":
+        return "len(XTAL) <= 80"
+    
+    elif parameter == "SCATFILE":
+        list = ['BSI', 'SISI', 'PSI', 'ASSI', 'BO', 
+                'ERSI', 'SCATTAB', 'SCATTAB_big']
+        condition = f"{parameter} in {list} or len({parameter})<=80"
+        return condition
+    
+    elif parameter == "COEFFILE":
+        return f"{parameter}=='ZBLspec' or len({parameter})<=80"
+    
+    elif parameter == "XPER":
+        return "XPER[2]>=XPER[1]"
+    
+    elif parameter == "POSIF":
+        return "all(POSIF[i]<=POSIF[i+1] for i in range(len(POSIF)-1))"
+    
+    elif parameter == "MODDIV":
+        return "MODDIV in [1, 2]"
+    
+    elif parameter == "XINIT":
+        return "XINIT[2]>=XINIT[1]"
+    
+    elif parameter == "YINIT":
+        return "YINIT[2]>=YINIT[1]"
+    
+    elif parameter == "ZINIT":
+        return "ZINIT[2]>=ZINIT[1]"
+    
+    elif parameter == "MCOORD":
+        return "MCOORD in [1, 2, 3, 4, 5]"
+    
+    elif parameter == "ENL":
+        return ("all(ENL[i]<=ENL[i+1] for i in range(len(ENL)-1)) and "
+                "all(ENL[i]>=0 for i in range(len(ENL)-1)))")
+        
+    elif parameter == "NDIM":
+        return "NDIM in [1, 2, 3]"
+    
+    elif parameter == "NIONHIS":
+        return ("0<=NIONHIS<=NION if NTHREAD==1 else 1<=NIONHIS<=NION")
+        
+    elif parameter == "WCOL":
+        return ("all(WCOL[i] % 4 == 0 for i in range(3))")
+    
+    elif parameter == "VSURF" or parameter == "WAFER":
+        # Dot product
+        return "VSURF[0]*WAFER[0] + VSURF[1]*WAFER[1] + VSURF[2]*WAFER[2] == 0"
+        
+    ########## general cases ##########
+    
     # conditions with only one bound such as "< 0"
     pattern = r'^\s*(\d+\s*[><≥≤]\s*\d*|\d*\s*[><≥≤]\s*\d+)\s*\.?\s*$'
     search = re.search(pattern, inpRange)
@@ -780,85 +883,6 @@ def get_range_condition(parameter, inpRange):
         " if " not in inpRange.lower() and
         " or " not in inpRange.lower()):
         return f"len({parameter})<=80"
-    
-    ########## special cases ##########
-    if parameter == "IARAND":
-        return ("1<=IARAND<=70000 if RNG.lower() == 'haas' "
-                    "else 1<=IARAND<=131071")
-            
-    elif parameter == "IBRAND":
-        return ("1<=IBRAND<=90000 if RNGlower()=='haas' "
-                    "else 1<=IBRAND<=262143")
-
-    elif parameter == "IRAND":
-        return ("1<=IRAND<=10000 for RNG.lower()=='haas' "
-                "else 1<=IRAND<=16383")
-
-    elif parameter == "MRAND":
-        return ("1<=MRAND<=8000 for RNG.lower()=='haas' "
-                "else 1<=MRAND<=16383")
-   
-    elif parameter == "NAME":
-        if inpRange.strip() == "any chemical name of an atom":
-            return f"NAME.lower() in {get_chemical_elements()}"
-        else:
-            return ("NAME.lower() in ['sc', 'bcc', 'fcc', 'zincblende', '3c', "
-                    "'wurtzite', 'wurzite', '2h', '4h', '6h']")
-
-    elif inpRange.strip() == "any real number":
-        return f"{parameter}.replace('.', '').replace(',', '').isnumeric()"
-    
-    elif parameter == "NDAMDIM":
-        return "1<=NDAMDIM<=3"
-    
-    elif parameter == "LAMZON":
-        #  T if LDAMDYN=T \\\\ T, F otherwise
-        return ("LAMZON.lower() == 'true' if LDAMDYN.lower() == 'true' "
-                "else LAMZON.lower() in ['true', 'false']")
-    
-    elif parameter == "XTAL":
-        return "len(XTAL) <= 80"
-    
-    elif parameter == "SCATFILE":
-        list = ['BSI', 'SISI', 'PSI', 'ASSI', 'BO', 
-                'ERSI', 'SCATTAB', 'SCATTAB_big']
-        condition = f"{parameter} in {list} or len({parameter})<=80"
-        return condition
-    
-    elif parameter == "COEFFILE":
-        return f"{parameter}=='ZBLspec' or len({parameter})<=80"
-    
-    elif parameter == "XPER":
-        return "XPER[2]>=XPER[1]"
-    
-    elif parameter == "POSIF":
-        return "all(POSIF[i]<=POSIF[i+1] for i in range(len(POSIF)-1))"
-    
-    elif parameter == "MODDIV":
-        return "MODDIV in [1, 2]"
-    
-    elif parameter == "XINIT":
-        return "XINIT[2]>=XINIT[1]"
-    
-    elif parameter == "YINIT":
-        return "YINIT[2]>=YINIT[1]"
-    
-    elif parameter == "ZINIT":
-        return "ZINIT[2]>=ZINIT[1]"
-    
-    elif parameter == "MCOORD":
-        return "MCOORD in [1, 2, 3, 4, 5]"
-    
-    elif parameter == "ENL":
-        return ("all(ENL[i]<=ENL[i+1] for i in range(len(ENL)-1)) and "
-                "all(ENL[i]>=0 for i in range(len(ENL)-1)))")
-        
-    elif parameter == "NDIM":
-        return "NDIM in [1, 2, 3]"
-    
-    elif parameter == "NIONHIS":
-        return ("0<=NIONHIS<=NION if NTHREAD==1 "
-                "1<=NIONHIS<=NION if NTHREAD>1")
     
     # "no range defined in manual"
     return "No condition parsed"
