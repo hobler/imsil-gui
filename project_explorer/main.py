@@ -279,7 +279,7 @@ class ProjectExplorer(Frame):
                 release event.
         """
         filepath = self.tree.set(event.widget.selection(), "filename")
-        if filepath.endswith(".inp"):
+        if filepath.endswith(".inp") or os.path.basename(filepath) == "INP":
             edit_button = self.nametowidget("buttons_frame.edit_button")
             edit_button.configure(state="enabled")
             view_button = self.nametowidget("buttons_frame.view_button")
@@ -329,8 +329,11 @@ class ProjectExplorer(Frame):
         """
         filepath = Path(self.tree.set(self.tree.selection()[0],
                                       "filepath"))
-        # Check if selection is valid
-        filepath = filepath if str(filepath).endswith(".inp") else None
+        # Check if selection is valid (either .inp or INP file)
+        filename = os.path.basename(filepath)
+        if not (filename.endswith(".inp") or filename == "INP"):
+            return
+        
         # If started from outside the directory, change cwd to where main.py is
         os.chdir(Path(os.path.abspath(__file__)).parent)
         # Because the parameter editor does not use relative inputs the
