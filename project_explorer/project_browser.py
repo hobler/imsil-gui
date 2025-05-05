@@ -60,11 +60,12 @@ def populate_tree(tree: ttk.Treeview, node: str, path: PurePath) -> None:
     tree.delete(*tree.get_children(node))
 
     # Search for .inp files inside the passed directory
-    inp_items = [item for item in os.listdir(path) if item.endswith(".inp")]
+    inp_items = [item for item in os.listdir(path) 
+                if str(item).endswith(".inp") or str(item) == "INP"]  # Modified line
     inp_items.sort()
     # Create fake directory and assign it the project name for each .inp
     for inp_item in inp_items:
-        project_name = os.path.splitext(inp_item)[0]
+        project_name = os.path.splitext(inp_item)[0] if inp_item.endswith(".inp") else inp_item
         if tree.set(node, "project") != project_name:
             fake_directory_id = tree.insert(
                 node, "end", "TempDir" + str(next(TEMP_DIR_ID_COUNTER)),
@@ -78,12 +79,17 @@ def populate_tree(tree: ttk.Treeview, node: str, path: PurePath) -> None:
         item_type = "directory" if os.path.isdir(item_path) else "file"
         # Sort out items that should not be included in the tree
         if item_type == "directory":
-            # Don't add directories that don't contain .inp files
-            if not list(Path(item_path).rglob("*.inp")):
+            # Check for both .inp and INP files in subdirectories
+            has_inp_files = any(
+                str(f.name).endswith('.inp') or str(f.name) == 'INP' 
+                for f in Path(item_path).rglob('*')
+                if f.is_file()
+            )
+            if not has_inp_files:
                 continue
         elif item_type == "file":
-            # Don't add files without qualified extension
-            if not item.lower().endswith(ACCEPTED_FILE_EXTENSIONS):
+            # Accept both .inp files and INP files
+            if not (str(item).endswith(ACCEPTED_FILE_EXTENSIONS) or str(item) == "INP"):
                 continue
 
         if item_type == "directory":
@@ -95,21 +101,22 @@ def populate_tree(tree: ttk.Treeview, node: str, path: PurePath) -> None:
             tree.set(item_id, "date", get_date(
                                               os.stat(item_path).st_mtime))
             tree.set(item_id, "filepath", item_path)
-            tree.set(item_id, "project", Path(item).stem)
+            tree.set(item_id, "project", Path(item).stem if item.endswith(".inp") else item)
             tree.set(item_id, "status", random.choice(
                 ["Completed", "Running"]))  # Add status logic here
     # Iterate through all created children and move project specific files
     # to their respective fake project directory
-    projects = [Path(inp_item).stem for inp_item in inp_items]
+    projects = [Path(inp_item).stem if inp_item.endswith(".inp") else inp_item 
+               for inp_item in inp_items]  # Modified line
     for child in tree.get_children(node):
         child_name = tree.set(child, "filename")
-        project = Path(child_name).stem     # project the file belongs to
+        project = Path(child_name).stem if child_name.endswith(".inp") else child_name  # Modified line     # project the file belongs to
         if project in projects:
             for other_child in tree.get_children(node):
                 if (other_child.startswith("TempDir")
                         and tree.set(other_child, "project") == project
                         and other_child != child):
-                    if Path(child_name).suffix == ".inp":
+                    if Path(child_name).suffix == ".inp" or child_name == "INP":  # Modified line
                         position = 0
                     elif Path(child_name).suffix == ".out":
                         position = 1
