@@ -757,7 +757,7 @@ def get_range_condition(parameter, inpRange):
             pass
 
     elif inpRange.strip() == "any real number":
-        return f"{parameter}.replace('.', '').replace(',', '').isnumeric()"
+        return f"type({parameter}) in [int, float]"
     
     elif parameter == "NDAMDIM":
         return ("('(1<=NDAMDIM<=3) and "
