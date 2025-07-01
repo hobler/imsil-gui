@@ -908,7 +908,7 @@ def get_range_condition(parameter, inpRange):
         return f"len({parameter})<=80"
     
     # "no range defined in manual"
-    return "No condition parsed"
+    return None
 
 def get_chemical_elements():
     """Returns a list of chemical element names in lowercase."""
