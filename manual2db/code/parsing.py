@@ -770,8 +770,8 @@ def get_range_condition(parameter, inpRange):
     
     elif parameter == "LAMZON":
         #  T if LDAMDYN=T \\\\ T, F otherwise
-        return ("LAMZON.lower() == 'true' if LDAMDYN.lower() == 'true' "
-                "else LAMZON.lower() in ['true', 'false']")
+        return ("LAMZON == 'T' if LDAMDYN == 'T' "
+                "else LAMZON in ['T', 'F']")
     
     elif parameter == "XTAL":
         return "len(XTAL) <= 80"
@@ -871,20 +871,20 @@ def get_range_condition(parameter, inpRange):
     search = re.findall(pattern, inpRange)
     
     if search:
-        return f"{parameter}.lower() in ['true', 'false']"
+        return f"{parameter} in ['T', 'F']"
     
     # true and false conditions with extra conditions
     pattern = r'\s*([TF])\s+if\s+(\w+=[TF])\s*,\s*([TF])\s*'
     search = re.search(pattern, inpRange)
     
     if search:
-        pbool1 = "true" if search.group(1) == "T" else "false"
-        pbool2 = "false" if pbool1 == "true" else "true"
+        pbool1 = "T" if search.group(1) == "T" else "F"
+        pbool2 = "F" if pbool1 == "T" else "T"
         cvar, cbool = search.group(2).split("=")
-        cbool = "true" if cbool == "T" else "false"
+        cbool = "T" if cbool == "T" else "F"
         
-        condition = (f"{parameter}.lower()=='{pbool1}' if {cvar}.lower()=='{cbool}'"
-                      f" else {parameter}.lower()=='{pbool2}'")
+        condition = (f"{parameter} =='{pbool1}' if {cvar} =='{cbool}'"
+                      f" else {parameter} =='{pbool2}'")
         
         return condition
     
