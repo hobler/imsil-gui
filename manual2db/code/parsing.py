@@ -827,8 +827,11 @@ def get_range_condition(parameter, inpRange):
         return ("all(WCOL[i] % 4 == 0 for i in range(3))")
     
     elif parameter == "VSURF" or parameter == "WAFER":
-        # Dot product
-        return "VSURF[0]*WAFER[0] + VSURF[1]*WAFER[1] + VSURF[2]*WAFER[2] == 0"
+        # Dot product with tolerance to avoid round-off errors
+        return ("abs(VSURF[0]*WAFER[0] + VSURF[1]*WAFER[1] + VSURF[2]*WAFER[2])" 
+                " < 0.001 * "
+                "max(VSURF[0]*VSURF[0] + VSURF[1]*VSURF[1] + VSURF[2]*VSURF[2],"
+                "WAFER[0]*WAFER[0] + WAFER[1]*WAFER[1] + WAFER[2]*WAFER[2])")
         
     ########## general cases ##########
     
