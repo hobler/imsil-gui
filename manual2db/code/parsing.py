@@ -715,26 +715,26 @@ def get_range_condition(parameter, inpRange):
     if parameter == "IARAND":
         return ("('1<=IARAND<=70000 if RNG.lower() == 'haas' "
                 "else 1<=IARAND<=131071') "
-            "or (print('WARNING: IARAND value accepted, but allowed range "
-            "might have changed.') or True)")
+            "or (print('WARNING: IARAND value accepted, "
+            "but might be out of range.') or True)")
             
     elif parameter == "IBRAND":
         return ("('1<=IBRAND<=90000 if RNGlower()=='haas' "
                     "else 1<=IBRAND<=262143') "
-                "or (print('WARNING: IBRAND value accepted, but allowed range "
-                "might have changed.') or True)")
+                "or (print('WARNING: IBRAND value accepted, "
+                "but might be out of range.') or True)")
 
     elif parameter == "IRAND":
         return ("('1<=IRAND<=10000 for RNG.lower()=='haas' "
                 "else 1<=IRAND<=16383') "
-                "or (print('WARNING: IRAND value accepted, but allowed range "
-                "might have changed.') or True)")
+                "or (print('WARNING: IRAND value accepted, "
+                "but might be out of range.') or True)")
 
     elif parameter == "MRAND":
         return ("('1<=MRAND<=8000 for RNG.lower()=='haas' "
                 "else 1<=MRAND<=16383') "
-                "or (print('WARNING: MRAND value accepted, but allowed range "
-                "might have changed.') or True)")
+                "or (print('WARNING: MRAND value accepted, "
+                "but might be out of range.') or True)")
    
     elif parameter == "NAME":
         # NAME in ATOMS
@@ -749,7 +749,7 @@ def get_range_condition(parameter, inpRange):
                     "'wurtzite', 'wurzite', '2h', '4h', '6h'] "
                     "or len(NAME)<=80') "
                     "or (print('WARNING: CRYSTAL.NAME value accepted, "
-                    "but allowed range might have changed.') or True)")
+                    "but might be out of range.') or True)")
             
         # NAME in  IONS and MATERIAL
         # Let these match a general condition
@@ -766,7 +766,7 @@ def get_range_condition(parameter, inpRange):
                     "YINIT[1]==YINIT[2]) or "
                 "(DOSEUNITS=='cm-1' and YINIT[1]==YINIT[2])))') "
                 "or (print('WARNING: NDAMDIM value accepted, "
-                "but allowed range might have changed.') or True)")
+                "but might be out of range.') or True)")
     
     elif parameter == "LAMZON":
         #  T if LDAMDYN=T \\\\ T, F otherwise
@@ -781,12 +781,12 @@ def get_range_condition(parameter, inpRange):
                 'ERSI', 'SCATTAB', 'SCATTAB_big']
         condition = f"({parameter} in {list} or len({parameter})<=80)"
         return (condition + " or (print('WARNING: SCATFILE value accepted, "
-                "but allowed range might have changed.') or True)")
+                "but might be out of range.') or True)")
     
     elif parameter == "COEFFILE":
         condition = f"('{parameter}=='ZBLspec' or len({parameter})<=80)"
         return (condition + " or (print('WARNING: COEFFILE value accepted, "
-                "but allowed range might have changed.') or True)")
+                "but might be out of range.') or True)")
     
     elif parameter == "XPER":
         return "XPER[2]>=XPER[1]"
@@ -797,7 +797,7 @@ def get_range_condition(parameter, inpRange):
     elif parameter == "MODDIV":
         return ("MODDIV in [1, 2]"
                 " or (print('WARNING: MODDIV value accepted, "
-                "but allowed range might have changed.') or True)")
+                "but might be out of range.') or True)")
     
     elif parameter == "XINIT":
         return "XINIT[2]>=XINIT[1]"
@@ -811,7 +811,7 @@ def get_range_condition(parameter, inpRange):
     elif parameter == "MCOORD":
         return ("MCOORD in [1, 2, 3, 4, 5]"
                 " or (print('WARNING: MCOORD value accepted, "
-                "but allowed range might have changed.') or True)")
+                "but might be out of range.') or True)")
     
     elif parameter == "ENL":
         return ("all(ENL[i]<=ENL[i+1] for i in range(len(ENL)-1)) and "
