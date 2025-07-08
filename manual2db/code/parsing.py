@@ -761,10 +761,10 @@ def get_range_condition(parameter, inpRange):
     
     elif parameter == "NDAMDIM":
         return ("('(1<=NDAMDIM<=3) and "
-                "((NDAMDIM<=1 and DOSEUNITS=='cm-2' and XINIT[1]==XINIT[2]) or "
-                "(NDAMDIM<=2 and (DOSEUNITS=='cm-2' and XINIT[1]>XINIT[2] and "
-                    "YINIT[1]==YINIT[2]) or "
-                "(DOSEUNITS=='cm-1' and YINIT[1]==YINIT[2])))') "
+                "((NDAMDIM<=1 and DOSEUNITS=='cm-2' and XINIT[0]==XINIT[1]) or "
+                "(NDAMDIM<=2 and (DOSEUNITS=='cm-2' and XINIT[0]>XINIT[1] and "
+                    "YINIT[0]==YINIT[1]) or "
+                "(DOSEUNITS=='cm-1' and YINIT[0]==YINIT[1])))') "
                 "or (print('WARNING: NDAMDIM value accepted, "
                 "but might be out of range.') or True)")
     
@@ -789,7 +789,7 @@ def get_range_condition(parameter, inpRange):
                 "but might be out of range.') or True)")
     
     elif parameter == "XPER":
-        return "XPER[2]>=XPER[1]"
+        return "XPER[1]>=XPER[0]"
     
     elif parameter == "POSIF":
         return "all(POSIF[i]<=POSIF[i+1] for i in range(len(POSIF)-1))"
@@ -800,13 +800,13 @@ def get_range_condition(parameter, inpRange):
                 "but might be out of range.') or True)")
     
     elif parameter == "XINIT":
-        return "XINIT[2]>=XINIT[1]"
+        return "XINIT[1]>=XINIT[0]"
     
     elif parameter == "YINIT":
-        return "YINIT[2]>=YINIT[1]"
+        return "YINIT[1]>=YINIT[0]"
     
     elif parameter == "ZINIT":
-        return "ZINIT[2]>=ZINIT[1]"
+        return "ZINIT[1]>=ZINIT[0]"
     
     elif parameter == "MCOORD":
         return ("MCOORD in [1, 2, 3, 4, 5]"
