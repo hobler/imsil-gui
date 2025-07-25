@@ -126,9 +126,13 @@ def parse_file(filename, tablename, parse_private, manual_path):
                 p_range = p_range.replace('\\', '\\\\')
                 p_range = p_range.rstrip("}")
                 p_range = process_list(p_range)
+                
+            # Get string condition
+            condition = get_range_condition(title, p_range)
 
             parameters.append(Parameter(record, title, short_desc, long_desc,
-                                        p_type, default_value, p_range))
+                                        p_type, default_value, p_range, 
+                                        condition))
 
     return parameters
 
@@ -680,8 +684,10 @@ def reformat_square_roots(string):
             if match.group(0) and match.group(1) and match.group(2):
                 a, b, c = match.groups()
                 a = a.lstrip("(").rstrip(")")
-                c = "" if c == "2" else f"^{{{c}}}" # Remove "2" from simple square roots
-                b = "" if b == "1" else b # Remove "1" from simple square roots
+                # Remove "2" from simple square roots
+                c = "" if c == "2" else f"^{{{c}}}"
+                # Remove "1" from simple square roots
+                b = "" if b == "1" else b 
                 replacement = f"{c}\\sqrt{{{{{a}}}^{{{b}}}}}"
                 new_math_content = new_math_content.replace(match.group(0), 
                                                             replacement, 1)
@@ -692,3 +698,233 @@ def reformat_square_roots(string):
             return_string = return_string.replace(full_math, new_full_math, 1)
     
     return return_string
+
+def get_range_condition(parameter, inpRange):
+    """
+    Parse the range string to get a condition for the database
+    that can be used with eval() to check if a value is within the range.
+    
+    :param parameter: The name of the parameter
+    :param inpRange: The range string from the manual
+    :return: The condition string
+    """
+    
+    ########## special cases ##########
+    # Has to be checked first as some special cases contain range values
+    # that can accidentaly match a general condition
+    if parameter == "IARAND":
+        return ("(1<=IARAND<=70000 if RNG.lower() == 'haas' "
+                "else 1<=IARAND<=131071) "
+                "or (print('WARNING: IARAND value accepted, "
+                "but might be out of range.') or True)")
+            
+    elif parameter == "IBRAND":
+        return ("(1<=IBRAND<=90000 if RNG.lower() == 'haas' "
+                    "else 1<=IBRAND<=262143) "
+                "or (print('WARNING: IBRAND value accepted, "
+                "but might be out of range.') or True)")
+
+    elif parameter == "IRAND":
+        return ("(1<=IRAND<=10000 if RNG.lower() == 'haas' "
+                "else 1<=IRAND<=16383) "
+                "or (print('WARNING: IRAND value accepted, "
+                "but might be out of range.') or True)")
+
+    elif parameter == "MRAND":
+        return ("(1<=MRAND<=8000 if RNG.lower() == 'haas' "
+                "else 1<=MRAND<=16383) "
+                "or (print('WARNING: MRAND value accepted, "
+                "but might be out of range.') or True)")
+   
+    elif parameter == "NAME":
+        # NAME in ATOMS
+        if inpRange.strip() == "any chemical name of an atom":
+            return f"{parameter}.lower() in {get_chemical_elements()}"
+        
+        # NAME in CRYSTAL. 
+        # Assume that no other name has "diamond2" in its range...
+        elif "diamond2" in inpRange:
+            return (f"({parameter}.lower() in ['', 'diamond', 'diamond2', "
+                    "'sc', 'bcc', 'fcc', 'zincblende', '3c', "
+                    "'wurtzite', 'wurzite', '2h', '4h', '6h'] "
+                    f"or len({parameter})<=80) "
+                    "or (print('WARNING: CRYSTAL.NAME value accepted, "
+                    "but might be out of range.') or True)")
+            
+        # NAME in  IONS and MATERIAL
+        # Let these match a general condition
+        else:
+            pass
+
+    elif inpRange.strip() == "any real number":
+        return f"type({parameter}) in [int, float]"
+    
+    elif parameter == "NDAMDIM":
+        return ("((1<=NDAMDIM<=3) and "
+                "((NDAMDIM<=1 and DOSEUNITS=='cm-2' and XINIT[0]==XINIT[1]) or "
+                "(NDAMDIM<=2 and (DOSEUNITS=='cm-2' and XINIT[0]>XINIT[1] and "
+                    "YINIT[0]==YINIT[1]) or "
+                "(DOSEUNITS=='cm-1' and YINIT[0]==YINIT[1])))) "
+                "or (print('WARNING: NDAMDIM value accepted, "
+                "but might be out of range.') or True)")
+    
+    elif parameter == "LAMZON":
+        #  T if LDAMDYN=T \\\\ T, F otherwise
+        return ("LAMZON == 'T' if LDAMDYN == 'T' "
+                "else LAMZON in ['T', 'F']")
+    
+    elif parameter == "XTAL":
+        return "len(XTAL) <= 80"
+    
+    elif parameter == "SCATFILE":
+        list = ['BSI', 'SISI', 'PSI', 'ASSI', 'BO', 
+                'ERSI', 'SCATTAB', 'SCATTAB_big']
+        condition = f"({parameter} in {list} or len({parameter})<=80)"
+        return (condition + " or (print('WARNING: SCATFILE value accepted, "
+                "but might be out of range.') or True)")
+    
+    elif parameter == "COEFFILE":
+        condition = f"({parameter}=='ZBLspec' or len({parameter})<=80)"
+        return (condition + " or (print('WARNING: COEFFILE value accepted, "
+                "but might be out of range.') or True)")
+    
+    elif parameter == "XPER":
+        return "XPER[1]>=XPER[0]"
+    
+    elif parameter == "POSIF":
+        return "all(POSIF[i]<=POSIF[i+1] for i in range(len(POSIF)-1))"
+    
+    elif parameter == "MODDIV":
+        return ("MODDIV in [1, 2]"
+                " or (print('WARNING: MODDIV value accepted, "
+                "but might be out of range.') or True)")
+    
+    elif parameter == "XINIT":
+        return "XINIT[1]>=XINIT[0]"
+    
+    elif parameter == "YINIT":
+        return "YINIT[1]>=YINIT[0]"
+    
+    elif parameter == "ZINIT":
+        return "ZINIT[1]>=ZINIT[0]"
+    
+    elif parameter == "MCOORD":
+        return ("MCOORD in [1, 2, 3, 4, 5]"
+                " or (print('WARNING: MCOORD value accepted, "
+                "but might be out of range.') or True)")
+    
+    elif parameter == "ENL":
+        return ("all(ENL[i]<ENL[i+1] for i in range(len(ENL)-1)) and "
+                "all(ENL[i]>=0 for i in range(len(ENL)-1))")
+        
+    elif parameter == "NDIM":
+        return "NDIM in [1, 2, 3]"
+    
+    elif parameter == "NIONHIS":
+        return ("0<=NIONHIS<=NION if NTHREAD==1 else 1<=NIONHIS<=NION")
+        
+    elif parameter == "WCOL":
+        return ("all(WCOL[i] % 4 == 0 for i in range(3))")
+    
+    elif parameter == "VSURF" or parameter == "WAFER":
+        # Dot product with tolerance to avoid round-off errors
+        return ("abs(VSURF[0]*WAFER[0] + VSURF[1]*WAFER[1] + VSURF[2]*WAFER[2])" 
+                " < 0.001 * "
+                "((VSURF[0]*VSURF[0] + VSURF[1]*VSURF[1] + VSURF[2]*VSURF[2])*"
+                "(WAFER[0]*WAFER[0] + WAFER[1]*WAFER[1] + WAFER[2]*WAFER[2]))"
+                "**0.5")
+        
+    ########## general cases ##########
+    
+    # conditions with only one bound such as "< 0"
+    pattern = r'^\s*(\d+\s*[><≥≤]\s*\d*|\d*\s*[><≥≤]\s*\d+)\s*\.?\s*$'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        # replace for eval() to function
+        condition = (inpRange.replace("≤", "<=").replace("≥", ">=")
+                     .replace(".", "").replace(" ", ""))
+        
+        if condition[0].isnumeric():
+            return f"{condition}{parameter}"
+        else:
+            return f"{parameter}{condition}"
+    
+    # bound condition with the parameter present like "DAMAMO > 0"
+    pattern = r'^\s*(\w+)\s*([><≥≤])\s*(\w+)\s*$'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        condition = inpRange.replace("≤", "<=").replace("≥", ">=").replace(" ", "")
+        return condition
+    
+    # conditions with upper and lower bounds such as 0 ≤ NRAD2 ≤ 32
+    pattern = r'^\s*([-\w]+)\s*([><≥≤])\s*(\w+)\s*([><≥≤])\s*([-\w]+)\s*$'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        condition = inpRange.replace("≤", "<=").replace("≥", ">=").replace(" ", "")
+        
+        return condition
+        
+    # true and false condition such as "T,F" strictly without extra conditions
+    pattern = r'^\s*T\s*,\s*F\s*$'
+    search = re.findall(pattern, inpRange)
+    
+    if search:
+        return f"{parameter} in ['T', 'F']"
+    
+    # true and false conditions with extra conditions
+    pattern = r'\s*([TF])\s+if\s+(\w+=[TF])\s*,\s*([TF])\s*'
+    search = re.search(pattern, inpRange)
+    
+    if search:
+        pbool1 = "T" if search.group(1) == "T" else "F"
+        pbool2 = "F" if pbool1 == "T" else "T"
+        cvar, cbool = search.group(2).split("=")
+        cbool = "T" if cbool == "T" else "F"
+        
+        condition = (f"{parameter} == '{pbool1}' if '{cvar}' == '{cbool}'"
+                      f" else {parameter} == '{pbool2}'")
+        
+        return condition
+    
+    # lists of names, like 'wurtzite', 'wurzite', '2H'
+        # strictly match list of names without extra conditions
+    if inpRange.lstrip("- ")[0] == "'" and inpRange.rstrip(".")[-1] == "'":
+        pattern = r"'([^']+)'(?:\s*[,\n-]\s*|\s+)?+"
+        search = re.findall(pattern, inpRange)
+        
+        if search:
+            return f"{parameter}.lower() in {[x.lower() for x in search]}"
+        
+    # condition is "arbitrary" or "any"
+    if inpRange.strip("- ").lower() in ["arbitrary", "any"]:
+        return "True"
+    
+    # file names without extra conditions
+    if ("80 characters" in inpRange.lower() and
+        " if " not in inpRange.lower() and
+        " or " not in inpRange.lower()):
+        return f"len({parameter})<=80"
+    
+    # "no range defined in manual"
+    return None
+
+def get_chemical_elements():
+    """Returns a list of chemical element names in lowercase."""
+    
+    elements = [
+        'h', 'he', 'li', 'be', 'b', 'c', 'n', 'o', 'f', 'ne',
+        'na', 'mg', 'al', 'si', 'p', 's', 'cl', 'ar', 'k', 'ca',
+        'sc', 'ti', 'v', 'cr', 'mn', 'fe', 'co', 'ni', 'cu', 'zn',
+        'ga', 'ge', 'as', 'se', 'br', 'kr', 'rb', 'sr', 'y', 'zr',
+        'nb', 'mo', 'tc', 'ru', 'rh', 'pd', 'ag', 'cd', 'in', 'sn',
+        'sb', 'te', 'i', 'xe', 'cs', 'ba', 'la', 'ce', 'pr', 'nd',
+        'pm', 'sm', 'eu', 'gd', 'tb', 'dy', 'ho', 'er', 'tm', 'yb',
+        'lu', 'hf', 'ta', 'w', 're', 'os', 'ir', 'pt', 'au', 'hg',
+        'tl', 'pb', 'bi', 'po', 'at', 'rn', 'fr', 'ra', 'ac', 'th',
+        'pa', 'u'
+    ]
+    
+    return elements

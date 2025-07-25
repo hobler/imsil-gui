@@ -24,7 +24,8 @@ def create_tables(conn, table_names):
                     long_desc text,
                     type text,
                     defaultValue text,
-                    range text
+                    range text,
+                    condition text
                     )""").format(name)
         c.execute(query)
         conn.commit()
@@ -64,7 +65,7 @@ def write_parameters(conn, parameters):
     for param in parameters:
         query = ('INSERT INTO {} VALUES '.format(param.record) +
                  '(:name, :short_desc, :long_desc, :type, :defaultValue, ' +
-                 ':range)')
+                 ':range, :condition)')
         c.execute(query, param.get_dict())
         conn.commit()
 
