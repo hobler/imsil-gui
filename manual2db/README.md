@@ -23,22 +23,24 @@ pip install sqlite3
 
 ### Setup global variables
 
+In the file ```manual_version``` set the name of the folder which contains the 
+manual .tex files, such as the parameter files. It is assumed that the file
+folder is in the same folder as the ```manual2db.py``` file. The paramter files 
+**must** have the prefix **param_**, otherwise the script will not find them.
+
 In the main file **manual2db.py** set the following variables:
 
 ```db_name:``` filename for the database
 
-```manual_path:``` path were the .tex files are stored
-
-```filenames:``` list of the files containing parameters
-
 ```parse_private:``` boolean value if private sections should be included or not
 
 #### Example:
+```text
+manual_version = manual_2024-03
+```
+
 ```python
 db_name = 'parameters.db'
-manual_path = 'C:\\Users\\myname\\somedirectory\\manual'
-filenames = ['setup.tex', 'atoms.tex', 'ions.tex', 'material.tex', 'snpar.tex', 
-             'separ.tex', 'damage.tex', 'geom.tex', 'output.tex', 'xtal.tex']
 parse_private = False
 ```
 
@@ -68,4 +70,10 @@ the file is overwritten.
 In order to check the parameters you can either open up the 
 [DB Browser for SQLite](https://sqlitebrowser.org/) and go through the tables 
 manually.
+
+There is currently a column called **condition** in the parameter database,
+whose contents are parsed from the **range** conditions when generating the
+database. This column is to be used to automatically check the validity of
+the parameters in the GUI, using _validate_ or a similar function. However, this
+is not yet implemented.
 
