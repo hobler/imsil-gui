@@ -268,23 +268,44 @@ class ProjectExplorer(Frame):
 
     def check_selection(self, event: tk.Event):
         """
-        Enable buttons depending on ttk.Treeview selection.
-
-        Currently only the selection of an .inp file triggers enabling of
-        the View and Edit buttons.
-
-        Args:
-            event (tk.Event):
-                The event that triggers the method, usually a button click
-                release event.
+        Enable buttons based on selected file type
+        - .inp/INP files: Enable Edit and View
+        - .his/.HIS files: Enable Plot
+        - Numeric dirs (1/, 2/, etc.): Plot if contains plottable files
         """
-        filepath = self.tree.set(event.widget.selection(), "filename")
-        if filepath.endswith(".inp"):
-            edit_button = self.nametowidget("buttons_frame.edit_button")
-            edit_button.configure(state="enabled")
-            view_button = self.nametowidget("buttons_frame.view_button")
-            view_button.configure(state="enabled")
-            return True
+        selected = event.widget.selection()
+        if not selected:
+            self._disable_all_action_buttons()
+            return False
+        
+        path = Path(self.tree.set(selected[0], "filepath"))
+
+        # Get all buttons except New
+        buttons = [btn for btn in self.nametowidget("buttons_frame").winfo_children() 
+                if "new_button" not in str(btn)]
+        
+        # Determine file type
+        is_inp = (path.suffix.lower() == '.inp' or path.name == 'INP')
+        is_his = (path.suffix.lower() in ('.his', '.his2', '.his3') or 
+                path.name.upper() in ('HIS', 'HIS2', 'HIS3'))
+        is_numeric_dir = (path.is_dir() and 
+                        path.name.isdigit() and 
+                        self._dir_contains_plot_data(path))
+
+        # Update button states //falsch auf config ändern wie vorher
+         # Simple button state control
+        if is_inp:
+            buttons[0].configure(state="enabled")  # Edit
+            buttons[1].configure(state="enabled")  # View
+            buttons[3].configure(state="disabled") # Plot
+        elif is_his:
+            buttons[0].configure(state="disabled") # Edit
+            buttons[1].configure(state="disabled") # View
+            buttons[3].configure(state="enabled")  # Plot
+        elif is_numeric_dir:
+            buttons[0].configure(state="disabled") # Edit
+            buttons[1].configure(state="disabled") # View
+            buttons[3].configure(state="enabled")  # Plot
         else:
             buttons = self.nametowidget("buttons_frame").winfo_children()
             for button in buttons:
@@ -292,17 +313,172 @@ class ProjectExplorer(Frame):
                     button.configure(state="disabled")
             return False
 
-    def plot_clicked(self, event):
+        return is_inp or is_his or is_numeric_dir
+    
+    def _dir_contains_plot_data(self, directory: Path) -> bool:
+        """Check if directory contains files needed by plot_1.py"""
+        required_files = {'alpha_geometry.txt', 'P.txt', 'U.txt'}
+        try:
+            return all((directory / file).exists() for file in required_files)
+        except:
+            return False
+    
+    def plot_clicked(self, event=None):
         """
-        # TODO: After the plotting functionality is included assign the
-        # TODO: plotting task to this function's calls.
+        Handle plot button clicks for both files and numeric directories.
+        
+        Supported items:
+        - HIS files (.his, .his2, .his3, HIS, HIS2, HIS3)
+        - Numeric directories (1/, 2/, etc.) containing IMSIL output
+        
+        Args:
+            event: Optional tkinter event object
+        """
+        try:
+            selected_item = self.tree.selection()
+            if not selected_item:
+                tk.messagebox.showwarning("No Selection", "Please select a file or directory to plot")
+                return
+                
+            path = Path(self.tree.set(selected_item[0], "filepath"))
+            
+            # Handle numeric directories
+            if path.is_dir() and path.name.isdigit():
+                if not self._validate_imsil_directory(path):
+                    tk.messagebox.showwarning(
+                        "Invalid Directory",
+                        f"Directory {path.name} doesn't contain required IMSIL output files\n"
+                        f"Required: alpha_geometry.txt, P.txt, U.txt"
+                    )
+                    return
+                    
+                self._plot_imsil_directory(path)
+                
+            # Handle HIS files    
+            elif self._is_plottable_his_file(path):
+                self._plot_his_file(path)
+                
+            else:
+                tk.messagebox.showwarning(
+                    "Unsupported Item",
+                    f"Cannot plot {path.name}\n"
+                    f"Supported: HIS files or numeric directories with IMSIL output"
+                )
+                
+        except Exception as e:
+            tk.messagebox.showerror(
+                "Plotting Error",
+                f"Failed to plot {path.name if 'path' in locals() else 'item'}:\n{str(e)}"
+            )
 
-        Args: event: The tk.event that called this method.
+    def _validate_imsil_directory(self, directory: Path) -> bool:
+        """Check if directory contains required IMSIL output files"""
+        required_files = {'alpha_geometry.txt', 'P.txt', 'U.txt'}
+        return all((directory / file).exists() for file in required_files)
 
+    def _plot_imsil_directory(self, directory: Path):
+        """Execute plot_1.py for numeric directories"""
+        plot_script = Path(__file__).parent.parent / "plot" / "plot_1.py"
+        
+        try:
+            subprocess.run(
+                [sys.executable, str(plot_script), str(directory)],
+                check=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+        except subprocess.CalledProcessError as e:
+            error_msg = e.stderr.decode() if e.stderr else str(e)
+            raise RuntimeError(f"Directory plotting failed:\n{error_msg}")
+
+    def _plot_his_file(self, filepath: Path):
+        """Existing HIS file plotting logic"""
+        plot_script = Path(__file__).parent.parent / "plot" / "read_output.py"
+        subprocess.run(
+            [sys.executable, str(plot_script), str(filepath)],
+            check=True,
+            creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0
+        )
+
+    def _is_plottable_his_file(self, path: Path) -> bool:
+        """Check if file is a plottable HIS file"""
+        if not path.is_file():
+            return False
+            
+        his_extensions = {'.his', '.his2', '.his3'}
+        his_names = {'HIS', 'HIS2', 'HIS3'}
+        
+        return (path.suffix.lower() in his_extensions or 
+                path.name.upper() in his_names)
+
+    def _plot_numeric_directory(self, directory: Path):
+        """Run plot_1.py on numeric directory"""
+        plot_script = Path(__file__).parent.parent / "plot" / "plot_1.py"
+        
+        try:
+            subprocess.run(
+                [sys.executable, str(plot_script), str(directory)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+        except subprocess.CalledProcessError as e:
+            tk.messagebox.showerror(
+                "Plot Error",
+                f"Failed to plot directory {directory.name}:\n{e.stderr.decode()}"
+            )
+
+    def _is_plottable_file(self, path: Path) -> bool:
+        """
+        Check if a file is plottable based on its extension or name.
+        
+        Args:
+            path: Path object to the file
+            
         Returns:
-
+            bool: True if file is plottable, False otherwise
         """
-        pass
+        if not path.is_file():
+            return False
+            
+        ext = path.suffix.lower()
+        name = path.name.upper()
+        
+        return (ext in ('.his', '.his2', '.his3') or 
+                name in ('HIS', 'HIS2', 'HIS3'))
+
+    def _execute_plot_script(self, filepath: Path):
+        """
+        Execute the read_output.py script to visualize the data file.
+        
+        Args:
+            filepath: Path to the data file to plot
+            
+        Raises:
+            subprocess.CalledProcessError: If the script fails
+            Exception: For other unexpected errors
+        """
+        plot_script = Path(__file__).parent.parent / "plot" / "read_output.py"
+        
+        # Platform-independent execution
+        cmd = [sys.executable, str(plot_script), str(filepath)]
+        
+        if platform.system() == "Windows":
+            subprocess.run(
+                cmd,
+                check=True,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+        else:
+            subprocess.run(
+                cmd,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
 
     def view_clicked(self) -> None:
         """
@@ -329,8 +505,11 @@ class ProjectExplorer(Frame):
         """
         filepath = Path(self.tree.set(self.tree.selection()[0],
                                       "filepath"))
-        # Check if selection is valid
-        filepath = filepath if str(filepath).endswith(".inp") else None
+        # Check if selection is valid (either .inp or INP file)
+        filename = os.path.basename(filepath)
+        if not (filename.endswith(".inp") or filename == "INP"):
+            return
+        
         # If started from outside the directory, change cwd to where main.py is
         os.chdir(Path(os.path.abspath(__file__)).parent)
         # Because the parameter editor does not use relative inputs the
