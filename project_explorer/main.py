@@ -268,41 +268,136 @@ class ProjectExplorer(Frame):
 
     def check_selection(self, event: tk.Event):
         """
-        Enable buttons depending on ttk.Treeview selection.
-
-        Currently only the selection of an .inp file triggers enabling of
-        the View and Edit buttons.
-
-        Args:
-            event (tk.Event):
-                The event that triggers the method, usually a button click
-                release event.
+        Enable buttons based on selected file type
+        - .inp/INP files: Enable Edit and View
+        - .his/.HIS files: Enable Plot
+        - Others: Disable all action buttons
         """
         filepath = self.tree.set(event.widget.selection(), "filename")
-        if filepath.endswith(".inp"):
-            edit_button = self.nametowidget("buttons_frame.edit_button")
-            edit_button.configure(state="enabled")
-            view_button = self.nametowidget("buttons_frame.view_button")
-            view_button.configure(state="enabled")
-            return True
+        full_path = self.tree.set(event.widget.selection(), "filepath")
+        
+        # Get all buttons except New
+        buttons = [btn for btn in self.nametowidget("buttons_frame").winfo_children() 
+                if "new_button" not in str(btn)]
+        
+        # Check file types
+        is_inp = filepath.endswith(".inp") or os.path.basename(filepath) == "INP"
+        is_his = (filepath.endswith(('.his', '.his2', '.his3')) or 
+                os.path.basename(full_path).upper() in ('HIS', 'HIS2', 'HIS3'))
+        
+        # Simple button state control
+        if is_inp:
+            buttons[0].configure(state="enabled")  # Edit
+            buttons[1].configure(state="enabled")  # View
+            buttons[3].configure(state="disabled") # Plot
+        elif is_his:
+            buttons[0].configure(state="disabled") # Edit
+            buttons[1].configure(state="disabled") # View
+            buttons[3].configure(state="enabled")  # Plot
         else:
-            buttons = self.nametowidget("buttons_frame").winfo_children()
-            for button in buttons:
-                if "new_button" not in str(button):
-                    button.configure(state="disabled")
-            return False
+            for btn in buttons:
+                btn.configure(state="disabled")
+        
+        return is_inp or is_his
 
-    def plot_clicked(self, event):
+    def plot_clicked(self, event=None):
         """
-        # TODO: After the plotting functionality is included assign the
-        # TODO: plotting task to this function's calls.
+        Handle the plot button click event by visualizing supported IMSIL output files.
+        
+        Supported file types:
+        - 1D histograms (.his or HIS)
+        - 2D histograms (.his2 or HIS2) 
+        - 3D histograms (.his3 or HIS3)
+        
+        Args:
+            event: The tkinter event object (optional, defaults to None)
+        
+        Behavior:
+        - Checks if selected file is plottable
+        - Calls the appropriate visualization script
+        - Displays errors in message boxes
+        - Maintains platform independence
+        """
+        try:
+            # Get selected item from treeview
+            selected_item = self.tree.selection()
+            if not selected_item:
+                tk.messagebox.showwarning(
+                    "No Selection",
+                    "Please select a file to plot"
+                )
+                return
+                
+            filepath = Path(self.tree.set(selected_item[0], "filepath"))
+            
+            # Validate file type
+            if not self._is_plottable_file(filepath):
+                tk.messagebox.showwarning(
+                    "Unsupported File Type",
+                    f"Cannot plot {filepath.name}.\n"
+                    f"Supported formats: .his/.his2/.his3 or HIS/HIS2/HIS3"
+                )
+                return
+                
+            # Execute plotting script
+            self._execute_plot_script(filepath)
+            
+        except Exception as e:
+            tk.messagebox.showerror(
+                "Plotting Error",
+                f"Failed to plot file:\n{str(e)}"
+            )
 
-        Args: event: The tk.event that called this method.
-
+    def _is_plottable_file(self, path: Path) -> bool:
+        """
+        Check if a file is plottable based on its extension or name.
+        
+        Args:
+            path: Path object to the file
+            
         Returns:
-
+            bool: True if file is plottable, False otherwise
         """
-        pass
+        if not path.is_file():
+            return False
+            
+        ext = path.suffix.lower()
+        name = path.name.upper()
+        
+        return (ext in ('.his', '.his2', '.his3') or 
+                name in ('HIS', 'HIS2', 'HIS3'))
+
+    def _execute_plot_script(self, filepath: Path):
+        """
+        Execute the read_output.py script to visualize the data file.
+        
+        Args:
+            filepath: Path to the data file to plot
+            
+        Raises:
+            subprocess.CalledProcessError: If the script fails
+            Exception: For other unexpected errors
+        """
+        plot_script = Path(__file__).parent.parent / "plot" / "read_output.py"
+        
+        # Platform-independent execution
+        cmd = [sys.executable, str(plot_script), str(filepath)]
+        
+        if platform.system() == "Windows":
+            subprocess.run(
+                cmd,
+                check=True,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+        else:
+            subprocess.run(
+                cmd,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
 
     def view_clicked(self) -> None:
         """
@@ -329,8 +424,11 @@ class ProjectExplorer(Frame):
         """
         filepath = Path(self.tree.set(self.tree.selection()[0],
                                       "filepath"))
-        # Check if selection is valid
-        filepath = filepath if str(filepath).endswith(".inp") else None
+        # Check if selection is valid (either .inp or INP file)
+        filename = os.path.basename(filepath)
+        if not (filename.endswith(".inp") or filename == "INP"):
+            return
+        
         # If started from outside the directory, change cwd to where main.py is
         os.chdir(Path(os.path.abspath(__file__)).parent)
         # Because the parameter editor does not use relative inputs the
